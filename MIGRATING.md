@@ -1,9 +1,179 @@
 # Migration Guide
 
+## Migrating from versions < 24.0.0
+SDK v24 introduces breaking changes organized into two categories:
+
+### 1. Dependency/Version Upgrades
+- The SDK now requires Android 7.0+ (API level 24+).
+- The SDK now targets `compileSdkVersion` and `targetSdkVersion` 37.
+  - The minimum [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) version is now 9.1.1.
+  - The minimum [Gradle](https://gradle.org/releases/) version is now 9.3.1.
+- The SDK now requires Kotlin 2.3.21.
+- The SDK uses Jetpack Compose 1.12.
+- The SDK uses AndroidX Lifecycle 2.11.
+
+### 2. Deprecated and Removed Features
+Features that are deprecated at Stripe or in the SDK. You must migrate away or stop using them.
+
+**Removed APIs:**
+- **`googlePlacesApiKey` in Payment Element**: `PaymentSheet.Configuration.Builder.googlePlacesApiKey(...)` has been removed. Address autocomplete within Payment Element continues to work without providing your own Google Places API key; there is no replacement parameter.
+    ```kotlin
+    // before
+    val configuration = PaymentSheet.Configuration.Builder("Example Store")
+        .googlePlacesApiKey(googlePlacesApiKey)
+        .build()
+
+    // after
+    val configuration = PaymentSheet.Configuration.Builder("Example Store")
+        .build()
+    ```
+- **`googlePlacesApiKey` in `AddressLauncher`**: `AddressLauncher.Configuration.Builder.googlePlacesApiKey(...)` and the `googlePlacesApiKey` constructor parameter of `AddressLauncher.Configuration` have been removed. Address autocomplete within `AddressLauncher` continues to work without providing your own Google Places API key; there is no replacement parameter.
+    ```kotlin
+    // before
+    val configuration = AddressLauncher.Configuration.Builder()
+        .googlePlacesApiKey(googlePlacesApiKey)
+        .build()
+
+    val configuration = AddressLauncher.Configuration(
+        appearance = appearance,
+        googlePlacesApiKey = googlePlacesApiKey,
+    )
+
+    // after
+    val configuration = AddressLauncher.Configuration.Builder()
+        .build()
+
+    val configuration = AddressLauncher.Configuration(
+        appearance = appearance,
+    )
+    ```
+- **`returnUrl` setters on confirmation parameters**: `ConfirmPaymentIntentParams.returnUrl` and `ConfirmSetupIntentParams.returnUrl` are now read-only. Direct Kotlin assignments and the corresponding Java `setReturnUrl(...)` methods are no longer supported.
+- **Default `captureMethod` on `IntentConfiguration`**: The default `captureMethod` was removed from the `IntentConfiguration` constructor. If you had not set a `captureMethod` parameter, set it to `Automatic` to retain the behavior from previous SDK versions. For more information, see the [`capture_method` documentation](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-capture_method).
+
+**Deprecated APIs:**
+- **External Payment Methods (EPMs)**: Deprecated in favor of Custom Payment Methods (CPMs). Existing EPM integrations continue working in v24, but their configuration, confirmation callback, and result APIs now produce deprecation warnings.
+
+  Replace the list of external payment methods in your `PaymentSheet.Configuration` with a list of custom payment methods. Unlike external payment methods, custom payment methods must be explicitly configured in the Dashboard. Follow [this guide](https://docs.stripe.com/payments/custom-payment-methods) to add custom payment methods in the Dashboard. All supported external payment methods have templates you can use to quickly create the equivalent custom payment method. Make note of the custom payment method identifier, as you need to pass it in your `PaymentSheet.Configuration`.
+    ```kotlin
+    // before
+    val configuration = PaymentSheet.Configuration.Builder(
+        merchantDisplayName = "Example, Inc."
+    )
+        .externalPaymentMethods(listOf("external_fawry"))
+        .build()
+
+    // after
+    val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+        id = "cpmt_...",
+        subtitle = "Optional subtitle"
+    )
+
+    val configuration = PaymentSheet.Configuration.Builder(
+        merchantDisplayName = "Example, Inc."
+    )
+        .customPaymentMethods(listOf(customPaymentMethod))
+        .build()
+    ```
+
+  If you manually order your payment methods using `paymentMethodOrder`, replace your external payment method identifier with the equivalent custom payment method identifier.
+    ```kotlin
+    // before
+    val configuration = PaymentSheet.Configuration.Builder(
+        merchantDisplayName = "Example, Inc."
+    )
+        .paymentMethodOrder(listOf("external_fawry", "card"))
+        .build()
+
+    // after
+    val configuration = PaymentSheet.Configuration.Builder(
+        merchantDisplayName = "Example, Inc."
+    )
+        .paymentMethodOrder(listOf("cpmt_...", "card"))
+        .build()
+    ```
+
+  Migrate your `ExternalPaymentMethodConfirmHandler` to a `ConfirmCustomPaymentMethodCallback`. Both APIs expect you to call a result handler once the result of the payment is received. Replace calls to `ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult` with `CustomPaymentMethodResultHandler.handleCustomPaymentMethodResult`, which takes a `CustomPaymentMethodResult` instead of an `ExternalPaymentMethodResult`.
+    ```kotlin
+    // before
+    class CheckoutExternalPaymentMethodConfirmHandler(
+        private val context: Context,
+    ) : ExternalPaymentMethodConfirmHandler {
+        override fun confirmExternalPaymentMethod(
+            externalPaymentMethodType: String,
+            billingDetails: PaymentMethod.BillingDetails
+        ) {
+            /* Your implementation needs to complete the payment with the
+             * payment method provider. When the payment completes, cancels,
+             * or fails, call
+             * `ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult`
+             * with the result. This example code just immediately completes:
+             */
+            ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
+                context,
+                ExternalPaymentMethodResult.completed(),
+            )
+        }
+    }
+
+    // after
+    class CheckoutCustomPaymentMethodCallback(
+        private val context: Context,
+    ) : ConfirmCustomPaymentMethodCallback {
+        override fun onConfirmCustomPaymentMethod(
+            customPaymentMethod: PaymentSheet.CustomPaymentMethod,
+            billingDetails: PaymentMethod.BillingDetails
+        ) {
+            /* Your implementation needs to complete the payment with the
+             * payment method provider. When the payment completes, cancels,
+             * or fails, call
+             * `CustomPaymentMethodResultHandler.handleCustomPaymentMethodResult`
+             * with the result. This example code just immediately completes:
+             */
+            CustomPaymentMethodResultHandler.handleCustomPaymentMethodResult(
+                context,
+                CustomPaymentMethodResult.completed(),
+            )
+        }
+    }
+    ```
+- **`allowsPaymentMethodsRequiringShippingAddress`**: The option in `PaymentSheet.Configuration` and `EmbeddedPaymentElement.Configuration` is deprecated. All payment methods shown by Payment Element no longer require a shipping address; setting this value no longer has any effect.
+- **`IntentConfiguration`, `IntentConfiguration.Mode.Payment`, and `IntentConfiguration.Mode.Setup` constructors**: Deprecated. Use the simple constructors with the builder methods to build your `IntentConfiguration` instances.
+    ```kotlin
+    // before
+    val config = PaymentSheet.IntentConfiguration(
+        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            amount = amount, // 5000L
+            currency = currency, // "CAD"
+            captureMethod = captureMethod, // PaymentSheet.IntentConfiguration.CaptureMethod.Automatic
+            setupFutureUse = setupFutureUse, // SetupFutureUse.OffSession
+            paymentMethodOptions = paymentMethodOptions,
+        ),
+        paymentMethodTypes = paymentMethodTypes,
+        paymentMethodConfigurationId = paymentMethodConfigurationId,
+        onBehalfOf = onBehalfOf,
+        requireCvcRecollection = requireCvcRecollection,
+    )
+
+    // after
+    val config = PaymentSheet.IntentConfiguration(
+        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            amount = amount, // 5000L
+            currency = currency, // "CAD"
+            captureMethod = captureMethod, // PaymentSheet.IntentConfiguration.CaptureMethod.Automatic
+        )
+            .setupFutureUse(setupFutureUse) // SetupFutureUse.OffSession
+            .paymentMethodOptions(paymentMethodOptions)
+    )
+        .paymentMethodTypes(paymentMethodTypes)
+        .paymentMethodConfigurationId(paymentMethodConfigurationId)
+        .onBehalfOf(onBehalfOf)
+        .requireCvcRecollection(requireCvcRecollection)
+    ```
+
 ## Migrating from versions < 23.17.0
-- Removed `googlePlacesApiKey`:
-  * `PaymentSheet.Configuration.Builder.googlePlacesApiKey`, `AddressLauncher.Configuration.Builder.googlePlacesApiKey`, and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key have been removed.
-  * Remove the builder call or constructor argument from your integration. Address autocomplete works without a Google Places API key.
+- Changes to `googlePlacesApiKey`:
+    * `PaymentSheet.Configuration.Builder.googlePlacesApiKey`, `AddressLauncher.Configuration.Builder.googlePlacesApiKey`, and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key are deprecated and will be removed in a future release.
+    * Remove the builder call or constructor argument from your integration. Address autocomplete continues to work without a Google Places API key, and integrations that did not provide one receive autocomplete automatically.
 
 ## Migrating from versions < 23.0.0
 - The SDK now requires Android 6.0+ (API level 23+)
