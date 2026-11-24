@@ -9,6 +9,7 @@ import javax.inject.Inject
 internal fun interface FeaturedInstitutionsRepository {
     suspend fun retrieveFeaturedInstitutions(
         requestOptions: ApiRequest.Options,
+        country: String?,
     ): Result<FeaturedInstitutionList>
 }
 
@@ -21,6 +22,7 @@ internal class DefaultFeaturedInstitutionsRepository @Inject constructor(
 
     override suspend fun retrieveFeaturedInstitutions(
         requestOptions: ApiRequest.Options,
+        country: String?,
     ): Result<FeaturedInstitutionList> {
         return executeRequestWithResultParser(
             stripeNetworkClient = stripeNetworkClient,
@@ -30,8 +32,9 @@ internal class DefaultFeaturedInstitutionsRepository @Inject constructor(
                 options = requestOptions,
                 params = mapOf(
                     "product" to "instant_debits",
-                    // Instant debits is US-only today. The server ignores this for instant_debits unless it's CA.
-                    "country" to "US",
+                    // The server picks which country's institutions to return, so IBP can support more countries
+                    // without an SDK update. Default to the US, where instant debits launched.
+                    "country" to (country ?: "US"),
                     "limit" to FEATURED_INSTITUTIONS_LIMIT,
                 ),
             ),

@@ -16,8 +16,8 @@ import java.io.File
 internal class DefaultFeaturedInstitutionsRepositoryTest {
 
     @Test
-    fun `sends instant debits product, US country and limit of 12`() = runScenario {
-        repository.retrieveFeaturedInstitutions(OPTIONS)
+    fun `sends instant debits product, customer country and limit of 12`() = runScenario {
+        repository.retrieveFeaturedInstitutions(OPTIONS, country = "CA")
 
         val request = networkClient.requests.awaitItem() as ApiRequest
         assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
@@ -25,11 +25,19 @@ internal class DefaultFeaturedInstitutionsRepositoryTest {
         assertThat(request.params).isEqualTo(
             mapOf(
                 "product" to "instant_debits",
-                "country" to "US",
+                "country" to "CA",
                 "limit" to 12,
             )
         )
         assertThat(request.options).isEqualTo(OPTIONS)
+    }
+
+    @Test
+    fun `defaults to the US without a customer country`() = runScenario {
+        repository.retrieveFeaturedInstitutions(OPTIONS, country = null)
+
+        val request = networkClient.requests.awaitItem() as ApiRequest
+        assertThat(request.params?.get("country")).isEqualTo("US")
     }
 
     @Test
@@ -48,7 +56,7 @@ internal class DefaultFeaturedInstitutionsRepositoryTest {
             }
         """.trimIndent(),
     ) {
-        val result = repository.retrieveFeaturedInstitutions(OPTIONS)
+        val result = repository.retrieveFeaturedInstitutions(OPTIONS, country = null)
 
         networkClient.requests.awaitItem()
         assertThat(result.getOrThrow().data).containsExactly(
@@ -61,7 +69,7 @@ internal class DefaultFeaturedInstitutionsRepositoryTest {
 
     @Test
     fun `returns failure on error response`() = runScenario(responseCode = 500) {
-        val result = repository.retrieveFeaturedInstitutions(OPTIONS)
+        val result = repository.retrieveFeaturedInstitutions(OPTIONS, country = null)
 
         networkClient.requests.awaitItem()
         assertThat(result.isFailure).isTrue()

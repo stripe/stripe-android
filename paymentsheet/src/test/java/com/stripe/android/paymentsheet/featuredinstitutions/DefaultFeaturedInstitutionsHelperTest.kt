@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.PaymentIntentFactory
@@ -36,7 +37,7 @@ internal class DefaultFeaturedInstitutionsHelperTest {
     fun `fetches with the merchant publishable key when there's a bank row`() = runScenario {
         helper.fetchAsync(elementsSession(), BANK_ROW_METADATA, DEFAULT_API_CONFIG)
 
-        assertThat(repository.retrieveCalls.awaitItem()).isEqualTo(
+        assertThat(repository.retrieveCalls.awaitItem().requestOptions).isEqualTo(
             ApiRequest.Options(
                 apiKey = DEFAULT_API_CONFIG.publishableKey,
                 stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
@@ -64,6 +65,22 @@ internal class DefaultFeaturedInstitutionsHelperTest {
 
             assertThat(helper.iconIds()).containsExactly("bank_0", "bank_1", "bank_2", "bank_3").inOrder()
         }
+    }
+
+    @Test
+    fun `fetches with the customer country`() = runScenario {
+        helper.fetchAsync(elementsSession(customerCountry = "CA"), BANK_ROW_METADATA, DEFAULT_API_CONFIG)
+
+        assertThat(repository.retrieveCalls.awaitItem().country).isEqualTo("CA")
+        eventReporter.featuredInstitutionsInsufficientCalls.awaitItem()
+    }
+
+    @Test
+    fun `does not fetch in the horizontal layout`() = runScenario {
+        helper.fetchAsync(elementsSession(), HORIZONTAL_BANK_ROW_METADATA, DEFAULT_API_CONFIG)
+
+        repository.retrieveCalls.expectNoEvents()
+        assertThat(helper.featuredInstitutions).isNull()
     }
 
     @Test
@@ -279,24 +296,33 @@ internal class DefaultFeaturedInstitutionsHelperTest {
     }
 
     private companion object {
-        val BANK_ROW_METADATA: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFactory.create(
-                paymentMethodTypes = listOf("card", "link"),
-                linkFundingSources = listOf("card", "bank_account"),
-            ),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
-            isInstantDebitsOnboardingEnabled = true,
-        )
+        val BANK_ROW_METADATA: PaymentMethodMetadata = bankRowMetadata(PaymentSheet.PaymentMethodLayout.Vertical)
+
+        val HORIZONTAL_BANK_ROW_METADATA: PaymentMethodMetadata =
+            bankRowMetadata(PaymentSheet.PaymentMethodLayout.Horizontal)
 
         val NO_BANK_ROW_METADATA: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFactory.create(
                 paymentMethodTypes = listOf("card", "us_bank_account"),
             ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
+
+        fun bankRowMetadata(layout: PaymentSheet.PaymentMethodLayout): PaymentMethodMetadata {
+            return PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(
+                    paymentMethodTypes = listOf("card", "link"),
+                    linkFundingSources = listOf("card", "bank_account"),
+                ),
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                isInstantDebitsOnboardingEnabled = true,
+                paymentMethodLayout = layout,
+            )
+        }
 
         fun iconUrl(index: Int) = "https://b.stripecdn.com/bank_$index.png"
 
@@ -314,10 +340,13 @@ internal class DefaultFeaturedInstitutionsHelperTest {
 
         fun bitmap(): Bitmap = Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888)
 
-        fun elementsSession(killswitch: Boolean? = null): ElementsSession {
+        fun elementsSession(
+            killswitch: Boolean? = null,
+            customerCountry: String? = null,
+        ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(countryCode = customerCountry),
                 merchantCountry = null,
                 isGooglePayEnabled = true,
                 sessionsError = null,

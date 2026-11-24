@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -57,8 +58,10 @@ internal class DefaultFeaturedInstitutionsHelper @Inject constructor(
         fetchJob = null
         featuredInstitutions = null
 
+        // Only the vertical layout's Bank row shows the icons.
+        val isVertical = paymentMethodMetadata.paymentMethodOrientation() == PaymentMethodOrientation.Vertical
         val hasBankRow = PaymentMethod.Type.Link.code in paymentMethodMetadata.supportedPaymentMethodTypes()
-        if (!elementsSession.isFeaturedInstitutionsEnabled || !hasBankRow) {
+        if (!elementsSession.isFeaturedInstitutionsEnabled || !isVertical || !hasBankRow) {
             return
         }
 
@@ -68,6 +71,7 @@ internal class DefaultFeaturedInstitutionsHelper @Inject constructor(
         fetchJob = viewModelScope.launch(workContext) {
             featuredInstitutionsRepository.retrieveFeaturedInstitutions(
                 requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null),
+                country = elementsSession.stripeIntent.countryCode,
             ).onSuccess { institutionList ->
                 featuredInstitutions.loadIcons(
                     institutions = institutionList.data,

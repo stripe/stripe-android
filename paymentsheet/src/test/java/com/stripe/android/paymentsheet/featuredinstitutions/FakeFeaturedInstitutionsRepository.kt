@@ -9,13 +9,14 @@ internal class FakeFeaturedInstitutionsRepository(
     var result: Result<FeaturedInstitutionList> = Result.success(FeaturedInstitutionList(emptyList())),
     private val responseGate: CompletableDeferred<Unit>? = null,
 ) : FeaturedInstitutionsRepository {
-    private val _retrieveCalls = Turbine<ApiRequest.Options>()
-    val retrieveCalls: ReceiveTurbine<ApiRequest.Options> = _retrieveCalls
+    private val _retrieveCalls = Turbine<RetrieveCall>()
+    val retrieveCalls: ReceiveTurbine<RetrieveCall> = _retrieveCalls
 
     override suspend fun retrieveFeaturedInstitutions(
         requestOptions: ApiRequest.Options,
+        country: String?,
     ): Result<FeaturedInstitutionList> {
-        _retrieveCalls.add(requestOptions)
+        _retrieveCalls.add(RetrieveCall(requestOptions, country))
         responseGate?.await()
         return result
     }
@@ -23,4 +24,9 @@ internal class FakeFeaturedInstitutionsRepository(
     fun ensureAllEventsConsumed() {
         _retrieveCalls.ensureAllEventsConsumed()
     }
+
+    data class RetrieveCall(
+        val requestOptions: ApiRequest.Options,
+        val country: String?,
+    )
 }
