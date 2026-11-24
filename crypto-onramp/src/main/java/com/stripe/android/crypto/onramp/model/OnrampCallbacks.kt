@@ -1,6 +1,5 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
@@ -74,7 +73,6 @@ class OnrampCallbacks {
     /**
      * Callback invoked when the KYC collection flow completes.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun kycCallback(callback: OnrampKycCallback) = apply {
         this.kycCallback = callback
     }
