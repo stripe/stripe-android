@@ -8,6 +8,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val linkInlineAuth: EmbeddedLinkInlineAuth,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedConfigurationHandler {
 
@@ -72,7 +74,8 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         }
         inFlightRequest = null
 
-        if (sheetStateHolder.sheetIsOpen) {
+        // The Link dialog for inline verification counts as a sheet.
+        if (sheetStateHolder.sheetIsOpen || linkInlineAuth.isPresentingDialog) {
             return Result.failure(IllegalStateException("Configuring while a sheet is open is not supported."))
         }
 

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val paymentOptionsPresenter: EmbeddedPaymentOptionsPresenter,
+    private val linkInlineAuth: EmbeddedLinkInlineAuth,
 ) : EmbeddedContentHelper {
 
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
@@ -44,6 +46,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
                         appearance = currentState.configuration.appearance,
                         isImmediateAction = isImmediateAction,
+                        linkInlineAuth = linkInlineAuth,
                     )
                 }
                 _embeddedContent.value?.close()

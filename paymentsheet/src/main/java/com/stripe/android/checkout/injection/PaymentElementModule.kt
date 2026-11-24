@@ -23,6 +23,8 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodV
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
+import com.stripe.android.paymentelement.embedded.linkinline.DisabledEmbeddedLinkInlineAuth
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
@@ -38,6 +40,10 @@ internal const val CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER =
 internal interface PaymentElementModule {
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
+
+    // Inline Link verification is only built for the Embedded Payment Element.
+    @Binds
+    fun bindsEmbeddedLinkInlineAuth(impl: DisabledEmbeddedLinkInlineAuth): EmbeddedLinkInlineAuth
 
     @Binds
     fun bindsEmbeddedPaymentOptionsPresenter(
