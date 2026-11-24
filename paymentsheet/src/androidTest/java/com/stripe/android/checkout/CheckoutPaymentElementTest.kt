@@ -17,7 +17,6 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
@@ -29,7 +28,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import okhttp3.mockwebserver.MockResponse
-import org.json.JSONArray
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -251,29 +249,14 @@ internal class CheckoutPaymentElementTest {
     @Test
     fun testSuccessfulLinkWalletPayment() {
         var checkoutResult: CheckoutElementsController.Result? = null
-        networkRule.enqueueConsumerSessionLookup { response ->
-            response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
-                json.put("exists", true)
-            }
-        }
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/payment_details/list"),
-        ) { response ->
-            response.testBodyFromFile("consumer-payment-details-success.json") { json ->
-                val paymentDetails = json.getJSONObject("redacted_payment_details")
-                json.put("redacted_payment_details", JSONArray().put(paymentDetails))
-            }
-        }
+        networkRule.enqueueNativeLinkAccount()
+        networkRule.enqueueNativeLinkPaymentDetails()
 
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             checkoutInitResponse = { response ->
-                response.testBodyFromFile("checkout-session-init.json") { json ->
-                    json.put("customer_email", "test@stripe.com")
-                    json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
-                }
+                createNativeLinkCheckoutInitResponse(response)
             },
             setup = { controller ->
                 assertThat(
@@ -284,30 +267,20 @@ internal class CheckoutPaymentElementTest {
                 ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
-            networkRule.checkoutConfirm(
-                bodyPart("payment_method_data[type]", "link"),
-                bodyPart("payment_method_data[link][payment_details_id]", "QAAAKJ6"),
-            ) { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
+            networkRule.checkoutConfirmNativeLinkPayment()
 
             contentPage.clickOnLpm("link")
             confirm()
             linkWalletPage.pay()
         }
 
-        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-        val completed = checkoutResult as CheckoutElementsController.Result.Completed
-        assertThat(completed.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
+        assertNativeLinkPaymentCompleted(checkoutResult)
     }
 
     @Test
     fun testPaymentOptionsBridgesLinkAccountStateThroughCheckout() {
         val checkoutInitResponse: (MockResponse) -> Unit = { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("customer_email", "test@stripe.com")
-                json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
-            }
+            createNativeLinkCheckoutInitResponse(response)
         }
         val configuration = CheckoutElementsController.Configuration().paymentElement(
             PaymentElement.Configuration()
@@ -319,21 +292,9 @@ internal class CheckoutPaymentElementTest {
                 )
         )
 
-        networkRule.enqueueConsumerSessionLookup { response ->
-            response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
-                json.put("exists", true)
-            }
-        }
+        networkRule.enqueueNativeLinkAccount()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/payment_details/list"),
-        ) { response ->
-            response.testBodyFromFile("consumer-payment-details-success.json") { json ->
-                val paymentDetails = json.getJSONObject("redacted_payment_details")
-                json.put("redacted_payment_details", JSONArray().put(paymentDetails))
-            }
-        }
+        networkRule.enqueueNativeLinkPaymentDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -389,10 +350,7 @@ internal class CheckoutPaymentElementTest {
         expectedToLoadLinkAccount: Boolean,
     ) {
         val checkoutInitResponse: (MockResponse) -> Unit = { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("customer_email", "test@stripe.com")
-                json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
-            }
+            createNativeLinkCheckoutInitResponse(response)
         }
         val configuration = CheckoutElementsController.Configuration().paymentElement(
             PaymentElement.Configuration()
@@ -405,11 +363,7 @@ internal class CheckoutPaymentElementTest {
         )
 
         if (expectedToLoadLinkAccount) {
-            networkRule.enqueueConsumerSessionLookup { response ->
-                response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
-                    json.put("exists", true)
-                }
-            }
+            networkRule.enqueueNativeLinkAccount()
         }
 
         runCheckoutPaymentElementScenario(
