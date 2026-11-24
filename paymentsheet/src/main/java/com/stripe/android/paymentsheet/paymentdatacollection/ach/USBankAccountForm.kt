@@ -30,8 +30,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
@@ -46,8 +44,6 @@ import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
-import com.stripe.android.uicore.elements.AddressController
-import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -56,6 +52,8 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
@@ -83,6 +81,7 @@ internal fun USBankAccountForm(
         factory = USBankAccountFormViewModel.Factory(usBankAccountFormArgs.autocompleteAddressInteractorFactory) {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
+                requiresBillingAddressForAutomaticTax = usBankAccountFormArgs.requiresBillingAddressForAutomaticTax,
                 incentive = usBankAccountFormArgs.incentive,
                 linkMode = usBankAccountFormArgs.linkMode,
                 formArgs = formArgs,
@@ -110,7 +109,7 @@ internal fun USBankAccountForm(
 
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
-    val addressController by viewModel.addressElement.addressController.collectAsState()
+    val hiddenIdentifiers by viewModel.addressElement.hiddenIdentifiers.collectAsState()
     val isEnabled = !state.isProcessing && enabled
 
     USBankAccountEmitters(
@@ -128,7 +127,8 @@ internal fun USBankAccountForm(
         nameController = viewModel.nameController,
         emailController = viewModel.emailController,
         phoneController = viewModel.phoneController,
-        addressController = addressController,
+        addressSection = viewModel.addressSection,
+        hiddenIdentifiers = hiddenIdentifiers,
         lastTextFieldIdentifier = lastTextFieldIdentifier,
         sameAsShippingElement = viewModel.sameAsShippingElement,
         saveForFutureUseElement = viewModel.saveForFutureUseElement,
@@ -149,7 +149,8 @@ internal fun BankAccountForm(
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
-    addressController: AddressController,
+    addressSection: SectionElement?,
+    hiddenIdentifiers: Set<FormFieldId>,
     lastTextFieldIdentifier: FormFieldId?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
@@ -166,7 +167,8 @@ internal fun BankAccountForm(
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
-            addressController = addressController,
+            addressSection = addressSection,
+            hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
             enabled = enabled
@@ -216,7 +218,8 @@ private fun BillingDetailsForm(
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
-    addressController: AddressController,
+    addressSection: SectionElement?,
+    hiddenIdentifiers: Set<FormFieldId>,
     lastTextFieldIdentifier: FormFieldId?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
@@ -294,14 +297,17 @@ private fun BillingDetailsForm(
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
-        if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
-            AddressSection(
+        if (addressSection != null) {
+            SectionElementUI(
                 enabled = enabled,
-                addressController = addressController,
+                element = addressSection,
+                hiddenIdentifiers = hiddenIdentifiers,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
-                sameAsShippingElement = sameAsShippingElement,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
+            sameAsShippingElement?.let {
+                SameAsShippingElementUI(it.controller, Modifier.padding(top = 12.dp))
+            }
         }
     }
 }
@@ -331,41 +337,6 @@ private fun PhoneSection(
                 controller = phoneController,
                 imeAction = imeAction,
             )
-        }
-    }
-}
-
-@Composable
-private fun AddressSection(
-    enabled: Boolean,
-    addressController: AddressController,
-    lastTextFieldIdentifier: FormFieldId?,
-    sameAsShippingElement: SameAsShippingElement?,
-    modifier: Modifier = Modifier,
-) {
-    val validationMessage by addressController.validationMessage.collectAsState()
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        Column(modifier) {
-            Section(
-                title = resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
-                validationMessage = validationMessage,
-            ) {
-                AddressElementUI(
-                    enabled = enabled,
-                    controller = addressController,
-                    hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                )
-            }
-            sameAsShippingElement?.let {
-                SameAsShippingElementUI(it.controller, Modifier.padding(top = 12.dp))
-            }
         }
     }
 }

@@ -53,6 +53,7 @@ internal object USBankAccountFormArgumentsFactory {
             hostedSurface = hostedSurface,
             themeMode = paymentMethodMetadata.appearance.themeMode,
             instantDebits = instantDebits,
+            requiresBillingAddressForAutomaticTax = paymentMethodMetadata.requiresBillingAddressForAutomaticTax,
             linkMode = paymentMethodMetadata.linkMode,
             onBehalfOf = paymentMethodMetadata.onBehalfOf,
             isCompleteFlow = integrationInputs.isCompleteFlow,

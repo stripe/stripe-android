@@ -874,6 +874,7 @@ internal class CustomerSheetViewModel(
         paymentMethodMetadata: PaymentMethodMetadata,
     ): USBankAccountFormArguments {
         return USBankAccountFormArguments(
+            requiresBillingAddressForAutomaticTax = false,
             instantDebits = false,
             incentive = null,
             linkMode = null,

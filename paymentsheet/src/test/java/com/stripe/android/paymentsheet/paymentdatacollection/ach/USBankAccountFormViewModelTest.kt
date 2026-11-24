@@ -66,6 +66,7 @@ import kotlin.test.Test
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
+        requiresBillingAddressForAutomaticTax = false,
         instantDebits = false,
         incentive = null,
         formArgs = FormArguments(
@@ -158,6 +159,31 @@ class USBankAccountFormViewModelTest {
 
             assertThat(viewModel.requiredFields.value).isTrue()
         }
+
+    @Test
+    fun `changing tax country revalidates the linked bank selection without requiring hidden fields`() = runTest {
+        val viewModel = createViewModel(args = defaultArgs.copy(requiresBillingAddressForAutomaticTax = true))
+        val country = viewModel.addressElement.countryElement.controller
+        country.onRawValueChange("FR")
+
+        assertThat(viewModel.requiredFields.value).isTrue()
+        viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.address)
+                .isEqualTo(Address(country = "FR"))
+
+            country.onRawValueChange("CA")
+            assertThat(viewModel.requiredFields.value).isFalse()
+            assertThat(awaitItem()).isNull()
+
+            viewModel.addressElement.addressController.value.fieldsFlowable.value.forEach {
+                it.setRawValue(mapOf(FormFieldId.PostalCode to "K1A 0B1"))
+            }
+            assertThat(viewModel.requiredFields.value).isTrue()
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.address)
+                .isEqualTo(Address(country = "CA", postalCode = "K1A0B1"))
+        }
+    }
 
     @Test
     fun `when name is valid then required fields are filled for instant debits flow`() =
@@ -1923,7 +1949,7 @@ class USBankAccountFormViewModelTest {
             }
         )
 
-        assertThat(viewModel.addressElement).isInstanceOf<AutocompleteAddressElement>()
+        assertThat(viewModel.addressElement.addressElement).isInstanceOf<AutocompleteAddressElement>()
     }
 
     @Test

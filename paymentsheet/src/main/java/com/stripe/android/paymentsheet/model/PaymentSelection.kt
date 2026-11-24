@@ -459,6 +459,8 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.CustomPaymentMethod -> billingDetails
         PaymentSelection.GooglePay -> null
         is PaymentSelection.Link -> billingDetails
+        is PaymentSelection.New.USBankAccount ->
+            instantDebits?.paymentMethod?.billingDetails ?: paymentMethodCreateParams.billingDetails
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
         is PaymentSelection.Saved -> paymentMethod.billingDetails
     }

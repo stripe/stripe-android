@@ -47,10 +47,11 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
+import com.stripe.android.ui.core.elements.BillingAddressCollectionMode
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
-import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.ui.core.elements.additionalAutomaticTaxFieldsByCountry
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.FormFieldId
@@ -58,6 +59,7 @@ import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -70,6 +72,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
@@ -80,8 +83,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
 
+    private val collectingTaxAddress = collectionConfiguration.address == AddressCollectionMode.Automatic &&
+        args.requiresBillingAddressForAutomaticTax
     private val collectingAddress =
-        args.formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full
+        collectingTaxAddress || collectionConfiguration.address == AddressCollectionMode.Full
 
     private val collectingPhone =
         args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always
@@ -181,39 +186,39 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         }
 
-    private val autocompleteAddressElement = autocompleteAddressInteractorFactory?.let {
-        AutocompleteAddressElement(
-            identifier = FormFieldId.Generic("billing_details[address]"),
-            initialValues = defaultAddress?.asFormFieldValues() ?: emptyMap(),
-            countryCodes = collectionConfiguration.allowedBillingCountries,
-            sameAsShippingElement = sameAsShippingElement,
-            interactorFactory = it,
-            shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
-        )
-    }
-
-    val addressElement = autocompleteAddressElement ?: AddressElement(
-        _identifier = FormFieldId.Generic("billing_details[address]"),
-        rawValuesMap = defaultAddress?.asFormFieldValues() ?: emptyMap(),
+    val addressElement = BillingAddressElement(
+        identifier = FormFieldId.BillingAddress,
+        rawValuesMap = defaultAddress?.asFormFieldValues().orEmpty(),
         countryCodes = collectionConfiguration.allowedBillingCountries,
         sameAsShippingElement = sameAsShippingElement,
-        shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
+        shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(defaultBillingDetails),
+        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        addressCollectionMode = if (collectingTaxAddress) {
+            BillingAddressCollectionMode.Country(additionalAutomaticTaxFieldsByCountry)
+        } else {
+            BillingAddressCollectionMode.Full
+        },
     )
 
-    val address: StateFlow<Address?> = addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
-        formFieldValues.takeIf {
-            it.all { value ->
-                value.second.isComplete
-            }
-        }?.let { values ->
-            val rawMap = values.associate { it.first to it.second.value }
-            Address.fromFormFieldValues(rawMap)
+    val addressSection = if (collectingAddress) {
+        SectionElement.wrap(addressElement, resolvableString(PaymentsUiCoreR.string.stripe_billing_details))
+    } else {
+        null
+    }
+
+    val address: StateFlow<Address?> = combineAsStateFlow(
+        addressElement.getFormFieldValueFlow(),
+        addressElement.hiddenIdentifiers,
+    ) { values, hiddenIdentifiers ->
+        val visibleValues = values.filterNot { (id, _) -> id in hiddenIdentifiers }
+        visibleValues.takeIf { it.all { (_, entry) -> entry.isComplete } }?.let {
+            Address.fromFormFieldValues(it.associate { (id, entry) -> id to entry.value })
         }
     }
 
     val lastTextFieldIdentifier: StateFlow<FormFieldId?> = if (collectingAddress) {
-        addressElement.getTextFieldIdentifiers().mapAsStateFlow {
-            it.lastOrNull() ?: lastNonAddressTextFieldIdentifier
+        combineAsStateFlow(addressElement.getTextFieldIdentifiers(), addressElement.hiddenIdentifiers) { ids, hidden ->
+            ids.lastOrNull { it !in hidden } ?: lastNonAddressTextFieldIdentifier
         }
     } else {
         stateFlowOf(lastNonAddressTextFieldIdentifier)
@@ -278,10 +283,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         nameController.formFieldValue.mapAsStateFlow { it.isComplete },
         emailController.formFieldValue.mapAsStateFlow { it.isComplete },
         phoneController.formFieldValue.mapAsStateFlow { it.isComplete },
-        addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
-            formFieldValues.all { it.second.isComplete }
-        }
-    ) { validName, validEmail, validPhone, validAddress ->
+        address,
+    ) { validName, validEmail, validPhone, address ->
         val validBaseInfo = if (args.instantDebits) {
             validEmail
         } else {
@@ -289,7 +292,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
 
         val validAddressInfo = (validPhone || collectionConfiguration.phone != CollectionMode.Always) &&
-            (validAddress || collectionConfiguration.address != AddressCollectionMode.Full)
+            (address != null || !collectingAddress)
 
         validBaseInfo && validAddressInfo
     }
@@ -819,6 +822,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         billingDetails: PaymentMethod.BillingDetails,
     ): PaymentSelection.New.USBankAccount? {
         val linkedAccount = linkedBankAccount ?: return null
+        if (args.requiresBillingAddressForAutomaticTax && collectingAddress && billingDetails.address == null) {
+            return null
+        }
 
         return createNewPaymentSelection(
             resultIdentifier = linkedAccount.resultIdentifier,
@@ -860,6 +866,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val instantDebits: Boolean,
+        val requiresBillingAddressForAutomaticTax: Boolean,
         val incentive: PaymentMethodIncentive?,
         val linkMode: LinkMode?,
         val formArgs: FormArguments,

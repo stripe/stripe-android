@@ -1,23 +1,29 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.compose.ui.autofill.ContentType
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.address.CountryAddressSchema
 import com.stripe.android.uicore.address.FieldSchema
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.address.NameType
 import com.stripe.android.uicore.address.transformToElementList
-import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.utils.stateFlowOf
 
-internal fun createAddressController(
+internal fun createAddressSection(
+    formArgs: FormArguments,
     fillAddress: Boolean = false,
-): AddressController {
+): SectionElement? {
+    if (formArgs.billingDetailsCollectionConfiguration.address != AddressCollectionMode.Full) return null
+
     val elements = listOf(
         CountryAddressSchema(
             type = FieldType.AddressLine1,
@@ -57,18 +63,17 @@ internal fun createAddressController(
         }
     }
 
-    return AddressController(
-        stateFlowOf(
-            listOf(
-                CountryElement(
-                    identifier = FormFieldId.BillingAddress,
-                    controller = DropdownFieldController(
-                        config = CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry),
-                        initialValue = "US"
-                    )
-                ),
-            ).plus(elements)
-        )
+    return SectionElement.wrap(
+        sectionFieldElements = listOf(
+            CountryElement(
+                identifier = FormFieldId.BillingAddress,
+                controller = DropdownFieldController(
+                    config = CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry),
+                    initialValue = "US"
+                )
+            ),
+        ) + elements,
+        label = resolvableString(R.string.stripe_billing_details),
     )
 }
 

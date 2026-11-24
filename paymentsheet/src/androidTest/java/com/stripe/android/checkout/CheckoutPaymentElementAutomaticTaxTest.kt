@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -42,6 +43,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
@@ -50,6 +52,7 @@ import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
@@ -71,6 +74,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+            .around(IntentsRule())
     }
 
     private val editPage = EditPage(testRules.compose)
@@ -257,6 +261,36 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
+    }
+
+    @Test
+    fun testUsBankAccountCollectsBillingTaxAddressBeforeContinue() {
+        fun bankResponse(total: Long, taxStatus: String) = automaticTaxResponse(
+            total = total,
+            taxStatus = taxStatus,
+            billingAddressCollection = "auto",
+            additionalPaymentMethodType = "us_bank_account",
+        )
+
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = bankResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
+        ) {
+            UsBankAccountFormTestUtils.setupSuccessfulCompletionOfUsBankAccountForm()
+            contentPage.clickOnLpm("us_bank_account")
+            formPage.waitUntilVisible()
+            FormPage(testRules.compose).fillOutName()
+            formPage.clickDisabledPrimaryButton()
+
+            fillOutBillingDetails()
+            formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+
+            enqueueTaxUpdate(bankResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+            formPage.clickPrimaryButton()
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            contentPage.assertHasSelectedLpm("us_bank_account")
+            markTestSucceeded()
+        }
     }
 
     @Test
@@ -1091,10 +1125,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         billingAddressCollection: String = "required",
         hasSavedPaymentMethod: Boolean = false,
         savedBillingAddress: JSONObject? = null,
+        additionalPaymentMethodType: String? = null,
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
             json.put("billing_address_collection", billingAddressCollection)
+            additionalPaymentMethodType?.let { json.getJSONArray("ordered_payment_method_types_and_wallets").put(it) }
             json.put(
                 "automatic_tax",
                 JSONObject()

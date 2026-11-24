@@ -179,6 +179,19 @@ class PaymentSelectionTest {
     }
 
     @Test
+    fun `Instant Debits billing details come from the linked payment method`() {
+        val billingDetails = PaymentMethod.BillingDetails(address = Address(country = "FR"))
+        val selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.copy(
+            instantDebits = PaymentSelection.New.USBankAccount.InstantDebitsInfo(
+                paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD.copy(billingDetails = billingDetails),
+                linkMode = null,
+            )
+        )
+
+        assertThat(selection.billingDetails).isEqualTo(billingDetails)
+    }
+
+    @Test
     fun `Link billingDetails returns null when selectedPayment is null`() {
         val link = PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = null)
 

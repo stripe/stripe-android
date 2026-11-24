@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.update
  */
 internal class USBankAccountFormArguments(
     val instantDebits: Boolean,
+    val requiresBillingAddressForAutomaticTax: Boolean,
     val incentive: PaymentMethodIncentive?,
     val linkMode: LinkMode?,
     val onBehalfOf: String?,

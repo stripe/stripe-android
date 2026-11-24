@@ -101,6 +101,7 @@ internal class CustomerSheetScreenshotTest {
         .around(coroutineScopeCleanupRule)
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
+        requiresBillingAddressForAutomaticTax = false,
         showCheckbox = false,
         instantDebits = false,
         incentive = null,
