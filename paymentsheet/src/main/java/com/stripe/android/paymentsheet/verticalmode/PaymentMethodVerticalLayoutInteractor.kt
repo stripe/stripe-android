@@ -7,11 +7,13 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineListOptions
 import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -75,7 +77,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         object Saved : Selection
         data class New(
             val code: PaymentMethodCode,
-            val changeDetails: String? = null,
+            val changeDetails: ResolvableString? = null,
             val canBeChanged: Boolean = false,
         ) : Selection
     }
@@ -125,6 +127,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     private val updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)?,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
+    private val linkInlineListOptions: StateFlow<EmbeddedLinkInlineListOptions>,
     private val coroutineScope: CoroutineScope,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
@@ -224,6 +227,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 updateMandateText = viewModel.mandateHandler::updateMandateText,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
+                linkInlineListOptions = stateFlowOf(EmbeddedLinkInlineListOptions.Disabled),
                 coroutineScope = coroutineScope,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             )
@@ -278,8 +282,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState,
         paymentMethodIncentiveInteractor.displayedIncentive,
         expandedPaymentMethods,
-    ) { paymentMethods, walletsState, incentive, expandedPaymentMethods ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive, expandedPaymentMethods)
+        linkInlineListOptions,
+    ) { paymentMethods, walletsState, incentive, expandedPaymentMethods, linkInlineListOptions ->
+        getDisplayablePaymentMethods(
+            paymentMethods = paymentMethods,
+            walletsState = walletsState,
+            incentive = incentive,
+            expandedPaymentMethods = expandedPaymentMethods,
+            placesLinkFirst = linkInlineListOptions.placesLinkFirst,
+        )
     }
 
     private val expectedItemsForVisibilityTracking = combineAsStateFlow(
@@ -294,6 +305,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
+    private val linkRow = combineAsStateFlow(
+        linkAccount,
+        linkInlineListOptions,
+    ) { linkAccount, linkInlineListOptions ->
+        LinkRow(
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
+            linkPickIsChangeable = linkInlineListOptions.linkPickIsChangeable,
+        )
+    }
+
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
         processing,
@@ -302,9 +323,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         savedPaymentMethodSelectionState,
         availableSavedPaymentMethodAction,
         temporarySelection,
-        linkAccount,
+        linkRow,
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod,
-        savedPaymentMethodSelectionState, action, temporarySelectionCode, linkAccount ->
+        savedPaymentMethodSelectionState, action, temporarySelectionCode, linkRow ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -322,12 +343,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
-            selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
+            selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(
+                linkPickIsChangeable = linkRow.linkPickIsChangeable,
+            ),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
+            linkBrand = linkRow.linkBrand,
         )
     }
 
@@ -414,6 +437,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         walletsState: WalletsState?,
         incentive: PaymentMethodIncentive?,
         expandedPaymentMethods: List<PaymentMethodCode>,
+        placesLinkFirst: Boolean,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
@@ -432,7 +456,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
         val wallets = getInlineWalletDisplayablePaymentMethods(walletsState)
 
-        return wallets + lpms
+        val displayablePaymentMethods = wallets + lpms
+        return if (placesLinkFirst) {
+            displayablePaymentMethods.sortedByDescending { it.code == PaymentMethod.Type.Link.code }
+        } else {
+            displayablePaymentMethods
+        }
     }
 
     private fun getInlineWalletDisplayablePaymentMethods(
@@ -679,10 +708,20 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutInteractor.Selection = when (this) {
+    private fun PaymentSelection.asVerticalSelection(
+        linkPickIsChangeable: Boolean,
+    ): PaymentMethodVerticalLayoutInteractor.Selection = when (this) {
         is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
         is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
-        is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
+        is PaymentSelection.Link -> {
+            // The payment details picked in the Link wallet replace the email until Link is deselected.
+            val pick = selectedPayment?.details?.takeIf { linkPickIsChangeable }
+            PaymentMethodVerticalLayoutInteractor.Selection.New(
+                code = PaymentMethod.Type.Link.code,
+                changeDetails = pick?.paymentOptionLabel,
+                canBeChanged = pick != null,
+            )
+        }
         is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
             code = paymentMethodCreateParams.typeCode,
             changeDetails = changeDetails(),
@@ -692,12 +731,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
     }
 
-    private fun PaymentSelection.New.changeDetails(): String? = when (this) {
+    private fun PaymentSelection.New.changeDetails(): ResolvableString? = when (this) {
         is PaymentSelection.New.Card -> {
             val cardBrand = brand.displayName.takeIf { brand != CardBrand.Unknown }
-            "${cardBrand?.plus(" ").orEmpty()}···· $last4"
+            "${cardBrand?.plus(" ").orEmpty()}···· $last4".resolvableString
         }
-        is PaymentSelection.New.USBankAccount -> label
+        is PaymentSelection.New.USBankAccount -> label.resolvableString
         else -> null
     }
 
@@ -710,4 +749,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override fun close() {
         coroutineScope.cancel()
     }
+
+    private data class LinkRow(
+        val linkBrand: LinkBrand,
+        val linkPickIsChangeable: Boolean,
+    )
 }

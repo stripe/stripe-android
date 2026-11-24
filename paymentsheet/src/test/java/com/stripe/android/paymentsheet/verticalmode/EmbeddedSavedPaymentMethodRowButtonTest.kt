@@ -91,7 +91,7 @@ internal class EmbeddedSavedPaymentMethodRowButtonTest {
         )
         composeRule.setContent {
             EmbeddedSavedPaymentMethodRowButton(
-                paymentMethods = emptyList(),
+                showsDividerBelow = false,
                 displayedSavedPaymentMethod = paymentMethod,
                 savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,

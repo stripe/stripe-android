@@ -356,6 +356,7 @@ internal class PaymentMethodLayoutUITest(
                     PaymentMethodEmbeddedLayoutUI(
                         interactor = interactor,
                         embeddedViewDisplaysMandateText = true,
+                        linkInlineCard = null,
                         modifier = modifier,
                         appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     )

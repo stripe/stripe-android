@@ -51,6 +51,7 @@ import com.stripe.android.uicore.image.LocalImageOptimizer
 import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeCdnImageOptimizer
 import java.lang.Float.max
+import java.lang.Float.min
 import androidx.compose.ui.unit.max as maxDp
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -850,7 +851,7 @@ fun Context.getRawValueFromDimenResource(resource: Int): Float {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Color.lighten(amount: Float): Color {
     return modifyBrightness {
-        max(it + amount, 1f)
+        min(it + amount, 1f)
     }
 }
 

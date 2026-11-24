@@ -11,9 +11,11 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -26,6 +28,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineListOptions
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -1300,7 +1303,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
                             code = "card",
-                            changeDetails = "Visa ···· 4242",
+                            changeDetails = "Visa ···· 4242".resolvableString,
                             canBeChanged = true,
                         )
                     )
@@ -1324,7 +1327,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
                             code = "card",
-                            changeDetails = "···· 4242",
+                            changeDetails = "···· 4242".resolvableString,
                             canBeChanged = true,
                         )
                     )
@@ -1348,7 +1351,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
                             code = "card",
-                            changeDetails = "Visa ···· 4242",
+                            changeDetails = "Visa ···· 4242".resolvableString,
                             canBeChanged = true,
                         )
                     )
@@ -1399,7 +1402,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(awaitItem().selection).isEqualTo(
                     PaymentMethodVerticalLayoutInteractor.Selection.New(
                         code = "us_bank_account",
-                        changeDetails = "···· 6789",
+                        changeDetails = "···· 6789".resolvableString,
                         canBeChanged = true,
                     )
                 )
@@ -1422,7 +1425,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(awaitItem().selection).isEqualTo(
                     PaymentMethodVerticalLayoutInteractor.Selection.New(
                         code = "card",
-                        changeDetails = "Visa ···· 4242",
+                        changeDetails = "Visa ···· 4242".resolvableString,
                         canBeChanged = true,
                     )
                 )
@@ -2193,6 +2196,135 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         promotionsHelper.reportPromotionDisplayedCalls.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `Link stays after Google Pay without inline Link verification`() = runScenario(
+        paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+        initialWalletsState = inlineLinkAndGooglePayWalletState,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().displayablePaymentMethods.map { it.code })
+                .containsExactly("google_pay", "link", "card", "cashapp")
+                .inOrder()
+        }
+    }
+
+    @Test
+    fun `Link leads the list when inline Link verification places it first`() = runScenario(
+        paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+        initialWalletsState = inlineLinkAndGooglePayWalletState,
+        initialLinkInlineListOptions = EmbeddedLinkInlineListOptions(
+            placesLinkFirst = true,
+            linkPickIsChangeable = false,
+        ),
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().displayablePaymentMethods.map { it.code })
+                .containsExactly("link", "google_pay", "card", "cashapp")
+                .inOrder()
+        }
+    }
+
+    @Test
+    fun `selected Link pick shows its details and can be changed when the pick is changeable`() = runScenario(
+        paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+        initialWalletsState = inlineLinkAndGooglePayWalletState,
+        initialSelection = linkSelectionWithPick,
+        initialLinkInlineListOptions = changeableLinkPick,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().selection).isEqualTo(
+                PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "link",
+                    changeDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.paymentOptionLabel,
+                    canBeChanged = true,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `selected Link pick can't be changed without inline Link verification`() = runScenario(
+        paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+        initialWalletsState = inlineLinkAndGooglePayWalletState,
+        initialSelection = linkSelectionWithPick,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().selection).isEqualTo(
+                PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "link",
+                    changeDetails = null,
+                    canBeChanged = false,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `selected Link without a pick can't be changed`() = runScenario(
+        paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+        initialWalletsState = inlineLinkAndGooglePayWalletState,
+        initialSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+        initialLinkInlineListOptions = changeableLinkPick,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().selection).isEqualTo(
+                PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "link",
+                    changeDetails = null,
+                    canBeChanged = false,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Link pick details are kept when the Link email changes`() = runScenario(
+        paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+        initialWalletsState = inlineLinkAndGooglePayWalletState,
+        initialSelection = linkSelectionWithPick,
+        initialLinkInlineListOptions = changeableLinkPick,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().selection.changeDetails())
+                .isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.paymentOptionLabel)
+
+            walletsState.value = inlineLinkAndGooglePayWalletState.copy(
+                link = WalletsState.Link(
+                    state = LinkButtonState.Email("new@email.com"),
+                    linkBrand = LinkBrand.Link,
+                ),
+            )
+
+            val state = awaitItem()
+            assertThat(state.displayablePaymentMethods.first { it.code == "link" }.subtitle)
+                .isEqualTo("new@email.com".resolvableString)
+            assertThat(state.selection.changeDetails())
+                .isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.paymentOptionLabel)
+        }
+    }
+
+    private fun PaymentMethodVerticalLayoutInteractor.Selection?.changeDetails(): ResolvableString? {
+        return (this as? PaymentMethodVerticalLayoutInteractor.Selection.New)?.changeDetails
+    }
+
+    private val linkSelectionWithPick = PaymentSelection.Link(
+        brand = LinkBrand.Link,
+        selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null,
+            billingPhone = null,
+        ),
+    )
+
+    private val changeableLinkPick = EmbeddedLinkInlineListOptions(
+        placesLinkFirst = true,
+        linkPickIsChangeable = true,
+    )
+
+    private val inlineLinkAndGooglePayWalletState by lazy {
+        linkAndGooglePayWalletState.copy(walletsAllowedInHeader = emptyList())
+    }
+
     private val linkAndGooglePayWalletState = WalletsState(
         link = WalletsState.Link(
             state = LinkButtonState.Email("email@email.com"),
@@ -2254,6 +2386,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         displaysMandatesInFormScreen: Boolean = false,
         updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
         promotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+        initialLinkInlineListOptions: EmbeddedLinkInlineListOptions = EmbeddedLinkInlineListOptions.Disabled,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -2267,6 +2400,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
         val walletsState = MutableStateFlow(initialWalletsState)
         val linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = null))
+        val linkInlineListOptions = MutableStateFlow(initialLinkInlineListOptions)
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
@@ -2337,6 +2471,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             updateMandateText = updateMandateText,
             linkAccount = linkAccount,
+            linkInlineListOptions = linkInlineListOptions,
             paymentMethodMessagePromotionsHelper = promotionsHelper
         )
         closeInteractorRule.track(interactor)
@@ -2353,6 +2488,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             paymentMethodsSource = paymentMethods,
             walletsState = walletsState,
             linkAccountSource = linkAccount,
+            linkInlineListOptionsSource = linkInlineListOptions,
             interactor = interactor,
             canRemove = canRemove,
             transitionToManageScreenTurbine = transitionToManageScreenTurbine,
@@ -2383,6 +2519,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val walletsState: MutableStateFlow<WalletsState?>,
         val linkAccountSource: MutableStateFlow<LinkAccountUpdate.Value>,
+        val linkInlineListOptionsSource: MutableStateFlow<EmbeddedLinkInlineListOptions>,
         val canRemove: MutableStateFlow<Boolean>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
         val transitionToManageScreenTurbine: ReceiveTurbine<Unit>,
