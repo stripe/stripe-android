@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
@@ -16,6 +18,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -28,6 +31,7 @@ import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.net.HttpURLConnection
 import javax.inject.Inject
 import kotlin.time.TimeSource
 
@@ -256,12 +260,7 @@ internal class DefaultIdentityRepository @Inject constructor(
     }.fold(
         onSuccess = { response ->
             if (response.isError) {
-                // TODO(ccen) Parse the response code and throw different exceptions
-                throw APIException(
-                    stripeError = stripeErrorJsonParser.parse(response.responseJson()),
-                    requestId = response.requestId?.value,
-                    statusCode = response.code
-                )
+                throw response.toException()
             } else {
                 json.decodeFromString(
                     responseSerializer,
@@ -290,12 +289,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         }.fold(
             onSuccess = { response ->
                 if (response.isError) {
-                    // TODO(ccen) Parse the response code and throw different exceptions
-                    throw APIException(
-                        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
-                        requestId = response.requestId?.value,
-                        statusCode = response.code
-                    )
+                    throw response.toException()
                 } else {
                     responseJsonParser.parse(response.responseJson())?.let { response ->
                         onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
@@ -314,6 +308,16 @@ internal class DefaultIdentityRepository @Inject constructor(
                 )
             }
         )
+    }
+
+    // TODO(ccen) Parse the other response codes and throw different exceptions
+    private fun StripeResponse<String>.toException(): StripeException {
+        val stripeError = stripeErrorJsonParser.parse(responseJson())
+        return if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            AuthenticationException(stripeError, requestId?.value)
+        } else {
+            APIException(stripeError = stripeError, requestId = requestId?.value, statusCode = code)
+        }
     }
 
     internal companion object {

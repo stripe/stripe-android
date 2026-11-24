@@ -58,7 +58,7 @@ internal fun ConfirmationScreen(
         verificationPageResource = verificationPageState,
         onError = {
             identityViewModel.errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(context)
+            navController.navigateToErrorScreenWithDefaultValues(context, it)
         }
     ) {
         val successPage = remember { it.success }

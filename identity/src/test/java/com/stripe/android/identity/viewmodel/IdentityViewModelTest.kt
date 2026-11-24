@@ -1,5 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -11,7 +12,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
@@ -44,6 +47,7 @@ import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination.SELFIE_WARMUP
+import com.stripe.android.identity.navigation.finalErrorDestination
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
@@ -72,6 +76,7 @@ import com.stripe.android.mlcore.base.InterpreterInitializer
 import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -595,6 +600,66 @@ internal class IdentityViewModelTest {
             argWhere {
                 it.startsWith(ErrorDestination.ERROR)
             },
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - expired key navigates to final error`() = runBlocking {
+        // Given a session whose ephemeral key no longer works
+        viewModel._verificationPage.postValue(
+            Resource.success(
+                SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
+            )
+        )
+        val expiredKeyException = AuthenticationException(StripeError())
+        whenever(
+            mockIdentityRepository.postVerificationPageData(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenThrow(expiredKeyException)
+
+        // When the collected data is posted
+        viewModel.postVerificationPageDataAndMaybeNavigate(
+            mockController,
+            mockCollectedDataParam,
+            ConsentDestination.ROUTE.route,
+            mockOnMissingBack,
+            mockOnMissingPhoneOtp,
+            mockOnReadyToSubmit
+        )
+
+        // Then the flow ends on the final error screen instead of offering a retry
+        assertThat(viewModel.errorCause.value).isSameInstanceAs(expiredKeyException)
+        verify(mockController).navigate(
+            eq(ApplicationProvider.getApplicationContext<Context>().finalErrorDestination().routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `collectDataForSelfieScreen - expired key during upload navigates to final error`() = runBlocking {
+        // Given selfie uploads that failed because the ephemeral key no longer works
+        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any())).thenThrow(
+            AuthenticationException(StripeError())
+        )
+        viewModel.uploadScanResult(
+            FINAL_FACE_DETECTOR_RESULT,
+            mockVerificationPage
+        )
+
+        // When the selfie screen collects the upload state
+        launch(UnconfinedTestDispatcher()) {
+            viewModel.collectDataForSelfieScreen(mockController, mock(), mockVerificationPage)
+        }.cancel()
+
+        // Then the flow ends on the final error screen instead of offering a retry
+        verify(mockController).navigate(
+            eq(ApplicationProvider.getApplicationContext<Context>().finalErrorDestination().routeWithArgs),
             any<NavOptionsBuilder.() -> Unit>()
         )
     }

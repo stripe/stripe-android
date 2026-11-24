@@ -1,6 +1,8 @@
 package com.stripe.android.identity.networking
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import org.junit.Test
@@ -211,6 +213,28 @@ internal class SelfieUploadStateTest {
         )
 
         assertThat(state.getError(sideSelfies = emptyList()).message).doesNotContain("side failed")
+    }
+
+    @Test
+    fun `getError reports an authentication failure as the cause when another upload failed first`() {
+        // Given a failed upload, then an upload that failed because the ephemeral key no longer works
+        val expiredKeyException = AuthenticationException(StripeError())
+        val state = SelfieUploadState()
+            .updateError(
+                isHighRes = true,
+                selfie = FaceDetectorTransitioner.Selfie.FIRST,
+                message = "front failed",
+                throwable = ERROR_THROWABLE
+            )
+            .updateError(
+                isHighRes = false,
+                selfie = FaceDetectorTransitioner.Selfie.LEFT,
+                message = "side failed",
+                throwable = expiredKeyException
+            )
+
+        // Then the error's cause is the authentication failure, so the flow ends instead of offering a retry
+        assertThat(state.getError().cause).isSameInstanceAs(expiredKeyException)
     }
 
     @Test
