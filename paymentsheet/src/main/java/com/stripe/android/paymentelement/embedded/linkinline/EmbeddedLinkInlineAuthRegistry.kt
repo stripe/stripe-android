@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.linkinline
 
 import android.os.SystemClock
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationEligibility.IneligibleReason
 import java.lang.ref.WeakReference
@@ -74,4 +75,14 @@ internal class EmbeddedLinkInlineAuthRegistry(
 
         val shared = EmbeddedLinkInlineAuthRegistry(now = SystemClock::elapsedRealtime)
     }
+}
+
+/**
+ * Forgets which emails were sent a code or closed the inline Link verification card in this process, so each
+ * instrumentation test in a process can see the card.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@VisibleForTesting
+fun resetEmbeddedLinkInlineAuthRegistry() {
+    EmbeddedLinkInlineAuthRegistry.shared.reset()
 }

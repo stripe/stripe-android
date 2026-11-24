@@ -157,6 +157,7 @@ dependencies {
 
     androidTestImplementation project(':payments-ui-core')
     androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation project(':payment-element-test-pages')
     androidTestImplementation libs.playServicesWallet
     androidTestImplementation testLibs.androidx.archCore
     androidTestImplementation testLibs.androidx.composeUi

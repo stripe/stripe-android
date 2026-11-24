@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.linkinline
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.VectorConverter
@@ -771,13 +772,21 @@ private val DigitMaxFontSize = 28.sp
 private const val SHADE_DARKEN_AMOUNT = 0.04f
 private const val SHADE_LIGHTEN_AMOUNT = 0.08f
 
-internal const val EMBEDDED_LINK_INLINE_CARD_TEST_TAG = "embedded_link_inline_verification"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_LINK_INLINE_CARD_TEST_TAG = "embedded_link_inline_verification"
+
 internal const val EMBEDDED_LINK_INLINE_CARD_EMAIL_TEST_TAG = "embedded_link_inline_verification_email"
 internal const val EMBEDDED_LINK_INLINE_CARD_SWITCH_ACCOUNTS_TEST_TAG =
     "embedded_link_inline_verification_switch_accounts"
-internal const val EMBEDDED_LINK_INLINE_CARD_CLOSE_TEST_TAG = "embedded_link_inline_verification_close"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_LINK_INLINE_CARD_CLOSE_TEST_TAG = "embedded_link_inline_verification_close"
+
 internal const val EMBEDDED_LINK_INLINE_CARD_FOCUS_REGION_TEST_TAG = "embedded_link_inline_verification_focus_region"
-internal const val EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG = "embedded_link_inline_verification_code"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG = "embedded_link_inline_verification_code"
+
 internal const val EMBEDDED_LINK_INLINE_CARD_ERROR_TEST_TAG = "embedded_link_inline_verification_error"
 internal const val EMBEDDED_LINK_INLINE_CARD_ACTION_TEST_TAG = "embedded_link_inline_verification_action"
 internal const val EMBEDDED_LINK_INLINE_CARD_MENU_RESEND_TEST_TAG = "embedded_link_inline_verification_menu_resend"

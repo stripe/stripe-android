@@ -583,6 +583,41 @@ internal class PlaygroundTestDriver(
         return result
     }
 
+    /**
+     * Opens the Embedded Payment Element for a returning Link customer and pays with Link.
+     *
+     * @param beforeCheckout Runs once the element is on screen. It has to leave Link selected.
+     * @param afterCheckout Runs once checkout is pressed, e.g. to verify or pay in Link.
+     */
+    fun confirmEmbeddedWithLink(
+        testParameters: TestParameters,
+        beforeCheckout: EmbeddedLinkSteps.() -> Unit,
+        afterCheckout: EmbeddedLinkSteps.() -> Unit = {},
+    ) {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.Embedded
+                    )
+                }
+            }
+        )
+        launchEmbedded()
+
+        val steps = EmbeddedLinkSteps(composeTestRule)
+        steps.beforeCheckout()
+
+        selectors.complete.waitForEnabled()
+        selectors.complete.click()
+
+        steps.afterCheckout()
+
+        finishAfterAuthorization()
+
+        teardown()
+    }
+
     fun confirmEmbeddedUsBankAccount(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
