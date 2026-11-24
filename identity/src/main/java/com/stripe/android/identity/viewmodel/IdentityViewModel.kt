@@ -175,6 +175,15 @@ internal class IdentityViewModel(
     )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
+    // The uploads that did not succeed yet, by file. Kept only in memory: after process death the
+    // user captures again.
+    private val documentUploads = mutableMapOf<DocumentUploadKey, FileUpload>()
+    private val selfieUploads = mutableMapOf<SelfieUploadSpec, FileUpload>()
+
+    // Continues the flow of the screen that showed the upload error. Kept until the uploads are
+    // cleared, so the error screen still offers Try again after the activity is recreated.
+    private var continueAfterUploadRetry: (suspend (NavController) -> Unit)? = null
+
     internal val selfieTrainingConsent: Boolean
         get() = savedStateHandle[SELFIE_TRAINING_CONSENT] ?: false
 
@@ -735,6 +744,23 @@ internal class IdentityViewModel(
         val isHighRes: Boolean
     )
 
+    private data class DocumentUploadKey(
+        val isFront: Boolean,
+        val isHighRes: Boolean
+    )
+
+    /**
+     * An upload of one file that did not succeed yet. A result that arrives after a newer upload
+     * of the same file, or after the uploads are cleared, is ignored.
+     */
+    private class FileUpload(
+        // False when preparing the file failed, so there is no file to upload again.
+        val hasFile: Boolean = true
+    ) {
+        // Starts the upload again with the same file. Set when the upload fails.
+        var retry: (() -> Unit)? = null
+    }
+
     private fun cropBitmapToUpload(
         originalBitmap: Bitmap,
         boundingBox: BoundingBox,
@@ -827,17 +853,20 @@ internal class IdentityViewModel(
         scanType: IdentityScanState.ScanType,
         compressionQuality: Float
     ) {
+        val uploadKey = DocumentUploadKey(isFront = isFront, isHighRes = isHighRes)
+        val upload = FileUpload()
+        documentUploads[uploadKey] = upload
+        // Set loading before the launch, so a retry never shows the previous error.
+        if (isFront) {
+            _documentFrontUploadedState
+        } else {
+            _documentBackUploadedState
+        }.updateStateAndSave { currentState ->
+            currentState.updateLoading(isHighRes = isHighRes)
+        }
         viewModelScope.launch {
-            if (isFront) {
-                _documentFrontUploadedState
-            } else {
-                _documentBackUploadedState
-            }.updateStateAndSave { currentState ->
-                currentState.updateLoading(isHighRes = isHighRes)
-            }
-
             var fileToUpload = imageFile
-            runCatching {
+            val result = runCatching {
                 fileToUpload = imageFile.fileForVerificationMode(
                     isLiveMode = isLiveMode,
                     testModeImage = if (isFront) {
@@ -847,8 +876,11 @@ internal class IdentityViewModel(
                     }
                 )
                 uploadPreparedImage(fileToUpload, filePurpose)
-            }.fold(
+            }
+            if (documentUploads[uploadKey] !== upload) return@launch
+            result.fold(
                 onSuccess = { fileTimePair ->
+                    documentUploads.remove(uploadKey)
                     identityAnalyticsRequestFactory.imageUpload(
                         value = fileTimePair.second,
                         compressionQuality = compressionQuality,
@@ -897,6 +929,19 @@ internal class IdentityViewModel(
                             fileName = fileToUpload.name
                         )
                     )
+                    upload.retry = {
+                        uploadDocumentImagesAndNotify(
+                            imageFile = imageFile,
+                            filePurpose = filePurpose,
+                            uploadMethod = uploadMethod,
+                            scores = scores,
+                            isHighRes = isHighRes,
+                            isFront = isFront,
+                            isLiveMode = isLiveMode,
+                            scanType = scanType,
+                            compressionQuality = compressionQuality
+                        )
+                    }
                     if (isFront) {
                         _documentFrontUploadedState
                     } else {
@@ -935,6 +980,8 @@ internal class IdentityViewModel(
             )
         )
         val error = IllegalStateException(detailedMessage, throwable)
+        documentUploads[DocumentUploadKey(isFront = isFront, isHighRes = isHighRes)] =
+            FileUpload(hasFile = false)
         if (isFront) {
             _documentFrontUploadedState
         } else {
@@ -1019,6 +1066,7 @@ internal class IdentityViewModel(
         }
     }
 
+    @Suppress("LongMethod")
     private fun uploadSelfieImagesAndNotify(
         imageFile: File,
         filePurpose: StripeFilePurpose,
@@ -1027,19 +1075,25 @@ internal class IdentityViewModel(
         isLiveMode: Boolean,
         compressionQuality: Float
     ) {
+        val uploadSpec = SelfieUploadSpec(selfie = selfie, isHighRes = isHighRes)
+        val upload = FileUpload()
+        selfieUploads[uploadSpec] = upload
         _selfieUploadedState.updateStateAndSave { currentState ->
             currentState.updateLoading(isHighRes, selfie)
         }
         viewModelScope.launch {
             var fileToUpload = imageFile
-            runCatching {
+            val result = runCatching {
                 fileToUpload = imageFile.fileForVerificationMode(
                     isLiveMode = isLiveMode,
                     testModeImage = TestModeImage.SELFIE
                 )
                 uploadPreparedImage(fileToUpload, filePurpose)
-            }.fold(
+            }
+            if (selfieUploads[uploadSpec] !== upload) return@launch
+            result.fold(
                 onSuccess = { fileTimePair ->
+                    selfieUploads.remove(uploadSpec)
                     identityAnalyticsRequestFactory.imageUpload(
                         value = fileTimePair.second,
                         compressionQuality = compressionQuality,
@@ -1069,6 +1123,16 @@ internal class IdentityViewModel(
                             fileName = fileToUpload.name
                         )
                     )
+                    upload.retry = {
+                        uploadSelfieImagesAndNotify(
+                            imageFile = imageFile,
+                            filePurpose = filePurpose,
+                            isHighRes = isHighRes,
+                            selfie = selfie,
+                            isLiveMode = isLiveMode,
+                            compressionQuality = compressionQuality
+                        )
+                    }
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
@@ -1100,6 +1164,8 @@ internal class IdentityViewModel(
             )
         )
         val error = IllegalStateException(detailedMessage, throwable)
+        selfieUploads[SelfieUploadSpec(selfie = selfie, isHighRes = isHighRes)] =
+            FileUpload(hasFile = false)
         _selfieUploadedState.updateStateAndSave { currentState ->
             currentState.updateError(
                 isHighRes = isHighRes,
@@ -1181,7 +1247,9 @@ internal class IdentityViewModel(
                     }
 
                     val missingSet = verificationPage.requirements.missing.toSet()
-                    if (missingSet.contains(Requirement.IDDOCUMENTFRONT)) {
+                    // While the upload error can retry, keep the front: the retry needs the files that
+                    // already uploaded, and it can post the front before this response arrives.
+                    if (missingSet.contains(Requirement.IDDOCUMENTFRONT) && continueAfterUploadRetry == null) {
                         _collectedData.updateStateAndSave { it.clearData(Requirement.IDDOCUMENTFRONT) }
                         _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
                     }
@@ -1729,6 +1797,8 @@ internal class IdentityViewModel(
     }
 
     fun clearDocumentUploadedState() {
+        documentUploads.clear()
+        continueAfterUploadRetry = null
         listOf(_documentFrontUploadedState, _documentBackUploadedState).forEach {
             it.updateStateAndSave {
                 SingleSideDocumentUploadState()
@@ -1737,9 +1807,44 @@ internal class IdentityViewModel(
     }
 
     fun clearSelfieUploadedState() {
+        selfieUploads.clear()
+        continueAfterUploadRetry = null
         _selfieUploadedState.updateStateAndSave {
             SelfieUploadState()
         }
+    }
+
+    fun canRetryFailedUploads(): Boolean =
+        continueAfterUploadRetry != null &&
+            (documentUploads.values + selfieUploads.values).all { it.hasFile }
+
+    /**
+     * Starts the failed uploads again, without the uploads that succeeded, then continues the flow
+     * of the screen that showed the upload error.
+     */
+    suspend fun retryFailedUploads(navController: NavController) {
+        val continueFlow = continueAfterUploadRetry ?: return
+        (documentUploads.values + selfieUploads.values).mapNotNull { it.retry }.forEach { it() }
+        continueFlow(navController)
+    }
+
+    private fun navigateUpAfterUploadRetry(navController: NavController) {
+        screenTracker.screenTransitionStart(IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR)
+        navController.navigateUp()
+    }
+
+    private fun navigateToUploadError(
+        navController: NavController,
+        cause: Throwable,
+        continueAfterRetry: suspend (NavController) -> Unit
+    ) {
+        continueAfterUploadRetry = continueAfterRetry
+        errorCause.postValue(cause)
+        navController.navigateToErrorScreenWithDefaultValues(
+            getApplication(),
+            cause,
+            isUploadError = true
+        )
     }
 
     fun setSelfieTrainingConsent(trainingConsent: Boolean) {
@@ -1988,10 +2093,15 @@ internal class IdentityViewModel(
         } else {
             documentBackUploadedState
         }.collectLatest { uploadedState ->
-            if (uploadedState.hasError()) {
-                val cause = uploadedState.getError()
-                errorCause.postValue(cause)
-                navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
+            // Wait for both files, so Try again starts every failed upload at once.
+            if (uploadedState.hasError() && !uploadedState.isLoading()) {
+                navigateToUploadError(navController, uploadedState.getError()) { errorNavController ->
+                    // Going up returns to the scan screen, which scans the back when the front is
+                    // collected.
+                    collectDataForDocumentScanScreen(errorNavController, isFront) {
+                        errorNavController.navigateUp()
+                    }
+                }
             } else {
                 val collectedDataParam = createCollectedDataParamForDocumentCapture(
                     uploadedState = uploadedState,
@@ -2026,9 +2136,12 @@ internal class IdentityViewModel(
             frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
                 if (collectedData.idDocumentFront == null) {
                     if (frontUploadState.hasError()) {
-                        val cause = frontUploadState.getError()
-                        errorCause.postValue(cause)
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
+                        // The upload screen collects both sides again when it shows.
+                        navigateToUploadError(
+                            navController,
+                            frontUploadState.getError(),
+                            ::navigateUpAfterUploadRetry
+                        )
                     } else {
                         val collectedDataParam = createCollectedDataParamForDocumentCapture(
                             uploadedState = frontUploadState,
@@ -2046,9 +2159,11 @@ internal class IdentityViewModel(
             backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
                 if (collectedData.idDocumentBack == null) {
                     if (backUploadedState.hasError()) {
-                        val cause = backUploadedState.getError()
-                        errorCause.postValue(cause)
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
+                        navigateToUploadError(
+                            navController,
+                            backUploadedState.getError(),
+                            ::navigateUpAfterUploadRetry
+                        )
                     } else {
                         val collectedDataParam = createCollectedDataParamForDocumentCapture(
                             uploadedState = backUploadedState,
@@ -2123,7 +2238,6 @@ internal class IdentityViewModel(
      * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
      * navigate accordingly.
      */
-    @Suppress("LongMethod")
     suspend fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,
@@ -2135,22 +2249,50 @@ internal class IdentityViewModel(
         } else {
             emptyList()
         }
+        // Read the scan now, so an upload retry does not keep the transitioner and its camera
+        // frames. A failure shows when the uploads finish, as before.
+        val scan = runCatching {
+            SelfieScan(
+                frameData = faceDetectorTransitioner.createFaceFrameData(
+                    sideSelfies = sideSelfies,
+                    cameraLensModel = selfieCameraLensModel
+                ),
+                scoreVariance = faceDetectorTransitioner.scoreVariance,
+                bestFaceScore = faceDetectorTransitioner.bestFaceScore,
+                numFrames = faceDetectorTransitioner.numFrames
+            )
+        }
+        collectSelfieUploads(navController, sideSelfies, scan, trainingConsent)
+    }
+
+    private class SelfieScan(
+        val frameData: Map<FaceDetectorTransitioner.Selfie, FaceFrameDataParam>,
+        val scoreVariance: Float,
+        val bestFaceScore: Float,
+        val numFrames: Int
+    )
+
+    @Suppress("LongMethod")
+    private suspend fun collectSelfieUploads(
+        navController: NavController,
+        sideSelfies: List<FaceDetectorTransitioner.Selfie>,
+        scan: Result<SelfieScan>,
+        trainingConsent: Boolean
+    ) {
         selfieUploadState.collectLatest {
             when {
                 it.isIdle(sideSelfies) -> {} // no-op
                 it.isAnyLoading() -> {} // no-op
                 it.hasError(sideSelfies) -> {
-                    val cause = it.getError(sideSelfies)
-                    errorCause.postValue(cause)
-                    navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
+                    navigateToUploadError(navController, it.getError(sideSelfies)) { errorNavController ->
+                        collectSelfieUploads(errorNavController, sideSelfies, scan, trainingConsent)
+                    }
                 }
 
                 it.isAllUploaded(sideSelfies) -> {
                     runCatching {
-                        val frameData = faceDetectorTransitioner.createFaceFrameData(
-                            sideSelfies = sideSelfies,
-                            cameraLensModel = selfieCameraLensModel
-                        )
+                        val selfieScan = scan.getOrThrow()
+                        val frameData = selfieScan.frameData
                         postVerificationPageDataAndMaybeNavigate(
                             navController = navController,
                             collectedDataParam = CollectedDataParam.createForSelfie(
@@ -2161,9 +2303,9 @@ internal class IdentityViewModel(
                                 bestHighResResult = requireNotNull(it.bestHighResResult.data),
                                 bestLowResResult = requireNotNull(it.bestLowResResult.data),
                                 trainingConsent = trainingConsent,
-                                faceScoreVariance = faceDetectorTransitioner.scoreVariance,
-                                bestFaceScore = faceDetectorTransitioner.bestFaceScore,
-                                numFrames = faceDetectorTransitioner.numFrames,
+                                faceScoreVariance = selfieScan.scoreVariance,
+                                bestFaceScore = selfieScan.bestFaceScore,
+                                numFrames = selfieScan.numFrames,
                                 bestCameraLensModel = selfieCameraLensModel,
                                 bestExposureIso = selfieBestExposureIso,
                                 bestFocalLength = selfieBestFocalLength,

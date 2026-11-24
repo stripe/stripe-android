@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -288,11 +289,26 @@ internal fun IdentityNavGraph(
                     ErrorDestination.TAG,
                     "About to show error screen with error caused by ${identityViewModel.errorCause.value?.cause}"
                 )
+                // The retry collects upload states until it navigates, so it must stop when this
+                // screen leaves, not run in the graph's scope.
+                val errorScreenScope = rememberCoroutineScope()
+                val canRetryUploads = remember {
+                    ErrorDestination.isUploadError(it) && identityViewModel.canRetryFailedUploads()
+                }
+                val tryAgainButton = if (canRetryUploads) {
+                    ErrorScreenButton(buttonText = stringResource(R.string.stripe_try_again)) {
+                        errorScreenScope.launch {
+                            identityViewModel.retryFailedUploads(navController)
+                        }
+                    }
+                } else {
+                    null
+                }
                 ErrorScreen(
                     identityViewModel = identityViewModel,
                     title = ErrorDestination.errorTitle(it),
                     message1 = ErrorDestination.errorContent(it),
-                    topButton = ErrorDestination.continueButtonContext(it)
+                    topButton = tryAgainButton ?: ErrorDestination.continueButtonContext(it)
                         ?.let { (topButtonText, topButtonRequirement) ->
                             ErrorScreenButton(buttonText = topButtonText) {
                                 coroutineScope.launch {

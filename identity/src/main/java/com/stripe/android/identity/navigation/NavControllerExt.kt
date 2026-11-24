@@ -73,11 +73,13 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 /**
  * Navigate to the final error screen with default values, clicking the action button would return
  * to the previous screen. If [cause] shows that the ephemeral key no longer works, navigate to the
- * final error screen instead.
+ * final error screen instead. If [isUploadError] is true, the screen can also start the failed
+ * uploads again.
  */
 internal fun NavController.navigateToErrorScreenWithDefaultValues(
     context: Context,
-    cause: Throwable? = null
+    cause: Throwable? = null,
+    isUploadError: Boolean = false
 ) {
     // A retry with the same ephemeral key cannot succeed.
     if (generateSequence(cause) { it.cause }.any { it is AuthenticationException }) {
@@ -90,7 +92,8 @@ internal fun NavController.navigateToErrorScreenWithDefaultValues(
             errorContent = context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             backButtonDestination = ConsentDestination.ROUTE.route,
             backButtonText = context.getString(R.string.stripe_go_back),
-            shouldFail = false
+            shouldFail = false,
+            isUploadError = isUploadError
         )
     )
 }
