@@ -46,6 +46,7 @@ fun VerificationPreview() {
         Box(modifier = Modifier.fillMaxSize()) {
             VerificationBody(
                 state = VerificationViewState(
+                    isTestMode = false,
                     authFlow = null,
                     isProcessing = false,
                     isSendingNewCode = false,

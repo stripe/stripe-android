@@ -187,6 +187,7 @@ internal class VerificationViewModelAuthFlowTest {
         val dismissWithResultCalls = Turbine<LinkActivityResult>()
 
         val viewModel = VerificationViewModel(
+            isTestMode = false,
             linkAccount = requireNotNull(accountManager.linkAccountHolder.linkAccountInfo.value.account),
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             linkAccountManager = accountManager,

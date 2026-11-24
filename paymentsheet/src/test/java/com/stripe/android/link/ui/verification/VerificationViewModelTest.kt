@@ -487,6 +487,16 @@ internal class VerificationViewModelTest {
         assertThat(viewModel.viewState.value.isProcessingWebAuth).isTrue()
     }
 
+    @Test
+    fun `test mode is exposed in verification state`() {
+        assertThat(createViewModel(isTestMode = true).viewState.value.isTestMode).isTrue()
+    }
+
+    @Test
+    fun `live mode is exposed in verification state`() {
+        assertThat(createViewModel(isTestMode = false).viewState.value.isTestMode).isFalse()
+    }
+
     // Utility functions for test setup
     private fun linkAccountWithInlineConsent(consentSection: ConsentUi.ConsentSection = mock()) =
         TestFactory.LINK_ACCOUNT.copy(
@@ -499,6 +509,7 @@ internal class VerificationViewModelTest {
         )
 
     private fun createViewModel(
+        isTestMode: Boolean = false,
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
@@ -512,6 +523,7 @@ internal class VerificationViewModelTest {
         dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
+            isTestMode = isTestMode,
             linkAccount = linkAccount,
             linkAccountHolder = linkAccountHolder,
             linkAccountManager = linkAccountManager,

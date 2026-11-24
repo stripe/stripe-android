@@ -155,6 +155,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         linkConfiguration = linkConfiguration,
         paymentMethodMetadata = paymentMethodMetadata,
         viewState = VerificationViewState(
+            isTestMode = !linkConfiguration.stripeIntent.isLiveMode,
             authFlow = null,
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
