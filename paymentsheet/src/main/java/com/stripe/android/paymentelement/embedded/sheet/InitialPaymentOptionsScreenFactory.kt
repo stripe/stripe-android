@@ -278,6 +278,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateMandateText = null,
             coroutineScope = coroutineScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            featuredInstitutions = null,
             linkAccount = linkAccountHolder.linkAccountInfo,
         )
     }

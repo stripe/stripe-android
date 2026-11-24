@@ -605,6 +605,23 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    sealed class FeaturedInstitutions : PaymentSheetEvent() {
+
+        class Shown : FeaturedInstitutions() {
+            override val eventName: String = "mc_instant_debits_featured_institutions_shown"
+        }
+
+        class Insufficient(count: Int) : FeaturedInstitutions() {
+            override val eventName: String = "mc_instant_debits_featured_institutions_insufficient"
+            override val params: Map<String, Any?> = mapOf("count" to count)
+        }
+
+        class LoadFailed(error: Throwable) : FeaturedInstitutions() {
+            override val eventName: String = "mc_instant_debits_featured_institutions_load_failed"
+            override val params: Map<String, Any?> = ErrorReporter.getAdditionalParamsFromError(error)
+        }
+    }
+
     class BillingAddressCompleted(
         private val addressCountryCode: String,
         private val autocompleteResultSelected: Boolean,

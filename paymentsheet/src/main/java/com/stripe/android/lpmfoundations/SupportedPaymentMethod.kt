@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutions
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.ui.IconHelper
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
@@ -102,6 +103,7 @@ internal data class SupportedPaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
         incentive: PaymentMethodIncentive?,
         promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
+        featuredInstitutions: FeaturedInstitutions? = null,
         isExpanded: Boolean,
         onClick: () -> Unit,
     ): DisplayablePaymentMethod {
@@ -128,6 +130,7 @@ internal data class SupportedPaymentMethod(
             subtitle = subtitle,
             promoBadge = incentive?.displayText,
             promotionProvider = promotionProvider,
+            featuredInstitutions = featuredInstitutions,
             onClick = onClick,
             isExpanded = isExpanded
         )

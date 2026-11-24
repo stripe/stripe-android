@@ -38,6 +38,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -88,6 +89,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    private val featuredInstitutionsHelper: FeaturedInstitutionsHelper,
     placesClient: PlacesClientProxy?,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
@@ -440,7 +442,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                featuredInstitutionsHelper = featuredInstitutionsHelper,
             )
         }
         val target = if (args.state.showSavedPaymentMethods) {

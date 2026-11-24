@@ -39,6 +39,9 @@ internal class EmbeddedPaymentElementBankIncentiveTest {
         )
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json") { json ->
+                // This test doesn't cover the featured institution icons, so don't fetch them.
+                json.getJSONObject("flags")
+                    .put("elements_mobile_featured_institutions_killswitch", true)
                 json.getJSONObject("link_settings")
                     .put("link_mode", "LINK_PAYMENT_METHOD")
                     .put(

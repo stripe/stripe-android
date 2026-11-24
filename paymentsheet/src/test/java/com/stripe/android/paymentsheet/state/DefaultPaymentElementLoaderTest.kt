@@ -84,6 +84,9 @@ import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.paymentsheet.featuredinstitutions.FakeFeaturedInstitutionsHelper
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
+import com.stripe.android.paymentsheet.featuredinstitutions.NoOpFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -4594,6 +4597,28 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `starts fetching featured institutions with the loaded payment method metadata`() = runScenario {
+        val featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper()
+        val loader = createPaymentElementLoader(
+            featuredInstitutionsHelper = featuredInstitutionsHelper,
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            )
+        ).getOrThrow()
+
+        assertThat(featuredInstitutionsHelper.fetchCalls.awaitItem()).isEqualTo(state.paymentMethodMetadata)
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `logs exposure does not fetch messaging for pmm experiment control group`() = runScenario {
         val reporter = FakeEventReporter()
         val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
@@ -5421,6 +5446,7 @@ internal class DefaultPaymentElementLoaderTest {
         paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper =
             FakePaymentMethodMessagePromotionsHelper(),
+        featuredInstitutionsHelper: FeaturedInstitutionsHelper = NoOpFeaturedInstitutionsHelper(),
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
@@ -5482,6 +5508,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            featuredInstitutionsHelper = featuredInstitutionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,

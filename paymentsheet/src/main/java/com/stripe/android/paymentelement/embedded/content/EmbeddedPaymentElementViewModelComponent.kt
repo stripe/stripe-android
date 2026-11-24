@@ -30,6 +30,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelperModule
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -85,6 +86,7 @@ import javax.inject.Singleton
         PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
+        FeaturedInstitutionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         PreselectLinkExperimentModule::class,
         ApiConfigurationResolverModule::class,

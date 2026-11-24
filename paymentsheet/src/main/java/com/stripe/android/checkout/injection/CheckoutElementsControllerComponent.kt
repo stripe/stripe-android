@@ -72,6 +72,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.NoOpFeaturedInstitutionsHelperModule
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -132,6 +133,7 @@ import javax.inject.Singleton
         EmbeddedLinkExtrasModule::class,
         LinkHoldbackExposureModule::class,
         NoOpPaymentMethodMessagingPromotionHelperModule::class,
+        NoOpFeaturedInstitutionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         PreselectLinkExperimentModule::class,
         NfcScanningAvailabilityModule::class,

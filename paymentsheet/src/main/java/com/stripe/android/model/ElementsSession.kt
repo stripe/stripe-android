@@ -116,6 +116,10 @@ internal data class ElementsSession(
     val shouldUseAutocompleteProxyEndpoints: Boolean
         get() = flags[Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS] == true
 
+    // Killswitch: a missing flag means the feature is enabled.
+    val isFeaturedInstitutionsEnabled: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_FEATURED_INSTITUTIONS_KILLSWITCH] != true
+
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
@@ -265,6 +269,9 @@ internal data class ElementsSession(
         ),
         OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS(
             "ocs_mobile_should_use_autocomplete_proxy_endpoints"
+        ),
+        ELEMENTS_MOBILE_FEATURED_INSTITUTIONS_KILLSWITCH(
+            "elements_mobile_featured_institutions_killswitch"
         ),
     }
 

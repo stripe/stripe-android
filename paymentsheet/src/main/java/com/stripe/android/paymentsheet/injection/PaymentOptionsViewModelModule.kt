@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -9,10 +10,13 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
+import com.stripe.android.paymentsheet.featuredinstitutions.PrefetchedFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Module
 internal class PaymentOptionsViewModelModule {
@@ -56,6 +61,24 @@ internal class PaymentOptionsViewModelModule {
         eventReporter: EventReporter
     ): PaymentMethodMessagePromotionsHelper {
         return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, eventReporter)
+    }
+
+    @Provides
+    @Singleton
+    fun providesFeaturedInstitutionsHelper(
+        appContext: Context,
+        args: PaymentOptionContract.Args,
+        eventReporter: EventReporter,
+        @ViewModelScope viewModelScope: CoroutineScope,
+        @IOContext workContext: CoroutineContext,
+    ): FeaturedInstitutionsHelper {
+        return PrefetchedFeaturedInstitutionsHelper(
+            institutions = args.featuredInstitutions,
+            imageLoader = DefaultStripeImageLoader(appContext),
+            eventReporter = eventReporter,
+            viewModelScope = viewModelScope,
+            workContext = workContext,
+        )
     }
 
     @Provides

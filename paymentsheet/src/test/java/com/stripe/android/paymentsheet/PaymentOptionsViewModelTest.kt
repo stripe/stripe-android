@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.FakeFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -1519,6 +1520,7 @@ internal class PaymentOptionsViewModelTest {
             },
             customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper(),
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
@@ -1573,7 +1575,8 @@ internal class PaymentOptionsViewModelTest {
                 lastUpdateReason = null
             ),
             walletButtonsRendered = false,
-            promotions = null
+            promotions = null,
+            featuredInstitutions = null,
         )
         private val AVAILABLE_LINK_STATE = LinkState(
             configuration = TestFactory.LINK_CONFIGURATION,

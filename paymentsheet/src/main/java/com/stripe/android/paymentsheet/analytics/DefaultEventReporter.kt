@@ -609,6 +609,18 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onFeaturedInstitutionsShown() {
+        fireEvent(PaymentSheetEvent.FeaturedInstitutions.Shown())
+    }
+
+    override fun onFeaturedInstitutionsInsufficient(count: Int) {
+        fireEvent(PaymentSheetEvent.FeaturedInstitutions.Insufficient(count))
+    }
+
+    override fun onFeaturedInstitutionsLoadFailed(error: Throwable) {
+        fireEvent(PaymentSheetEvent.FeaturedInstitutions.LoadFailed(error))
+    }
+
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),

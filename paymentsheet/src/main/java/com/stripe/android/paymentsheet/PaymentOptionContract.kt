@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitution
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -35,7 +36,8 @@ internal class PaymentOptionContract :
         val walletButtonsRendered: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
-        val promotions: List<PaymentMethodMessagePromotion>?
+        val promotions: List<PaymentMethodMessagePromotion>?,
+        val featuredInstitutions: List<FeaturedInstitution>?,
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
