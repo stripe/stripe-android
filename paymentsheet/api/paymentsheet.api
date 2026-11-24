@@ -289,6 +289,7 @@ public final class com/stripe/android/link/LinkController {
 	public static final field $stable I
 	public final fun configure-gIAlu-s (Lcom/stripe/android/link/LinkController$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createPresenter (Landroidx/activity/ComponentActivity;Lcom/stripe/android/link/LinkController$PresentCallback;)Lcom/stripe/android/link/LinkController$Presenter;
+	public final fun createPresenter (Landroidx/activity/ComponentActivity;Lcom/stripe/android/link/LinkController$PresentCallback;Lcom/stripe/android/link/LinkController$ConfirmSetupIntentCallback;)Lcom/stripe/android/link/LinkController$Presenter;
 	public final fun getPaymentMethodPreview ()Lkotlinx/coroutines/flow/StateFlow;
 }
 

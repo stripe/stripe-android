@@ -146,6 +146,31 @@ class LinkController @Inject internal constructor(
     )
 
     /**
+     * Creates a [Presenter] for use with [Presenter.present] and [Presenter.confirmSetupIntent].
+     *
+     * The two-argument [createPresenter] installs an empty [ConfirmSetupIntentCallback], so
+     * [Presenter.confirmSetupIntent] results never leave this library. Pass
+     * [confirmSetupIntentCallback] to receive them. The other presenter callbacks stay on the
+     * library-group overload.
+     *
+     * @param activity The [ComponentActivity] that will host the Link UI.
+     * @param presentCallback Callback to receive results from [Presenter.present].
+     * @param confirmSetupIntentCallback Callback to receive results from [Presenter.confirmSetupIntent].
+     */
+    fun createPresenter(
+        activity: ComponentActivity,
+        presentCallback: PresentCallback,
+        confirmSetupIntentCallback: ConfirmSetupIntentCallback,
+    ): Presenter = createPresenter(
+        activity = activity,
+        presentPaymentMethodsCallback = {},
+        authenticationCallback = {},
+        authorizeCallback = {},
+        presentCallback = presentCallback,
+        confirmSetupIntentCallback = confirmSetupIntentCallback,
+    )
+
+    /**
      * Creates a [Presenter] for the Link controller that can present user-interactive flows.
      *
      * @param activity The [ComponentActivity] that will host the Link UI.
