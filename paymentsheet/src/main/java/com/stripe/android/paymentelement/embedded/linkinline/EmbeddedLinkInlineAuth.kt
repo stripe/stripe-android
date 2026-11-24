@@ -6,6 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
@@ -196,6 +197,7 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
     private val registry: EmbeddedLinkInlineAuthRegistry,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val logger: Logger,
 ) : EmbeddedLinkInlineAuth, EmbeddedLinkInlineAuthController.Host {
 
     private val controller = MutableStateFlow<EmbeddedLinkInlineAuthController?>(null)
@@ -538,6 +540,7 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
             is Result.Eligible -> result
             is Result.Ineligible -> {
                 controllerScope.cancel()
+                logger.debug("Inline Link verification is ineligible: ${result.reason.analyticsValue}")
                 if (logsIneligibility && result.reason.isReported) {
                     eventReporter.onEmbeddedLinkInlineAuthEvent(EmbeddedLinkInlineAuthEvent.Ineligible(result.reason))
                 }

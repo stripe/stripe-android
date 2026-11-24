@@ -7,6 +7,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.core.Logger
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -657,6 +658,7 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
             registry = EmbeddedLinkInlineAuthRegistry(now = { testScheduler.currentTime }),
             selectionHolder = selectionHolder,
             immediateActionHandler = { immediateActionCalls.add(Unit) },
+            logger = Logger.noop(),
         )
         val activityHost = FakeEmbeddedLinkInlineActivityHost().also { linkInlineAuth.activityHost = it }
 

@@ -19,6 +19,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -31,6 +32,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -174,6 +176,49 @@ internal class EmbeddedLinkInlineVerificationCardTest {
     }
 
     @Test
+    fun `tapping another digit while typing keeps focus on the next digit`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performTextInput("1")
+        composeRule.onNodeWithTag("OTP-1").assertIsFocused()
+
+        composeRule.onNodeWithTag("OTP-4").performClick()
+        composeRule.onNodeWithTag("OTP-1").assertIsFocused()
+
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performClick()
+        composeRule.onNodeWithTag("OTP-1").assertIsFocused()
+
+        codeTapCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `typing again continues from the next digit`() = runScenario {
+        otpElement.controller.onValueChanged(0, "12")
+
+        isTyping.value = true
+
+        composeRule.onNodeWithTag("OTP-2").assertIsFocused()
+    }
+
+    @Test
+    fun `clearing the code while typing moves focus back to the first digit`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performTextInput("123")
+        composeRule.onNodeWithTag("OTP-3").assertIsFocused()
+
+        otpElement.controller.reset()
+
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsFocused()
+    }
+
+    @Test
+    fun `typing moves through every digit`() = runScenario(isTyping = true) {
+        "123456".forEachIndexed { index, digit ->
+            composeRule.onNodeWithTag("OTP-$index").assertIsFocused()
+            composeRule.onNodeWithTag("OTP-$index").performTextInput(digit.toString())
+        }
+
+        assertThat(otpElement.controller.fieldValue.value).isEqualTo("123456")
+    }
+
+    @Test
     fun `Done on the keyboard ends typing`() = runScenario(isTyping = true) {
         composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performImeAction()
 
@@ -195,6 +240,8 @@ internal class EmbeddedLinkInlineVerificationCardTest {
         composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsFocused()
 
         composeRule.runOnIdle { requireNotNull(focusManager.value).clearFocus() }
+        // The interruption is reported on the next frame, once focus hasn't moved to another digit.
+        composeRule.waitForIdle()
 
         typingInterruptedCalls.awaitItem()
     }
@@ -221,6 +268,7 @@ internal class EmbeddedLinkInlineVerificationCardTest {
         val isTypingState = mutableStateOf(isTyping)
         val isShown = mutableStateOf(true)
         val focusManager = mutableStateOf<FocusManager?>(null)
+        val otpElement = OTPElementFactory.create()
 
         composeRule.setContent {
             focusManager.value = LocalFocusManager.current
@@ -228,7 +276,7 @@ internal class EmbeddedLinkInlineVerificationCardTest {
                 if (isShown.value) {
                     EmbeddedLinkInlineVerificationCard(
                         state = state,
-                        otpElement = OTPElementFactory.create(),
+                        otpElement = otpElement,
                         linkBrand = LinkBrand.Link,
                         rowStyle = RowStyle.FlatWithRadio.default,
                         isTyping = isTypingState.value,
@@ -257,6 +305,7 @@ internal class EmbeddedLinkInlineVerificationCardTest {
             isTyping = isTypingState,
             isShown = isShown,
             focusManager = focusManager,
+            otpElement = otpElement,
         ).block()
 
         codeTapCalls.ensureAllEventsConsumed()
@@ -277,6 +326,7 @@ internal class EmbeddedLinkInlineVerificationCardTest {
         val isTyping: MutableState<Boolean>,
         val isShown: MutableState<Boolean>,
         val focusManager: State<FocusManager?>,
+        val otpElement: OTPElement,
     )
 
     private companion object {

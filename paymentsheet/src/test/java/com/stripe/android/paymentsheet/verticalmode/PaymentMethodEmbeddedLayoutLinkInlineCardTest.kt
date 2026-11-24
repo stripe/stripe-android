@@ -67,6 +67,19 @@ internal class PaymentMethodEmbeddedLayoutLinkInlineCardTest {
     }
 
     @Test
+    fun `card replaces only the Link row when Instant Bank Payments also uses the Link code`() = runScenario(
+        paymentMethods = listOf(LINK, CARD, INSTANT_DEBITS),
+    ) {
+        composeRule.onAllNodesWithTag(CARD_TAG).assertCountEquals(1)
+        composeRule.onNodeWithTag(rowTag("link")).assertDoesNotExist()
+        composeRule.onNodeWithTag(rowTag("link_instant_debits")).assertExists()
+
+        val cardBounds = composeRule.onNodeWithTag(CARD_TAG).getBoundsInRoot()
+        val cardRowBounds = composeRule.onNodeWithTag(rowTag("card")).getBoundsInRoot()
+        assertThat(cardBounds.bottom).isLessThan(cardRowBounds.top)
+    }
+
+    @Test
     fun `card at the top hides the top separator and the one below it`() = runScenario(
         paymentMethods = listOf(LINK, GOOGLE_PAY, CARD, CASH_APP),
     ) {
@@ -184,9 +197,14 @@ internal class PaymentMethodEmbeddedLayoutLinkInlineCardTest {
         val GOOGLE_PAY = displayablePaymentMethod("google_pay")
         val CARD = displayablePaymentMethod("card")
         val CASH_APP = displayablePaymentMethod("cashapp")
+        val INSTANT_DEBITS = displayablePaymentMethod("link", syntheticCode = "link_instant_debits")
 
-        fun displayablePaymentMethod(code: String) = DisplayablePaymentMethod(
+        fun displayablePaymentMethod(
+            code: String,
+            syntheticCode: String = code,
+        ) = DisplayablePaymentMethod(
             code = code,
+            syntheticCode = syntheticCode,
             displayName = code.resolvableString,
             iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
             iconResourceNight = null,

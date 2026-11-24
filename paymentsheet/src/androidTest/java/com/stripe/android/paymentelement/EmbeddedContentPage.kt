@@ -59,6 +59,13 @@ internal class EmbeddedContentPage(
             .assertIsSelected()
     }
 
+    fun assertLpmIsMissing(code: String) {
+        waitUntilVisible()
+
+        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
+            .assertDoesNotExist()
+    }
+
     fun assertLpmIsEnabled(code: String, isEnabled: Boolean) {
         waitUntilVisible()
 
