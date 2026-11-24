@@ -23,9 +23,9 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthModule
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedVerticalPaymentSelectionHandler
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -53,7 +53,6 @@ import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
-import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -210,23 +209,17 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
+    fun bindsVerticalPaymentSelectionHandler(
+        handler: EmbeddedVerticalPaymentSelectionHandler,
+    ): VerticalPaymentSelectionHandler
+
+    @Binds
     fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
 
     @Suppress("TooManyFunctions")
     companion object {
-        @Provides
-        fun provideVerticalPaymentSelectionHandler(
-            selectionHolder: EmbeddedSelectionHolder,
-            immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
-        ): VerticalPaymentSelectionHandler {
-            return ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-                completionAction = immediateActionHandler::invoke,
-            )
-        }
-
         @Provides
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens(): Set<String> = setOf("EmbeddedPaymentElement")

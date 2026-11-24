@@ -5,6 +5,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineActivityHost
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.previouslySentDeepLinkEvent
 import javax.inject.Inject
@@ -13,6 +15,8 @@ import javax.inject.Inject
 internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val sheetLauncher: EmbeddedSheetLauncher,
     private val sheetStateHolder: SheetStateHolder,
+    private val linkInlineAuth: EmbeddedLinkInlineAuth,
+    private val linkInlineActivityHost: EmbeddedLinkInlineActivityHost,
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
@@ -25,12 +29,16 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
         }
 
         sheetStateHolder.sheetLauncher = sheetLauncher
+        linkInlineAuth.activityHost = linkInlineActivityHost
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     sheetStateHolder.sheetLauncher = null
+                    if (linkInlineAuth.activityHost === linkInlineActivityHost) {
+                        linkInlineAuth.activityHost = null
+                    }
                 }
             }
         )

@@ -28,9 +28,7 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must have a ViewModelStoreOwner."
     }
 
-    val paymentElementCallbackIdentifier = rememberSaveable {
-        UUID.randomUUID().toString()
-    }
+    val paymentElementCallbackIdentifier = rememberSaveable { UUID.randomUUID().toString() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
@@ -50,6 +48,7 @@ fun rememberEmbeddedPaymentElement(
                 key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
                 registryOwner = activityResultRegistryOwner,
             ),
+            activityResultRegistryOwner = activityResultRegistryOwner,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             lifecycleOwner = lifecycleOwner,
             viewModelStoreOwner = viewModelStoreOwner,
