@@ -1,7 +1,9 @@
 package com.stripe.android.identity.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
@@ -12,13 +14,18 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityCameraManager
+import com.stripe.android.identity.ml.AnalyzerInput
+import com.stripe.android.identity.ml.BoundingBox
+import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -30,6 +37,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class IdentityScanViewModelTest {
@@ -74,7 +82,8 @@ internal class IdentityScanViewModelTest {
         val result = IdentityAggregator.FinalResult(
             mock(),
             mock(),
-            identityState = mock<IdentityScanState.Finished>()
+            identityState = mock<IdentityScanState.Finished>(),
+            isTimeoutFallback = false
         )
 
         viewModel.onResult(result)
@@ -93,7 +102,8 @@ internal class IdentityScanViewModelTest {
             identityState = IdentityScanState.TimeOut(
                 resultType,
                 mock()
-            )
+            ),
+            isTimeoutFallback = false
         )
 
         viewModel.onResult(result)
@@ -107,6 +117,36 @@ internal class IdentityScanViewModelTest {
     }
 
     @Test
+    fun `document timeout fallback is scanned and reports metrics once`() = runTest {
+        val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+        val result = IdentityAggregator.FinalResult(
+            frame = AnalyzerInput(CameraPreviewImage(bitmap, Rect(), exposureIso = 100f), Rect()),
+            result = IDDetectorOutput(
+                BoundingBox(0.25f, 0.25f, 0.5f, 0.5f),
+                Category.ID_FRONT,
+                0.8f,
+                listOf(0f, 0.8f, 0f, 0f),
+                0.1f,
+                bitmap
+            ),
+            identityState = IdentityScanState.TimeOut(
+                IdentityScanState.ScanType.DOC_FRONT,
+                IDDetectorTransitioner(timeout = 8.seconds)
+            ),
+            isTimeoutFallback = true
+        )
+
+        viewModel.scannerState.test {
+            assertThat(awaitItem()).isEqualTo(IdentityScanViewModel.State.Initializing)
+            viewModel.onResult(result)
+            assertThat((awaitItem() as IdentityScanViewModel.State.Scanned).result).isSameInstanceAs(result)
+            ensureAllEventsConsumed()
+        }
+        verify(mockIdentityAnalyticsRequestFactory).documentTimeout(IdentityScanState.ScanType.DOC_FRONT)
+        verify(mockFpsTracker).reportAndReset(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
+    }
+
+    @Test
     fun testTimeoutResultForSelfie() = runBlocking {
         val resultType = IdentityScanState.ScanType.SELFIE
         val result = IdentityAggregator.FinalResult(
@@ -115,7 +155,8 @@ internal class IdentityScanViewModelTest {
             identityState = IdentityScanState.TimeOut(
                 resultType,
                 mock()
-            )
+            ),
+            isTimeoutFallback = false
         )
 
         viewModel.onResult(result)

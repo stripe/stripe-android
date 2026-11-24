@@ -20,6 +20,7 @@ import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.ml.MediaPipeFaceDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
+import com.stripe.android.identity.states.DocumentFrameCache
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,7 @@ internal class IdentityScanFlow(
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
+    private val documentFrameCache = DocumentFrameCache()
 
     /**
      * If this is true, do not start the flow.
@@ -96,7 +98,8 @@ internal class IdentityScanFlow(
             aggregator = IdentityAggregator(
                 parameters,
                 aggregateResultListener,
-                verificationPage
+                verificationPage,
+                documentFrameCache
             )
 
             requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)
@@ -170,7 +173,7 @@ internal class IdentityScanFlow(
     }
 
     /**
-     * Reset the flow to the initial state, ready to be started again
+     * Stop this attempt, retaining document fallbacks for retries and side changes in this session.
      */
     internal fun resetFlow() {
         canceled = false
@@ -180,6 +183,7 @@ internal class IdentityScanFlow(
     override fun cancelFlow() {
         canceled = true
         cleanUp()
+        documentFrameCache.reset()
     }
 
     private fun cleanUp() {

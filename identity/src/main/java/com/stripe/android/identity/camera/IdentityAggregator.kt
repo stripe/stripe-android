@@ -4,8 +4,10 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
+import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
+import com.stripe.android.identity.states.DocumentFrameCache
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
@@ -21,7 +23,8 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class IdentityAggregator(
     identityScanType: IdentityScanState.ScanType,
     aggregateResultListener: AggregateResultListener<InterimResult, FinalResult>,
-    verificationPage: VerificationPage
+    verificationPage: VerificationPage,
+    private val documentFrameCache: DocumentFrameCache
 ) : ResultAggregator<
     AnalyzerInput,
     IdentityScanState,
@@ -60,24 +63,24 @@ internal class IdentityAggregator(
     internal data class FinalResult(
         val frame: AnalyzerInput,
         val result: AnalyzerOutput,
-        val identityState: IdentityScanState
+        val identityState: IdentityScanState,
+        val isTimeoutFallback: Boolean
     )
 
     override suspend fun aggregateResult(
         frame: AnalyzerInput,
         result: AnalyzerOutput
     ): Pair<InterimResult, FinalResult?> {
+        if (!state.isFinal && result is IDDetectorOutput) {
+            documentFrameCache.consider(frame, result, state.type)
+        }
         if (isFirstResultReceived) {
             val previousState = state
             state = previousState.consumeTransition(frame, result)
             val interimResult = InterimResult(state)
             return interimResult to
                 if (state.isFinal) {
-                    FinalResult(
-                        frame,
-                        result,
-                        state
-                    )
+                    finalResult(frame, result)
                 } else {
                     null
                 }
@@ -89,5 +92,24 @@ internal class IdentityAggregator(
             isFirstResultReceived = true
             return InterimResult(state) to null
         }
+    }
+
+    private fun finalResult(frame: AnalyzerInput, result: AnalyzerOutput): FinalResult {
+        val fallback = if (state is IdentityScanState.TimeOut) {
+            documentFrameCache.bestCandidate(state.type)
+        } else {
+            null
+        }
+        val transitioner = if (state is IdentityScanState.Finished) {
+            state.transitioner as? IDDetectorTransitioner
+        } else {
+            null
+        }
+        return FinalResult(
+            frame = fallback?.input ?: transitioner?.getBestInput() ?: frame,
+            result = fallback?.output ?: transitioner?.getBestOutput() ?: result,
+            identityState = state,
+            isTimeoutFallback = fallback != null
+        )
     }
 }

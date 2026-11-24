@@ -10,8 +10,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowSystemClock
@@ -457,25 +455,23 @@ internal class IDDetectorTransitionerTest {
             )
             transitioner.timeoutAt = mockNeverTimeoutClockMark
 
-            val transitionerSpy = spy(transitioner)
-
             val unsatisfiedState =
                 IdentityScanState.Unsatisfied(
                     "reason",
                     ScanType.DOC_FRONT,
-                    transitionerSpy,
+                    transitioner,
                     reachedStateAt = mockReachAtClockMark
                 )
 
             val resultState =
-                transitionerSpy.transitionFromUnsatisfied(
+                transitioner.transitionFromUnsatisfied(
                     unsatisfiedState,
                     mock(),
                     mock()
                 )
 
-            verify(transitionerSpy).resetAndReturn()
             assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
+            assertThat(transitioner.timeoutAt).isSameInstanceAs(mockNeverTimeoutClockMark)
         }
 
     private fun createAnalyzerOutputWithHighIOU(

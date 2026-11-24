@@ -178,6 +178,7 @@ class DocumentScanScreenTest {
                     frame = mock(),
                     result = mock<FaceDetectorOutput>(),
                     identityState = mock(),
+                    isTimeoutFallback = false
                 )
             ),
             messageId = R.string.stripe_scanned

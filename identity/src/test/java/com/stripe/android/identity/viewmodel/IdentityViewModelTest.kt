@@ -1536,7 +1536,8 @@ internal class IdentityViewModelTest {
                 blurScore = 1.0f,
                 croppedImage = INPUT_BITMAP
             ),
-            identityState = mock<IdentityScanState.Finished>()
+            identityState = mock<IdentityScanState.Finished>(),
+            isTimeoutFallback = false
         )
         val FINAL_ID_DETECTOR_RESULT_BACK = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
@@ -1554,7 +1555,8 @@ internal class IdentityViewModelTest {
                 blurScore = 1.0f,
                 croppedImage = INPUT_BITMAP
             ),
-            identityState = mock<IdentityScanState.Finished>()
+            identityState = mock<IdentityScanState.Finished>(),
+            isTimeoutFallback = false
         )
 
         val FILTERED_FRAMES = listOf(
@@ -1644,7 +1646,8 @@ internal class IdentityViewModelTest {
                         on { frameForSelfie(selfie) }.thenReturn(frame)
                     }
                 }
-            )
+            ),
+            isTimeoutFallback = false
         )
 
         val ID_DETECTOR_FILE = mock<File>()
