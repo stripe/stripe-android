@@ -1,6 +1,376 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
+public final class com/stripe/android/checkout/CheckoutElementsController {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/checkout/CheckoutElementsController$Companion;
+	public final fun clearPaymentOption (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun configure (Ljava/lang/String;Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun configure$default (Lcom/stripe/android/checkout/CheckoutElementsController;Ljava/lang/String;Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun createPresenter (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/checkout/CheckoutElementsPresenter;
+	public final fun destroy ()V
+	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isUpdating ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun runServerUpdate (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateEmail (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateShippingAddress (Ljava/lang/String;Lcom/stripe/android/checkout/CheckoutElementsController$Address;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Address {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun city (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Address;
+	public final fun line1 (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Address;
+	public final fun line2 (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Address;
+	public final fun postalCode (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Address;
+	public final fun state (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Address;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Builder {
+	public static final field $stable I
+	public fun <init> (Landroid/app/Application;Landroidx/lifecycle/SavedStateHandle;)V
+	public final fun build ()Lcom/stripe/android/checkout/CheckoutElementsController;
+	public final fun integrationName (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Builder;
+	public final fun resultCallback (Lcom/stripe/android/checkout/CheckoutElementsController$ResultCallback;)Lcom/stripe/android/checkout/CheckoutElementsController$Builder;
+	public final fun rowSelectionBehavior (Lcom/stripe/android/elements/PaymentElement$RowSelectionBehavior;)Lcom/stripe/android/checkout/CheckoutElementsController$Builder;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Companion {
+	public final fun clearLocalCustomerData (Landroid/content/Context;)V
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun currencySelectorElement (Lcom/stripe/android/elements/CurrencySelectorElement$Configuration;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;
+	public final fun defaults (Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;
+	public final fun expressCheckoutElement (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;
+	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;
+	public final fun paymentElement (Lcom/stripe/android/elements/PaymentElement$Configuration;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;
+	public final fun shippingAddressElement (Lcom/stripe/android/elements/ShippingAddressElement$Configuration;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun billingDetails (Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults$ContactDetails;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults;
+	public final fun email (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults;
+	public final fun phone (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults;
+	public final fun shippingDetails (Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults$ContactDetails;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults$ContactDetails {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun address (Lcom/stripe/android/checkout/CheckoutElementsController$Address;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults$ContactDetails;
+	public final fun name (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Configuration$Defaults$ContactDetails;
+}
+
+public abstract interface class com/stripe/android/checkout/CheckoutElementsController$OperationResult {
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$OperationResult$Failed : com/stripe/android/checkout/CheckoutElementsController$OperationResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisplayMessage ()Ljava/lang/String;
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$OperationResult$Succeeded : com/stripe/android/checkout/CheckoutElementsController$OperationResult {
+	public static final field $stable I
+}
+
+public abstract interface class com/stripe/android/checkout/CheckoutElementsController$Result {
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Result$Canceled : com/stripe/android/checkout/CheckoutElementsController$Result {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Result$Completed : com/stripe/android/checkout/CheckoutElementsController$Result {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentStatus ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Result$Failed : com/stripe/android/checkout/CheckoutElementsController$Result {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisplayMessage ()Ljava/lang/String;
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/checkout/CheckoutElementsController$ResultCallback {
+	public abstract fun onResult (Lcom/stripe/android/checkout/CheckoutElementsController$Result;)V
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvailableExpressCheckoutPaymentMethods ()Ljava/util/Set;
+	public final fun getBusinessName ()Ljava/lang/String;
+	public final fun getCurrency ()Ljava/lang/String;
+	public final fun getDiscountAmounts ()Ljava/util/List;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLivemode ()Z
+	public final fun getMinorUnitsAmountDivisor ()Ljava/lang/Integer;
+	public final fun getOrderSummaryItems ()Ljava/util/List;
+	public final fun getPaymentOption ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$PaymentOptionDisplayData;
+	public final fun getPresentmentDetails ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$PresentmentDetails;
+	public final fun getShippingAddress ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$ShippingAddress;
+	public final fun getStatus ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status;
+	public final fun getTax ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax;
+	public final fun getTaxAmounts ()Ljava/util/List;
+	public final fun getTotals ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Totals;
+	public fun hashCode ()I
+	public final fun isCurrencySelectorAvailable ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$AdjustableQuantity {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getMaximum ()I
+	public final fun getMinimum ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Amount {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmount ()Ljava/lang/String;
+	public final fun getMinorUnitsAmount ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$DecimalAmount {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmount ()Ljava/lang/String;
+	public final fun getMinorUnitsAmount ()Ljava/math/BigDecimal;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$DiscountAmount {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmount ()Ljava/lang/String;
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getMinorUnitsAmount ()J
+	public final fun getPercentOff ()Ljava/lang/Double;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/checkout/CheckoutElementsController$Session$OrderSummaryItem {
+	public static final field $stable I
+	public abstract fun getId ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$OrderSummaryItem$OneTimePrice : com/stripe/android/checkout/CheckoutElementsController$Session$OrderSummaryItem {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public final fun getItems ()Ljava/util/List;
+	public final fun getKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$OrderSummaryItem$OneTimePrice$Item {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdjustableQuantity ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$AdjustableQuantity;
+	public final fun getAmountDetails ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$OrderSummaryItem$OneTimePrice$Item$AmountDetails;
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getImages ()Ljava/util/List;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getQuantity ()I
+	public final fun getUnitAmount ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getUnitAmountDecimal ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$DecimalAmount;
+	public final fun getUnitLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$OrderSummaryItem$OneTimePrice$Item$AmountDetails {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSubtotal ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getTaxAmounts ()Ljava/util/List;
+	public final fun getTaxExclusive ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getTaxInclusive ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getTotal ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$PaymentOptionDisplayData {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBillingDetails ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$PaymentOptionDisplayData$BillingDetails;
+	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getMandateText ()Landroidx/compose/ui/text/AnnotatedString;
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public final fun getSublabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$PaymentOptionDisplayData$BillingDetails {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$PaymentOptionDisplayData$BillingDetails$Address;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$PaymentOptionDisplayData$BillingDetails$Address {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCity ()Ljava/lang/String;
+	public final fun getCountry ()Ljava/lang/String;
+	public final fun getLine1 ()Ljava/lang/String;
+	public final fun getLine2 ()Ljava/lang/String;
+	public final fun getPostalCode ()Ljava/lang/String;
+	public final fun getState ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$PresentmentDetails {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPresentmentCurrency ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$ShippingAddress {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$ShippingAddress$Address;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$ShippingAddress$Address {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCity ()Ljava/lang/String;
+	public final fun getCountry ()Ljava/lang/String;
+	public final fun getLine1 ()Ljava/lang/String;
+	public final fun getLine2 ()Ljava/lang/String;
+	public final fun getPostalCode ()Ljava/lang/String;
+	public final fun getState ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/checkout/CheckoutElementsController$Session$Status {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Status$Complete : com/stripe/android/checkout/CheckoutElementsController$Session$Status {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentStatus ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Status$Expired : com/stripe/android/checkout/CheckoutElementsController$Session$Status {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Status$Open : com/stripe/android/checkout/CheckoutElementsController$Session$Status {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus : java/lang/Enum {
+	public static final field NoPaymentRequired Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+	public static final field Paid Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+	public static final field Unpaid Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+	public static fun values ()[Lcom/stripe/android/checkout/CheckoutElementsController$Session$Status$PaymentStatus;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Tax {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStatus ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status : java/lang/Enum {
+	public static final field Ready Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status;
+	public static final field RequiresBillingAddress Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status;
+	public static final field RequiresShippingAddress Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status;
+	public static fun values ()[Lcom/stripe/android/checkout/CheckoutElementsController$Session$Tax$Status;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$TaxAmount {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmount ()Ljava/lang/String;
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getInclusive ()Z
+	public final fun getMinorUnitsAmount ()J
+	public final fun getPercentage ()Ljava/lang/Double;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsController$Session$Totals {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDiscount ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getSubtotal ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getTaxExclusive ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getTaxInclusive ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public final fun getTotal ()Lcom/stripe/android/checkout/CheckoutElementsController$Session$Amount;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/checkout/CheckoutElementsPresenter {
+	public static final field $stable I
+	public final fun confirm ()V
+	public final fun currencySelectorElement ()Lcom/stripe/android/elements/CurrencySelectorElement;
+	public final fun expressCheckoutElement ()Lcom/stripe/android/elements/ExpressCheckoutElement;
+	public final fun paymentElement ()Lcom/stripe/android/elements/PaymentElement;
+	public final fun shippingAddressElement ()Lcom/stripe/android/elements/ShippingAddressElement;
+}
+
+public abstract interface annotation class com/stripe/android/checkout/CheckoutSessionPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCloseButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCloseButtonKt;
 	public fun <init> ()V
@@ -240,6 +610,666 @@ public final class com/stripe/android/customersheet/PaymentOptionSelection$Payme
 
 public abstract interface class com/stripe/android/customersheet/SetupIntentClientSecretProvider {
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/CurrencySelectorElement {
+	public static final field $stable I
+	public final fun Content (Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/elements/CurrencySelectorElement$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun appearance (Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration;
+}
+
+public final class com/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun background-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun borderColor-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun borderWidthDp (F)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun contentVerticalPaddingDp (F)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun cornerRadiusDp (F)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun dangerColor-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun labelContent (Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent;)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun selectedBackground-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun selectedTextColor-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun sizeScaleFactor (F)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun textColor-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+	public final fun textSecondaryColor-8_81llA (J)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance;
+}
+
+public final class com/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent : java/lang/Enum {
+	public static final field AMOUNT Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent;
+	public static final field AUTOMATIC Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent;
+	public static final field CURRENCY_CODE Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent;
+	public static fun values ()[Lcom/stripe/android/elements/CurrencySelectorElement$Configuration$Appearance$LabelContent;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement {
+	public static final field $stable I
+	public final fun Content (Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun appearance (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration;
+	public final fun googlePayConfiguration (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration;
+	public final fun linkConfiguration (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun buttonLayout (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance;
+	public final fun buttonTheme (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance;
+	public final fun cornerRadiusDp (F)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun maxColumns (Ljava/lang/Integer;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout;
+	public final fun maxRows (Ljava/lang/Integer;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonLayout;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme;
+	public static final field Dark Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme;
+	public static final field Light Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme;
+	public static fun values ()[Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$Appearance$ButtonTheme;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalEnabledNetworks (Ljava/util/List;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration;
+	public final fun buttonType (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration;
+	public final fun display (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$Display;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration;
+	public final fun label (Ljava/lang/String;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType : java/lang/Enum {
+	public static final field Book Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Buy Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Checkout Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Donate Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Order Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Pay Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Plain Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Subscribe Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static fun values ()[Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$ButtonType;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$Display : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$Display;
+	public static final field Never Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$Display;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$Display;
+	public static fun values ()[Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$GooglePayConfiguration$Display;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun display (Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration$Display;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration$Display : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration$Display;
+	public static final field Never Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration$Display;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration$Display;
+	public static fun values ()[Lcom/stripe/android/elements/ExpressCheckoutElement$Configuration$LinkConfiguration$Display;
+}
+
+public abstract class com/stripe/android/elements/ExpressCheckoutElement$PaymentMethod {
+	public static final field $stable I
+	public abstract fun getType ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$PaymentMethod$GooglePay : com/stripe/android/elements/ExpressCheckoutElement$PaymentMethod {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+}
+
+public final class com/stripe/android/elements/ExpressCheckoutElement$PaymentMethod$Link : com/stripe/android/elements/ExpressCheckoutElement$PaymentMethod {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+}
+
+public final class com/stripe/android/elements/PaymentElement {
+	public static final field $stable I
+	public final fun Content (Landroidx/compose/runtime/Composer;I)V
+	public final fun present ()V
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun appearance (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun cardBrandAcceptance (Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun embeddedViewDisplaysMandateText (Z)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun googlePayConfiguration (Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun linkConfiguration (Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun opensCardScannerAutomatically (Z)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun paymentMethodLayout (Lcom/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+	public final fun termsDisplay (Ljava/util/Map;)Lcom/stripe/android/elements/PaymentElement$Configuration;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun colorsDark (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun colorsLight (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun embeddedAppearance (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun formInsetValues (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Insets;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun primaryButton (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun shapes (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Shapes;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun themeMode (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+	public final fun typography (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors$Companion;
+	public synthetic fun <init> (IIIIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun appBarIcon (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun appBarIcon-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun component (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun component-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun componentBorder (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun componentBorder-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun componentDivider (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun componentDivider-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun error (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun error-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun onComponent (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun onComponent-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun onSurface (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun onSurface-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun placeholderText (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun placeholderText-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun primary (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun primary-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun subtitle (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun subtitle-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun surface (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun surface-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+	public final fun light ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun paymentMethodIconMargins (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Insets;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded;
+	public final fun rowStyle (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded;
+	public final fun subtitleFont (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded;
+	public final fun titleFont (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded;
+}
+
+public abstract class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark : com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalVerticalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun bottomSeparatorEnabled (Z)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public synthetic fun build$paymentsheet_release ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$State;
+	public final fun checkmarkInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun colorsDark (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun colorsLight (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun endSeparatorInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun horizontalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun separatorThicknessDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun startSeparatorInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun topSeparatorEnabled (Z)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun checkmarkColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+	public final fun checkmarkColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+	public final fun separatorColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+	public final fun separatorColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+	public final fun light ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure : com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalVerticalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun bottomSeparatorEnabled (Z)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public synthetic fun build$paymentsheet_release ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$State;
+	public final fun colorsDark (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun colorsLight (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun disclosureIconRes (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun endSeparatorInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun horizontalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun separatorThicknessDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun startSeparatorInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+	public final fun topSeparatorEnabled (Z)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun disclosureColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+	public final fun disclosureColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+	public final fun separatorColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+	public final fun separatorColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+	public final fun light ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio : com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalVerticalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun bottomSeparatorEnabled (Z)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public synthetic fun build$paymentsheet_release ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$State;
+	public final fun colorsDark (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun colorsLight (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun endSeparatorInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun horizontalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun separatorThicknessDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun startSeparatorInsetDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun topSeparatorEnabled (Z)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun selectedColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun selectedColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun separatorColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun separatorColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun unselectedColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun unselectedColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun light ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FloatingButton : com/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalInsetsDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FloatingButton;
+	public synthetic fun build$paymentsheet_release ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$State;
+	public final fun spacingDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Embedded$RowStyle$FloatingButton;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Insets {
+	public static final field $stable I
+	public fun <init> (FF)V
+	public fun <init> (FFFF)V
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun colorsDark (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton;
+	public final fun colorsLight (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton;
+	public final fun shape (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Shape;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton;
+	public final fun typography (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Typography;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors$Companion;
+	public synthetic fun <init> (Ljava/lang/Integer;IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun background (Ljava/lang/Integer;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun background-Y2TPw74 (Landroidx/compose/ui/graphics/Color;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun border (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun border-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun onBackground (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun onBackground-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun onSuccessBackgroundColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun onSuccessBackgroundColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun successBackgroundColor (I)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun successBackgroundColor-8_81llA (J)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun light ()Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Colors;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Shape {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderStrokeWidthDp (Ljava/lang/Float;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Shape;
+	public final fun cornerRadiusDp (Ljava/lang/Float;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Shape;
+	public final fun heightDp (Ljava/lang/Float;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Shape;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Typography {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Typography;
+	public final fun fontSizeSp (Ljava/lang/Float;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$PrimaryButton$Typography;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Shapes {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderStrokeWidthDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Shapes;
+	public final fun bottomSheetCornerRadiusDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Shapes;
+	public final fun cornerRadiusDp (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Shapes;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode : java/lang/Enum {
+	public static final field AlwaysDark Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode;
+	public static final field AlwaysLight Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode;
+	public static final field Automatic Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$ThemeMode;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun custom (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Custom;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography;
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography;
+	public final fun sizeScaleFactor (F)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Custom {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun h1 (Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Custom;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun fontFamily (Ljava/lang/Integer;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;
+	public final fun fontSizeSp (Ljava/lang/Float;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;
+	public final fun fontWeight (Ljava/lang/Integer;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;
+	public final fun letterSpacingSp (Ljava/lang/Float;)Lcom/stripe/android/elements/PaymentElement$Configuration$Appearance$Typography$Font;
+}
+
+public abstract class com/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$Companion;
+	public static final fun all ()Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;
+	public static final fun allowed (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;
+	public static final fun disallowed (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory : java/lang/Enum, android/os/Parcelable {
+	public static final field Amex Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory;
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Discover Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory;
+	public static final field Mastercard Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory;
+	public static final field Visa Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory;
+	public final fun describeContents ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$BrandCategory;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance$Companion {
+	public final fun all ()Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;
+	public final fun allowed (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;
+	public final fun disallowed (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration$CardBrandAcceptance;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalEnabledNetworks (Ljava/util/List;)Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration;
+	public final fun buttonType (Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;)Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration;
+	public final fun display (Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$Display;)Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration;
+	public final fun label (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType : java/lang/Enum {
+	public static final field Book Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Buy Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Checkout Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Donate Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Order Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Pay Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Plain Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static final field Subscribe Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$ButtonType;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$Display : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$Display;
+	public static final field Never Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$Display;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$Display;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$GooglePayConfiguration$Display;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun display (Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display;)Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display;
+	public static final field Never Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display;
+	public static final field WalletButtonHidden Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$LinkConfiguration$Display;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout;
+	public static final field Horizontal Lcom/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout;
+	public static final field Vertical Lcom/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$PaymentMethodLayout;
+}
+
+public final class com/stripe/android/elements/PaymentElement$Configuration$TermsDisplay : java/lang/Enum {
+	public static final field AUTOMATIC Lcom/stripe/android/elements/PaymentElement$Configuration$TermsDisplay;
+	public static final field NEVER Lcom/stripe/android/elements/PaymentElement$Configuration$TermsDisplay;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElement$Configuration$TermsDisplay;
+	public static fun values ()[Lcom/stripe/android/elements/PaymentElement$Configuration$TermsDisplay;
+}
+
+public abstract class com/stripe/android/elements/PaymentElement$RowSelectionBehavior {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/PaymentElement$RowSelectionBehavior$Companion;
+}
+
+public final class com/stripe/android/elements/PaymentElement$RowSelectionBehavior$Companion {
+	public final fun default ()Lcom/stripe/android/elements/PaymentElement$RowSelectionBehavior;
+	public final fun immediateAction (Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/elements/PaymentElement$RowSelectionBehavior;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement {
+	public static final field $stable I
+	public final fun present ()V
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun appearance (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration;
+	public final fun buttonTitle (Ljava/lang/String;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration;
+	public final fun title (Ljava/lang/String;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun colorsDark (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+	public final fun colorsLight (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+	public final fun formInsetValues (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Insets;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+	public final fun primaryButton (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+	public final fun shapes (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Shapes;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+	public final fun themeMode (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+	public final fun typography (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors$Companion;
+	public synthetic fun <init> (IIIIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun appBarIcon (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun appBarIcon-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun component (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun component-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun componentBorder (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun componentBorder-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun componentDivider (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun componentDivider-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun error (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun error-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun onComponent (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun onComponent-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun onSurface (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun onSurface-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun placeholderText (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun placeholderText-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun primary (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun primary-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun subtitle (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun subtitle-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun surface (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun surface-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+	public final fun light ()Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Colors;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Insets {
+	public static final field $stable I
+	public fun <init> (FF)V
+	public fun <init> (FFFF)V
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun colorsDark (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton;
+	public final fun colorsLight (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton;
+	public final fun shape (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Shape;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton;
+	public final fun typography (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Typography;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors$Companion;
+	public synthetic fun <init> (Ljava/lang/Integer;IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun background (Ljava/lang/Integer;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun background-Y2TPw74 (Landroidx/compose/ui/graphics/Color;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun border (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun border-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun onBackground (I)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun onBackground-8_81llA (J)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors$Companion {
+	public final fun dark ()Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+	public final fun light ()Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Colors;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Shape {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderStrokeWidthDp (Ljava/lang/Float;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Shape;
+	public final fun cornerRadiusDp (Ljava/lang/Float;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Shape;
+	public final fun heightDp (Ljava/lang/Float;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Shape;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Typography {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Typography;
+	public final fun fontSizeSp (Ljava/lang/Float;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$PrimaryButton$Typography;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Shapes {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderStrokeWidthDp (F)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Shapes;
+	public final fun bottomSheetCornerRadiusDp (F)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Shapes;
+	public final fun cornerRadiusDp (F)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Shapes;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode : java/lang/Enum {
+	public static final field AlwaysDark Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode;
+	public static final field AlwaysLight Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode;
+	public static final field Automatic Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode;
+	public static fun values ()[Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$ThemeMode;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun custom (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Custom;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography;
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography;
+	public final fun sizeScaleFactor (F)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Custom {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun h1 (Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Font;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Custom;
+}
+
+public final class com/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Font {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun fontFamily (Ljava/lang/Integer;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Font;
+	public final fun fontSizeSp (Ljava/lang/Float;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Font;
+	public final fun fontWeight (Ljava/lang/Integer;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Font;
+	public final fun letterSpacingSp (Ljava/lang/Float;)Lcom/stripe/android/elements/ShippingAddressElement$Configuration$Appearance$Typography$Font;
 }
 
 public final class com/stripe/android/elements/ece/ComposableSingletons$ExpressCheckoutElementContentKt {

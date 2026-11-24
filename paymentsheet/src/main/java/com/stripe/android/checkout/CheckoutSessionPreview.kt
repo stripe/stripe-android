@@ -1,7 +1,5 @@
 package com.stripe.android.checkout
 
-import androidx.annotation.RestrictTo
-
 /**
  * This feature allows initializing PaymentSheet/FlowController/EmbeddedPaymentElement
  * with a Checkout Session client secret instead of a PaymentIntent or SetupIntent.
@@ -17,5 +15,4 @@ import androidx.annotation.RestrictTo
     AnnotationTarget.PROPERTY,
     AnnotationTarget.TYPEALIAS
 )
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 annotation class CheckoutSessionPreview

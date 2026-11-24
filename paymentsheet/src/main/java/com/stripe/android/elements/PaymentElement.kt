@@ -5,7 +5,6 @@ import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +28,6 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentElement @Inject internal constructor(
     private val contentHelper: EmbeddedContentHelper,
     private val stateHolder: CheckoutElementsControllerStateHolder,
@@ -68,7 +66,6 @@ class PaymentElement @Inject internal constructor(
      * Describes how you handle row selections in [PaymentElement].
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class RowSelectionBehavior internal constructor() {
         private object Default : RowSelectionBehavior()
 
@@ -77,14 +74,12 @@ class PaymentElement @Inject internal constructor(
         ) : RowSelectionBehavior()
 
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             /**
              * When a payment option is selected, the customer taps a button to continue or confirm payment.
              * This is the default recommended integration.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun default(): RowSelectionBehavior {
                 return Default
             }
@@ -94,7 +89,6 @@ class PaymentElement @Inject internal constructor(
              * You can implement this method to immediately perform an action, such as calling confirm.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun immediateAction(didSelectPaymentOption: () -> Unit): RowSelectionBehavior {
                 return ImmediateAction(didSelectPaymentOption)
             }
@@ -108,7 +102,6 @@ class PaymentElement @Inject internal constructor(
     }
 
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Suppress("TooManyFunctions")
     class Configuration {
         private var embeddedViewDisplaysMandateText: Boolean = true
@@ -220,14 +213,12 @@ class PaymentElement @Inject internal constructor(
         /**
          * Configuration related to Google Pay.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @CheckoutSessionPreview
         class GooglePayConfiguration {
 
             /**
              * Display configuration for Google Pay.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
                  * Google Pay will be displayed when available.
@@ -296,7 +287,6 @@ class PaymentElement @Inject internal constructor(
              * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
              * for more information on button types.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class ButtonType {
                 /**
                  * Displays "Buy with" alongside the Google Pay logo.
@@ -351,7 +341,6 @@ class PaymentElement @Inject internal constructor(
          * Builder for Link configuration used by the payment element.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class LinkConfiguration {
             private var display: Display = Display.Automatic
 
@@ -375,7 +364,6 @@ class PaymentElement @Inject internal constructor(
              * Display configuration for Link.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
                  * Link is displayed when available.
@@ -424,11 +412,9 @@ class PaymentElement @Inject internal constructor(
 
         /** Options to allow or disallow card brands. */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class CardBrandAcceptance : Parcelable {
             /** Card brand categories that can be allowed or disallowed. */
             @Parcelize
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class BrandCategory : Parcelable {
                 /** Visa branded cards. */
                 Visa,
@@ -456,21 +442,17 @@ class PaymentElement @Inject internal constructor(
                 val brands: List<BrandCategory>
             ) : CardBrandAcceptance()
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 /** Accepts all card brands supported by Stripe. */
                 @JvmStatic
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun all(): CardBrandAcceptance = All
 
                 /** Accepts only the specified card brands. */
                 @JvmStatic
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun allowed(brands: List<BrandCategory>): CardBrandAcceptance = Allowed(brands)
 
                 /** Accepts all card brands except the specified ones. */
                 @JvmStatic
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance = Disallowed(brands)
             }
         }
@@ -479,7 +461,6 @@ class PaymentElement @Inject internal constructor(
          * The layout of payment methods.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class PaymentMethodLayout {
             /**
              * Payment methods are arranged horizontally.
@@ -501,7 +482,6 @@ class PaymentElement @Inject internal constructor(
 
         /** Appearance configuration for the Payment Element. */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
         @OptIn(AppearanceAPIAdditionsPreview::class)
         class Appearance {
@@ -565,7 +545,6 @@ class PaymentElement @Inject internal constructor(
 
             /** Configures embedded payment method rows, margins, and fonts. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Embedded {
                 private var rowStyle: RowStyle = RowStyle.FlatWithRadio()
                 private var paymentMethodIconMargins: Insets? = null
@@ -607,14 +586,12 @@ class PaymentElement @Inject internal constructor(
                 )
 
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 sealed class RowStyle {
                     internal abstract fun build(): State
 
                     internal sealed class State : Parcelable
 
                     @CheckoutSessionPreview
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FlatWithRadio : RowStyle() {
                         private var separatorThicknessDp: Float = StripeThemeDefaults.flat.separatorThickness
                         private var startSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
@@ -720,7 +697,6 @@ class PaymentElement @Inject internal constructor(
                         )
 
                         @CheckoutSessionPreview
-                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Colors private constructor(
                             @ColorInt private var separatorColor: Int,
                             @ColorInt private var selectedColor: Int,
@@ -778,7 +754,6 @@ class PaymentElement @Inject internal constructor(
                             internal fun build(): State = State(separatorColor, selectedColor, unselectedColor)
 
                             @CheckoutSessionPreview
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
                                 /**
                                  * Creates a [Colors] prepopulated with default light mode values.
@@ -802,7 +777,6 @@ class PaymentElement @Inject internal constructor(
                     }
 
                     @CheckoutSessionPreview
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FlatWithCheckmark : RowStyle() {
                         private var separatorThicknessDp: Float = StripeThemeDefaults.flat.separatorThickness
                         private var startSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
@@ -918,7 +892,6 @@ class PaymentElement @Inject internal constructor(
                         )
 
                         @CheckoutSessionPreview
-                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Colors private constructor(
                             @ColorInt private var separatorColor: Int,
                             @ColorInt private var checkmarkColor: Int,
@@ -961,7 +934,6 @@ class PaymentElement @Inject internal constructor(
                             internal fun build(): State = State(separatorColor, checkmarkColor)
 
                             @CheckoutSessionPreview
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
                                 /**
                                  * Creates a [Colors] prepopulated with default light mode values.
@@ -986,7 +958,6 @@ class PaymentElement @Inject internal constructor(
                     }
 
                     @CheckoutSessionPreview
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FloatingButton : RowStyle() {
                         private var spacingDp: Float = StripeThemeDefaults.floating.spacing
                         private var additionalInsetsDp: Float =
@@ -1020,7 +991,6 @@ class PaymentElement @Inject internal constructor(
                     }
 
                     @CheckoutSessionPreview
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FlatWithDisclosure : RowStyle() {
                         private var separatorThicknessDp: Float = StripeThemeDefaults.flat.separatorThickness
                         private var startSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
@@ -1139,7 +1109,6 @@ class PaymentElement @Inject internal constructor(
                         )
 
                         @CheckoutSessionPreview
-                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Colors private constructor(
                             @ColorInt private var separatorColor: Int,
                             @ColorInt private var disclosureColor: Int,
@@ -1182,7 +1151,6 @@ class PaymentElement @Inject internal constructor(
                             internal fun build(): State = State(separatorColor, disclosureColor)
 
                             @CheckoutSessionPreview
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
                                 /**
                                  * Creates a [Colors] prepopulated with default light mode values.
@@ -1211,7 +1179,6 @@ class PaymentElement @Inject internal constructor(
 
             /** Shapes used for inputs, tabs, buttons, and sheets. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Shapes {
                 private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
                 private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
@@ -1259,7 +1226,6 @@ class PaymentElement @Inject internal constructor(
 
             /** Typography used for Payment Element text. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Typography {
                 private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
 
@@ -1308,7 +1274,6 @@ class PaymentElement @Inject internal constructor(
 
                 @AppearanceAPIAdditionsPreview
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Custom {
                     private var h1: Font? = null
 
@@ -1327,7 +1292,6 @@ class PaymentElement @Inject internal constructor(
 
                 @AppearanceAPIAdditionsPreview
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Font {
                     @FontRes
                     private var fontFamily: Int? = null
@@ -1366,7 +1330,6 @@ class PaymentElement @Inject internal constructor(
 
             /** Colors used to render the Payment Element. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Suppress("TooManyFunctions")
             class Colors private constructor(
                 @ColorInt private var primary: Int,
@@ -1476,7 +1439,6 @@ class PaymentElement @Inject internal constructor(
                     error = error,
                 )
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 companion object {
                     /** Creates colors initialized with the default light-mode values. */
                     fun light(): Colors = defaults(StripeThemeDefaults.colorsLight)
@@ -1500,7 +1462,6 @@ class PaymentElement @Inject internal constructor(
             }
 
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             /** Color modes available for the Payment Element. */
             enum class ThemeMode {
                 /** Follow the system's light or dark mode. */
@@ -1515,7 +1476,6 @@ class PaymentElement @Inject internal constructor(
 
             /** Insets used to position Payment Element content, in dp. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Insets(
                 private val startDp: Float,
                 private val topDp: Float,
@@ -1547,7 +1507,6 @@ class PaymentElement @Inject internal constructor(
 
             /** Configures the appearance of the primary button. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class PrimaryButton {
                 private var colorsLight = Colors.light()
                 private var colorsDark = Colors.dark()
@@ -1583,7 +1542,6 @@ class PaymentElement @Inject internal constructor(
 
                 /** Colors used to render the primary button. */
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Suppress("TooManyFunctions")
                 class Colors private constructor(
                     @ColorInt private var background: Int?,
@@ -1644,7 +1602,6 @@ class PaymentElement @Inject internal constructor(
                         onSuccessBackgroundColor,
                     )
 
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     companion object {
                         fun light(): Colors = defaults(StripeThemeDefaults.primaryButtonStyle.colorsLight)
                         fun dark(): Colors = defaults(StripeThemeDefaults.primaryButtonStyle.colorsDark)
@@ -1660,7 +1617,6 @@ class PaymentElement @Inject internal constructor(
 
                 /** Configures the shape of the primary button. */
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Shape {
                     private var cornerRadiusDp: Float? = null
                     private var borderStrokeWidthDp: Float? = null
@@ -1687,7 +1643,6 @@ class PaymentElement @Inject internal constructor(
 
                 /** Configures the typography of the primary button. */
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Typography {
                     @FontRes
                     private var fontResId: Int? = null
@@ -1717,7 +1672,6 @@ class PaymentElement @Inject internal constructor(
          * necessary.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class TermsDisplay {
             /** Show legal agreements only when necessary */
             AUTOMATIC,

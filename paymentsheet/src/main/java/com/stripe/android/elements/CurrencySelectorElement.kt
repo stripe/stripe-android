@@ -3,7 +3,6 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -20,7 +19,6 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CurrencySelectorElement @Inject internal constructor(
     private val checkoutElementsController: CheckoutElementsController,
     private val viewModelFactory: CurrencySelectorViewModel.Factory,
@@ -54,7 +52,6 @@ class CurrencySelectorElement @Inject internal constructor(
     }
 
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var appearance: Appearance = Appearance()
 
@@ -74,12 +71,10 @@ class CurrencySelectorElement @Inject internal constructor(
         )
 
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
         class Appearance {
 
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class LabelContent {
                 AUTOMATIC,
                 CURRENCY_CODE,

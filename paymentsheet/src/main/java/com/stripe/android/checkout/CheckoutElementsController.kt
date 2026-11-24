@@ -71,7 +71,6 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
  */
 @Singleton
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions")
 class CheckoutElementsController @Inject internal constructor(
     private val displayMessageResolver: CheckoutDisplayMessageResolver,
@@ -88,7 +87,6 @@ class CheckoutElementsController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutElementsControllerSavedState,
 ) {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Deletes persisted authentication state associated with a customer.
@@ -202,6 +200,7 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun removePromotionCode(): OperationResult = withCheckoutState {
         checkoutSessionRepository.removePromotionCode(checkoutSessionResponse)
     }.toOperationResult()
@@ -544,7 +543,6 @@ class CheckoutElementsController @Inject internal constructor(
      */
     @Poko
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Session internal constructor(
         /**
          * The checkout session ID (e.g., "cs_xxx").
@@ -634,13 +632,11 @@ class CheckoutElementsController @Inject internal constructor(
          * The status of a checkout session.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class Status {
             /**
              * The checkout session is still in progress. Payment processing has not started.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Open internal constructor() : Status() {
                 override fun equals(other: Any?): Boolean = other is Open
 
@@ -651,7 +647,6 @@ class CheckoutElementsController @Inject internal constructor(
              * The checkout session is complete. Payment processing may still be in progress.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Poko
             class Complete internal constructor(
                 /**
@@ -664,7 +659,6 @@ class CheckoutElementsController @Inject internal constructor(
              * The payment status of a completed checkout session.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class PaymentStatus {
                 /**
                  * The payment funds are available in your account.
@@ -687,7 +681,6 @@ class CheckoutElementsController @Inject internal constructor(
              * The checkout session has expired. No further processing will occur.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Expired internal constructor() : Status() {
                 override fun equals(other: Any?): Boolean = other is Expired
 
@@ -700,7 +693,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Tax internal constructor(
             /**
              * The current tax computation status.
@@ -711,7 +703,6 @@ class CheckoutElementsController @Inject internal constructor(
              * The status of tax computation.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Status {
                 /**
                  * The final tax amount is computed, and the session is ready for confirmation.
@@ -735,7 +726,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Amount internal constructor(
             /**
              * A localized, currency-formatted string representing the amount (e.g., "$9.99").
@@ -752,7 +742,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class DecimalAmount internal constructor(
             /**
              * A localized, currency-formatted string representing the amount.
@@ -769,7 +758,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Totals internal constructor(
             /**
              * The subtotal before discounts and taxes.
@@ -798,7 +786,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class PresentmentDetails internal constructor(
             /**
              * The three-letter ISO currency code presented to the customer (e.g., "eur").
@@ -811,7 +798,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class DiscountAmount internal constructor(
             /**
              * A localized, currency-formatted string representing the discount amount.
@@ -828,6 +814,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The promotion code that produced this discount, if any.
              */
+            @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             val promotionCode: String?,
             /**
              * The percentage off applied by this discount, if it is percentage-based.
@@ -840,7 +827,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class TaxAmount internal constructor(
             /**
              * A localized, currency-formatted string representing the tax amount.
@@ -869,7 +855,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class ShippingAddress internal constructor(
             /**
              * The recipient's name, if collected.
@@ -885,7 +870,6 @@ class CheckoutElementsController @Inject internal constructor(
              */
             @Poko
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Address internal constructor(
                 /**
                  * The city, district, suburb, town, or village.
@@ -919,7 +903,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class AdjustableQuantity internal constructor(
             /**
              * Whether the item's quantity can be adjusted.
@@ -939,7 +922,6 @@ class CheckoutElementsController @Inject internal constructor(
          * An item included in the order summary.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         abstract class OrderSummaryItem private constructor() {
             /**
              * The stable identity of this order summary item within its Checkout Session.
@@ -951,7 +933,6 @@ class CheckoutElementsController @Inject internal constructor(
              */
             @Poko
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class OneTimePrice internal constructor(
                 /**
                  * A stable key that uniquely identifies this item within the Checkout Session.
@@ -976,7 +957,6 @@ class CheckoutElementsController @Inject internal constructor(
                  */
                 @Poko
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Item internal constructor(
                     /**
                      * A stable key that identifies this item.
@@ -1025,7 +1005,6 @@ class CheckoutElementsController @Inject internal constructor(
                      */
                     @Poko
                     @CheckoutSessionPreview
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class AmountDetails internal constructor(
                         /**
                          * The total amount for the Price.
@@ -1057,7 +1036,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class PaymentOptionDisplayData internal constructor(
             private val paymentOptionResource: PaymentOptionResource,
             /**
@@ -1106,7 +1084,6 @@ class CheckoutElementsController @Inject internal constructor(
              */
             @Poko
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class BillingDetails internal constructor(
                 /**
                  * The customer's billing address.
@@ -1130,7 +1107,6 @@ class CheckoutElementsController @Inject internal constructor(
                  */
                 @Poko
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Address internal constructor(
                     /**
                      * City, district, suburb, town, or village.
@@ -1176,7 +1152,6 @@ class CheckoutElementsController @Inject internal constructor(
      * across process death.
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Builder(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
@@ -1245,7 +1220,6 @@ class CheckoutElementsController @Inject internal constructor(
      * feature toggles. Build with the fluent setters and pass to [CheckoutElementsController.configure].
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var merchantDisplayName: String? = null
         private var defaults: Defaults = Defaults()
@@ -1346,7 +1320,6 @@ class CheckoutElementsController @Inject internal constructor(
          * Prefill values for the customer's billing/shipping details, email, and phone number.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Defaults {
             private var billingDetails: ContactDetails? = null
             private var shippingDetails: ContactDetails? = null
@@ -1400,7 +1373,6 @@ class CheckoutElementsController @Inject internal constructor(
              * A name and postal address for a customer.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class ContactDetails {
                 private var name: String? = null
                 private var address: Address? = null
@@ -1429,7 +1401,6 @@ class CheckoutElementsController @Inject internal constructor(
      * @param country The two-letter country code (ISO 3166-1 alpha-2).
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Address(
         private val country: String,
     ) {
@@ -1501,14 +1472,12 @@ class CheckoutElementsController @Inject internal constructor(
      * Use [Failed.displayMessage] for customer-facing text. [Failed.error] retains diagnostic details.
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface OperationResult {
         /**
          * The operation succeeded.
          * The updated session is available through the [CheckoutElementsController.session] state flow.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Succeeded internal constructor() : OperationResult
 
         /**
@@ -1520,7 +1489,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(
             val error: Throwable,
             val displayMessage: String,
@@ -1531,7 +1499,6 @@ class CheckoutElementsController @Inject internal constructor(
      * The result of a checkout payment flow, delivered to [ResultCallback].
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Result {
         /**
          * The customer completed the payment flow.
@@ -1540,7 +1507,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Completed internal constructor(
             val paymentStatus: Session.Status.PaymentStatus,
         ) : Result
@@ -1549,7 +1515,6 @@ class CheckoutElementsController @Inject internal constructor(
          * The customer canceled the payment flow.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Canceled internal constructor() : Result
 
         /**
@@ -1562,7 +1527,6 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @Poko
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(
             val error: Throwable,
             val displayMessage: String,
@@ -1576,7 +1540,6 @@ class CheckoutElementsController @Inject internal constructor(
      * delivers its own result.
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ResultCallback {
         /**
          * Called when the payment flow finishes or confirmation cannot start, with [result].
