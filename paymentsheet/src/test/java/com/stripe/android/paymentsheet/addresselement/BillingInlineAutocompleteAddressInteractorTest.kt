@@ -29,13 +29,13 @@ class BillingInlineAutocompleteAddressInteractorTest {
     fun `onPredictionSelected forwards the resulting event to the registered listener`() = runScenario {
         // Address-mapping detail is covered by InlineAutocompleteControllerTest; here we only
         // verify the event the controller produces reaches the listener wired via register().
-        fakePlacesClient.fetchPlaceResult = Result.success(Address())
+        fakeAutocompleteClient.fetchPlaceResult = Result.success(Address())
 
         interactor.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
-        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
-        fakePlacesClient.resetSessionCalls.awaitItem()
+        assertThat(fakeAutocompleteClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
+        fakeAutocompleteClient.resetSessionCalls.awaitItem()
         assertThat(eventCalls.awaitItem())
             .isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
     }
@@ -43,18 +43,16 @@ class BillingInlineAutocompleteAddressInteractorTest {
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val fakePlaces = FakePlacesClientProxy(
+        val fakeAutocomplete = FakeAddressAutocompleteClient(
             findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
             fetchPlaceResult = Result.success(Address()),
         )
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test_key",
             autocompleteCountries = emptySet(),
-            isInlineAutocompleteEnabled = true,
         )
         val interactor = BillingInlineAutocompleteAddressInteractor(
-            placesClient = fakePlaces,
+            autocompleteClient = fakeAutocomplete,
             autocompleteConfig = config,
             coroutineScope = backgroundScope,
         )
@@ -62,18 +60,18 @@ class BillingInlineAutocompleteAddressInteractorTest {
 
         Scenario(
             interactor = interactor,
-            fakePlacesClient = fakePlaces,
+            fakeAutocompleteClient = fakeAutocomplete,
             eventCalls = eventCalls,
             testScope = this,
         ).apply { block() }
 
-        fakePlaces.ensureAllEventsConsumed()
+        fakeAutocomplete.ensureAllEventsConsumed()
         eventCalls.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val interactor: BillingInlineAutocompleteAddressInteractor,
-        val fakePlacesClient: FakePlacesClientProxy,
+        val fakeAutocompleteClient: FakeAddressAutocompleteClient,
         val eventCalls: Turbine<AutocompleteAddressInteractor.Event>,
         val testScope: TestScope,
     ) {

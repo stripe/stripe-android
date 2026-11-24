@@ -1,10 +1,9 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.checkout.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.uicore.StripeColors
 
 internal class CheckoutContactDetailsDefinitions(
     key: String,
@@ -56,113 +55,6 @@ internal class CheckoutAddressDefinitions(key: String) {
             postalCode,
             state,
         ),
-    )
-}
-
-internal class CheckoutPaymentColorsDefinitions(
-    key: String,
-    displayName: String,
-    defaultColors: StripeColors,
-) {
-    val primary = optionalColor(
-        key = "$key.primary",
-        displayName = "Primary",
-        defaultValue = defaultColors.materialColors.primary,
-    )
-    val surface = optionalColor(
-        key = "$key.surface",
-        displayName = "Surface",
-        defaultValue = defaultColors.materialColors.surface,
-    )
-    val component = optionalColor(
-        key = "$key.component",
-        displayName = "Component",
-        defaultValue = defaultColors.component,
-    )
-    val componentBorder = optionalColor(
-        key = "$key.component_border",
-        displayName = "Component border",
-        defaultValue = defaultColors.componentBorder,
-    )
-    val componentDivider = optionalColor(
-        key = "$key.component_divider",
-        displayName = "Component divider",
-        defaultValue = defaultColors.componentDivider,
-    )
-    val onComponent = optionalColor(
-        key = "$key.on_component",
-        displayName = "On component",
-        defaultValue = defaultColors.onComponent,
-    )
-    val subtitle = optionalColor(
-        key = "$key.subtitle",
-        displayName = "Subtitle",
-        defaultValue = defaultColors.subtitle,
-    )
-    val placeholderText = optionalColor(
-        key = "$key.placeholder_text",
-        displayName = "Placeholder text",
-        defaultValue = defaultColors.placeholderText,
-    )
-    val onSurface = optionalColor(
-        key = "$key.on_surface",
-        displayName = "On surface",
-        defaultValue = defaultColors.materialColors.onSurface,
-    )
-    val appBarIcon = optionalColor(
-        key = "$key.app_bar_icon",
-        displayName = "App bar icon",
-        defaultValue = defaultColors.appBarIcon,
-    )
-    val error = optionalColor(
-        key = "$key.error",
-        displayName = "Error",
-        defaultValue = defaultColors.materialColors.error,
-    )
-    val configuration = configuration(
-        key = key,
-        displayName = displayName,
-        children = arrayOf(
-            primary,
-            surface,
-            component,
-            componentBorder,
-            componentDivider,
-            onComponent,
-            subtitle,
-            placeholderText,
-            onSurface,
-            appBarIcon,
-            error,
-        ),
-    )
-}
-
-internal class CheckoutPrimaryButtonColorsDefinitions(
-    key: String,
-    displayName: String,
-    includeSuccessColors: Boolean,
-) {
-    val background = optionalColor(key = "$key.background", displayName = "Background")
-    val onBackground = optionalColor(key = "$key.on_background", displayName = "On background")
-    val border = optionalColor(key = "$key.border", displayName = "Border")
-    val successBackground = optionalColor(key = "$key.success_background", displayName = "Success background")
-    val onSuccessBackground = optionalColor(
-        key = "$key.on_success_background",
-        displayName = "On success background",
-    )
-    val configuration = configuration(
-        key = key,
-        displayName = displayName,
-        children = buildList {
-            add(background)
-            add(onBackground)
-            add(border)
-            if (includeSuccessColors) {
-                add(successBackground)
-                add(onSuccessBackground)
-            }
-        }.toTypedArray(),
     )
 }
 
@@ -235,4 +127,14 @@ internal enum class CheckoutFont(
     Default(serializedValue = "default", resourceId = null),
     Cursive(serializedValue = "cursive", resourceId = R.font.cursive),
     OpenSans(serializedValue = "opensans", resourceId = R.font.opensans),
+}
+
+internal enum class CheckoutDisclosureIcon(
+    val displayName: String,
+    val serializedValue: String,
+    val resourceId: Int?,
+) {
+    Default(displayName = "Default", serializedValue = "default", resourceId = null),
+    ArrowDown(displayName = "Arrow down", serializedValue = "arrow_down", resourceId = R.drawable.ic_arrow_down),
+    Add(displayName = "Add", serializedValue = "add", resourceId = R.drawable.ic_add_black_32dp),
 }

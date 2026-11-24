@@ -1,4 +1,4 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.checkout.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
@@ -73,6 +73,22 @@ class CheckoutPlaygroundScenariosTest {
         settings.applyPreset(saveAndRemove.preset)
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customerId]).isNull()
         assertThat(settings[CheckoutPlaygroundDefinitions.session.customer]).isEqualTo(CheckoutCustomer.Returning)
+    }
+
+    @Test
+    fun `required billing tax scenario explicitly updates customer address`() {
+        val snapshot = snapshotFor("automatic_tax_required_billing")
+
+        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.customerUpdate.address])
+            .isEqualTo(CheckoutCustomerUpdate.Auto)
+    }
+
+    @Test
+    fun `shipping tax scenario explicitly updates customer shipping`() {
+        val snapshot = snapshotFor("automatic_tax_shipping")
+
+        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.customerUpdate.shipping])
+            .isEqualTo(CheckoutCustomerUpdate.Auto)
     }
 
     @Test

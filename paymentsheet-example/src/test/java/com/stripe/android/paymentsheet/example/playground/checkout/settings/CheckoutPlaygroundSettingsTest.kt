@@ -36,11 +36,11 @@ class CheckoutPlaygroundSettingsTest {
 
     @Test
     fun `nested setting survives JSON round trip`() = runScenario {
-        settings.update(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale, 1.25f)
+        settings.update(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.sizeScaleFactor, 1.25f)
 
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
-        assertThat(restored[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
+        assertThat(restored[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.sizeScaleFactor])
             .isEqualTo(1.25f)
     }
 
@@ -52,6 +52,19 @@ class CheckoutPlaygroundSettingsTest {
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
         assertThat(restored[definition]).isFalse()
+    }
+
+    @Test
+    fun `customer updates survive JSON round trip`() = runScenario {
+        val definitions = CheckoutPlaygroundDefinitions.session.customerUpdate
+        settings.update(definitions.address, CheckoutCustomerUpdate.Auto)
+        settings.update(definitions.name, CheckoutCustomerUpdate.Never)
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[definitions.address]).isEqualTo(CheckoutCustomerUpdate.Auto)
+        assertThat(restored[definitions.name]).isEqualTo(CheckoutCustomerUpdate.Never)
+        assertThat(restored[definitions.shipping]).isEqualTo(CheckoutCustomerUpdate.Default)
     }
 
     @Test
@@ -143,9 +156,9 @@ class CheckoutPlaygroundSettingsTest {
 
     @Test
     fun `unknown and invalid persisted values fall back to defaults`() = runScenario(
-        json = """{"unknown":"value","currency.appearance.scale":"not-a-number"}"""
+        json = """{"unknown":"value","currency.appearance.size_scale_factor":"not-a-number"}"""
     ) {
-        assertThat(settings[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
+        assertThat(settings[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.sizeScaleFactor])
             .isEqualTo(1f)
     }
 
@@ -169,8 +182,8 @@ class CheckoutPlaygroundSettingsTest {
 
     @Test
     fun `payment colors default to effective SDK colors`() = runScenario {
-        val lightColors = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors
-        val darkColors = CheckoutPlaygroundDefinitions.Controller.payment.appearance.darkColors
+        val lightColors = CheckoutPlaygroundDefinitions.Controller.payment.appearance.colorsLight
+        val darkColors = CheckoutPlaygroundDefinitions.Controller.payment.appearance.colorsDark
 
         assertThat(lightColors.configuration.values().map(settings::serializedValue))
             .doesNotContain("")
@@ -238,10 +251,10 @@ class CheckoutPlaygroundSettingsTest {
 
     @Test
     fun `import with invalid setting does not change current settings`() = runScenario {
-        val definition = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale
+        val definition = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.sizeScaleFactor
         settings.update(definition, 1.25f)
 
-        val result = settings.importJson("""{"currency.appearance.scale":"not-a-number"}""")
+        val result = settings.importJson("""{"currency.appearance.size_scale_factor":"not-a-number"}""")
 
         assertThat(result.isFailure).isTrue()
         assertThat(settings[definition]).isEqualTo(1.25f)

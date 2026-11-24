@@ -35,7 +35,7 @@ class RequestBetasTest {
         assertThat(headers["Authorization"]).isEqualTo("Bearer ek_test_123")
         assertThat(headers).doesNotContainKey("Stripe-Account")
         assertThat(headers["Idempotency-Key"]).isEqualTo("operation-key")
-        assertThat(headers["Stripe-Version"]).isEqualTo("2020-03-02;example=v1")
+        assertThat(headers["Stripe-Version"]).isEqualTo("2026-10-28.endive;example=v1")
     }
 
     @Test
@@ -61,7 +61,7 @@ class RequestBetasTest {
         val request = ApiRequest.Factory().createGet(ApiRequest.API_HOST, options)
         builder.betas(setOf("second=v1"))
 
-        assertThat(request.headers["Stripe-Version"]).isEqualTo("2020-03-02;first=v1")
+        assertThat(request.headers["Stripe-Version"]).isEqualTo("2026-10-28.endive;first=v1")
         assertThat(options.copy(apiKey = "ek_test_123", stripeAccount = null).betas).containsExactly("first=v1")
     }
 }

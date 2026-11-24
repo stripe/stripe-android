@@ -1,7 +1,7 @@
 package com.stripe.android.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test

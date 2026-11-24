@@ -56,11 +56,12 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(betas = setOf("elements_beta=v1")),
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
         assertThat(requestCaptor.firstValue.headers["Stripe-Version"])
-            .isEqualTo("2020-03-02;elements_beta=v1")
+            .isEqualTo("2026-10-28.endive;elements_beta=v1")
         val requestOptions = (requestCaptor.firstValue as ApiRequest).options
         assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
@@ -84,6 +85,7 @@ internal class ElementsSessionRepositoryTest {
                 savedPaymentMethodSelectionId = null,
                 countryOverride = null,
                 apiConfiguration = DEFAULT_API_CONFIG,
+                mobileSessionConfig = null,
             ).getOrThrow()
         }
 
@@ -118,6 +120,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
                     apiConfiguration = DEFAULT_API_CONFIG,
+                    mobileSessionConfig = null,
                 ).getOrThrow()
             }
 
@@ -147,6 +150,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
                     apiConfiguration = DEFAULT_API_CONFIG,
+                    mobileSessionConfig = null,
                 ).getOrThrow()
             }
 
@@ -177,6 +181,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -208,8 +213,9 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
-                )
+                ).build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -217,6 +223,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -239,6 +246,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -261,6 +269,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -286,9 +295,11 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    paymentMethodTypes = expectedPaymentMethodTypes
                 )
+                    .paymentMethodTypes(expectedPaymentMethodTypes)
+                    .build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -296,6 +307,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -329,6 +341,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -364,6 +377,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -396,6 +410,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -444,6 +459,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -470,14 +486,20 @@ internal class ElementsSessionRepositoryTest {
         repository.get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode =
-                    PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                        businessName = "My business, Inc.",
-                        networkId = "network_123",
-                        externalId = "external_123",
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                )
+                    .sharedPaymentTokenSession(
+                        PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_123",
+                            externalId = "external_123",
+                        )
+                    )
+                    .build(),
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -485,6 +507,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -536,6 +559,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -551,14 +575,15 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
         )
 
-        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay
-                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                    PaymentMethod.Type.AmazonPay
+                        to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                )
             )
-        )
 
         createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -566,10 +591,10 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
-                        setupFutureUse = null,
-                        paymentMethodOptions = paymentMethodOptions
-                    ),
-                )
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                    )
+                        .paymentMethodOptions(paymentMethodOptions),
+                ).build()
             ),
             customer = null,
             customPaymentMethods = listOf(),
@@ -577,6 +602,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -598,14 +624,15 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
         )
 
-        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay
-                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                    PaymentMethod.Type.AmazonPay
+                        to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                )
             )
-        )
 
         createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -613,11 +640,12 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
-                        setupFutureUse = null,
-                        paymentMethodOptions = paymentMethodOptions,
-                    ),
-                    requireCvcRecollection = true,
-                ),
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                    )
+                        .paymentMethodOptions(paymentMethodOptions),
+                )
+                    .requireCvcRecollection(true)
+                    .build(),
             ),
             customer = null,
             customPaymentMethods = listOf(),
@@ -625,6 +653,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -651,10 +680,11 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
-                        setupFutureUse = null,
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    requireCvcRecollection = true,
-                ),
+                )
+                    .requireCvcRecollection(true)
+                    .build(),
             ),
             customer = null,
             customPaymentMethods = listOf(),
@@ -662,6 +692,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -691,6 +722,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
             linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
         )
 
@@ -716,6 +748,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -739,6 +772,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -767,6 +801,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -791,9 +826,11 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 2000,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    paymentMethodTypes = listOf("card", "link"),
                 )
+                    .paymentMethodTypes(listOf("card", "link"))
+                    .build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -801,6 +838,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -832,6 +870,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -856,6 +895,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -880,6 +920,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -904,6 +945,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -924,8 +966,9 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                )
+                ).build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -933,6 +976,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -958,6 +1002,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -982,6 +1027,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1009,6 +1055,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1032,9 +1079,11 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 2000,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    paymentMethodTypes = listOf("card"),
                 )
+                    .paymentMethodTypes(listOf("card"))
+                    .build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -1042,6 +1091,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())

@@ -18,6 +18,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -62,8 +63,9 @@ internal class EmbeddedPaymentElementTest(
         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
             amount = 5000,
             currency = "USD",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
         )
+            .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
     )
 
     @After
@@ -362,9 +364,10 @@ internal class EmbeddedPaymentElementTest(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 5000,
                     currency = "USD",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-                onBehalfOf = oboMerchantID,
             )
+                .onBehalfOf(oboMerchantID)
         )
 
         testContext.markTestSucceeded()
@@ -488,12 +491,7 @@ internal class EmbeddedPaymentElementTest(
         embeddedContentPage.clickOnLpm("card")
         formPage.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         // Click the "Save my info" checkbox and fill out Link signup fields
         testRules.compose.onNode(hasText("Save my info for faster checkout with Link"))

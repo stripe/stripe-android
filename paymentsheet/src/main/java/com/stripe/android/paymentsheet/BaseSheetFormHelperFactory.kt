@@ -15,6 +15,7 @@ internal class BaseSheetFormHelperFactory(
         cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
         savedStateHandle = viewModel.savedStateHandle,
         isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
+        errorReporter = viewModel.errorReporter,
     )
 
     fun create(

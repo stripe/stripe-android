@@ -2,17 +2,17 @@ package com.stripe.android.elements
 
 import android.os.Looper
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutMandateState
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContent
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentsheet.PaymentSheet

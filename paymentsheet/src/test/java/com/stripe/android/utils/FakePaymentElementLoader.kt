@@ -49,6 +49,10 @@ internal class FakePaymentElementLoader(
         this.stripeIntent = intent
     }
 
+    fun updateCustomer(customer: CustomerState?) {
+        this.customer = customer
+    }
+
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
         this.customer = customer?.copy(
             paymentMethods = paymentMethods
@@ -68,8 +72,6 @@ internal class FakePaymentElementLoader(
             billingDetailsCollectionConfiguration = configuration
                 .billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = configuration
-                .allowsPaymentMethodsRequiringShippingAddress,
             paymentMethodOrder = configuration.paymentMethodOrder,
             isGooglePayReady = isGooglePayAvailable,
             cbcEligibility = cbcEligibility,

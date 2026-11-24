@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.createComposeCleanupRule

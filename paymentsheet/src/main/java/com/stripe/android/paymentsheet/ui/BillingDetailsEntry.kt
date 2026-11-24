@@ -18,11 +18,8 @@ internal data class BillingDetailsEntry(
         )
 
         val addressChanged = when (billingDetailsCollectionConfiguration.address) {
-            AddressCollectionMode.Automatic -> {
-                billingDetails?.address?.postalCode nullableNeq billingDetailsFormState.postalCode ||
-                    billingDetails?.address?.country nullableNeq billingDetailsFormState.country
-            }
             AddressCollectionMode.Never -> false
+            AddressCollectionMode.Automatic,
             AddressCollectionMode.Full -> {
                 billingDetails?.address?.postalCode nullableNeq billingDetailsFormState.postalCode ||
                     billingDetails?.address?.country nullableNeq billingDetailsFormState.country ||
@@ -64,12 +61,10 @@ internal data class BillingDetailsEntry(
         val contactInfoComplete = contactInfoComplete(configuration)
 
         val addressComplete = when (configuration.address) {
-            AddressCollectionMode.Automatic -> {
-                billingDetailsFormState.country.isValid && billingDetailsFormState.postalCode.isValid
-            }
             AddressCollectionMode.Never -> {
                 true
             }
+            AddressCollectionMode.Automatic,
             AddressCollectionMode.Full -> {
                 billingDetailsFormState.country.isValid && billingDetailsFormState.state.isValid &&
                     billingDetailsFormState.postalCode.isValid && billingDetailsFormState.line1.isValid &&

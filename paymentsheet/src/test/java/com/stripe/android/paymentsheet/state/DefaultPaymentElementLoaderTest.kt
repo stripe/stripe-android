@@ -96,6 +96,10 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
+import com.stripe.android.paymentsheet.stripebalance.FakeLoadStripeBalanceFinancialAccounts
+import com.stripe.android.paymentsheet.stripebalance.LoadStripeBalanceFinancialAccounts
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccount
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.CustomerFactory
 import com.stripe.android.testing.FakeErrorReporter
@@ -193,6 +197,62 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load passes the buyer's Stripe balance financial accounts to the payment method metadata`() = runScenario {
+        val financialAccounts = StripeBalanceFinancialAccounts(
+            accounts = listOf(
+                StripeBalanceFinancialAccount(
+                    id = "fa_123",
+                    displayName = "Operating account",
+                    availableBalances = mapOf("usd" to 10_000L),
+                    eligible = true,
+                    ineligibleReason = null,
+                )
+            ),
+            currency = "usd",
+        )
+        val loadStripeBalanceFinancialAccounts = FakeLoadStripeBalanceFinancialAccounts(result = financialAccounts)
+        val loader = createPaymentElementLoader(loadStripeBalanceFinancialAccounts = loadStripeBalanceFinancialAccounts)
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+        )
+
+        val state = loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some name"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(loadStripeBalanceFinancialAccounts.calls.awaitItem().initializationMode)
+            .isEqualTo(initializationMode)
+        assertThat(state.paymentMethodMetadata.stripeBalanceFinancialAccounts).isEqualTo(financialAccounts)
+        loadStripeBalanceFinancialAccounts.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load succeeds without Stripe balance financial accounts when they fail to load`() = runScenario {
+        val loadStripeBalanceFinancialAccounts = FakeLoadStripeBalanceFinancialAccounts(result = null)
+        val loader = createPaymentElementLoader(loadStripeBalanceFinancialAccounts = loadStripeBalanceFinancialAccounts)
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some name"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(loadStripeBalanceFinancialAccounts.calls.awaitItem()).isNotNull()
+        assertThat(state.paymentMethodMetadata.stripeBalanceFinancialAccounts).isNull()
+        loadStripeBalanceFinancialAccounts.ensureAllEventsConsumed()
+        consumeLoadingEvents()
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -1961,9 +2021,10 @@ internal class DefaultPaymentElementLoaderTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = -1099,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ).validate()
         }
     }
@@ -1975,9 +2036,10 @@ internal class DefaultPaymentElementLoaderTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 0,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ).validate()
         }
     }
@@ -2046,8 +2108,9 @@ internal class DefaultPaymentElementLoaderTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1234,
                 currency = "cad",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        )
+        ).build()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = intentConfiguration
         )
@@ -2067,8 +2130,9 @@ internal class DefaultPaymentElementLoaderTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1234,
                 currency = "cad",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        )
+        ).build()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = intentConfiguration
         )
@@ -2088,8 +2152,9 @@ internal class DefaultPaymentElementLoaderTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1234,
                 currency = "cad",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        )
+        ).build()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = intentConfiguration
         )
@@ -2110,8 +2175,9 @@ internal class DefaultPaymentElementLoaderTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
@@ -2198,8 +2264,9 @@ internal class DefaultPaymentElementLoaderTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         loader.load(
@@ -2225,8 +2292,9 @@ internal class DefaultPaymentElementLoaderTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         val result = loader.load(
@@ -2273,8 +2341,9 @@ internal class DefaultPaymentElementLoaderTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
@@ -2305,8 +2374,9 @@ internal class DefaultPaymentElementLoaderTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
@@ -4719,6 +4789,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @Suppress("DEPRECATION")
     private suspend fun Scenario.testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
@@ -4899,9 +4970,10 @@ internal class DefaultPaymentElementLoaderTest {
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 5000,
-                    currency = "USD"
+                    currency = "USD",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         loader.load(
@@ -5426,6 +5498,8 @@ internal class DefaultPaymentElementLoaderTest {
             FakePaymentMethodMessagePromotionsExperimentHandler(),
         preselectLinkExperiment: PreselectLinkExperiment = this.preselectLinkExperiment,
         createLinkState: CreateLinkState? = null,
+        loadStripeBalanceFinancialAccounts: LoadStripeBalanceFinancialAccounts =
+            FakeLoadStripeBalanceFinancialAccounts(),
     ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -5486,6 +5560,7 @@ internal class DefaultPaymentElementLoaderTest {
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
             preselectLinkExperiment = preselectLinkExperiment,
+            loadStripeBalanceFinancialAccounts = loadStripeBalanceFinancialAccounts,
         )
     }
 

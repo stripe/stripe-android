@@ -205,7 +205,6 @@ class AddressTextFieldControllerTest {
             inlineAutocompleteHandler = inlineAutocompleteHandler,
             reportsFormValue = reportsFormValue,
             initialQuery = initialQuery,
-            showEnterManually = true,
         )
     }
 

@@ -55,7 +55,6 @@ internal class PaymentSheetAddressAutocompleteTest(
                                 attachDefaultsToPaymentMethod = true,
                             ),
                         )
-                        .googlePlacesApiKey("gp_123")
                         .build()
                 ),
             )
@@ -105,7 +104,6 @@ internal class PaymentSheetAddressAutocompleteTest(
                                 )
                             )
                         )
-                        .googlePlacesApiKey("gp_123")
                         .build()
                 ),
             )

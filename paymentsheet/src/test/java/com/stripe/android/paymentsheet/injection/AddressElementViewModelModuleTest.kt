@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.injection
 
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
@@ -12,7 +11,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
-import com.stripe.android.model.Address
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -22,10 +20,9 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
-import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.StripeHostedAddressAutocompleteClient
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -34,7 +31,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFact
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
@@ -282,41 +278,21 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
-        val googlePlacesClient = FakePlacesClientProxy(
-            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
-            fetchPlaceResult = Result.success(Address()),
-        )
+    fun `provideInlineAutocompleteClient returns hosted client by default`() {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
         val stripeAutocompleteRepository = FakeStripeAutocompleteRepository()
-        val placesClient = module.provideInlinePlacesClient(
+        val autocompleteClient = module.provideInlineAutocompleteClient(
             args = AddressElementActivityContract.Args.Standalone(
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = stripeAutocompleteRepository,
-            googlePlacesClient = googlePlacesClient,
             addressLauncherEventReporter = addressLauncherEventReporter,
         )
 
-        assertThat(placesClient).isInstanceOf(StripeHostedPlacesClientProxy::class.java)
-        assertThat(placesClient).isNotSameInstanceAs(googlePlacesClient)
-        googlePlacesClient.ensureAllEventsConsumed()
+        assertThat(autocompleteClient).isInstanceOf(StripeHostedAddressAutocompleteClient::class.java)
         stripeAutocompleteRepository.ensureAllEventsConsumed()
         addressLauncherEventReporter.validate()
-    }
-
-    @Test
-    fun `provideGooglePlacesClient returns null without google api key`() {
-        val placesClient = module.provideGooglePlacesClient(
-            context = ApplicationProvider.getApplicationContext(),
-            args = AddressElementActivityContract.Args.Standalone(
-                apiConfiguration = DEFAULT_API_CONFIG,
-                config = AddressLauncher.Configuration(billingAddress = null),
-            ),
-        )
-
-        assertThat(placesClient).isNull()
     }
 
     private fun runCheckoutShippingScenario(
@@ -364,7 +340,7 @@ class AddressElementViewModelModuleTest {
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                 analyticsRequestFactory = createAnalyticsRequestFactory(),
             ),
-            placesClient = null,
+            autocompleteClient = null,
             primaryButtonAction = module.providePrimaryButtonAction(
                 args = args,
                 taxRegionUpdater = createTaxRegionUpdater(),

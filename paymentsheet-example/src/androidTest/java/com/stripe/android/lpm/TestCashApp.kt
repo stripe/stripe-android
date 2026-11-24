@@ -47,9 +47,7 @@ internal class TestCashApp : BasePlaygroundTest() {
     fun testCashAppPay_Fail() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copy(
-                authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "The customer declined this payment.",
-                ),
+                authorizationAction = AuthorizeAction.Fail,
             ),
         )
     }

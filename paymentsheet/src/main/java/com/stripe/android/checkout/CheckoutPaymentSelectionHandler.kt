@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@OptIn(CheckoutSessionPreview::class)
 @Singleton
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
     private val checkoutElementsController: CheckoutElementsController,

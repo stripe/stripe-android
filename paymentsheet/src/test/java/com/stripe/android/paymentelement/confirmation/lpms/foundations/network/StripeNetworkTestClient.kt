@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.lpms.foundations.network
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -108,10 +107,9 @@ internal class StripeNetworkTestClient @Inject constructor(
         return STRIPE_CI_TEST_BACKEND_URL + path
     }
 
-    private fun <T : ConfirmStripeIntentParams> T.withReturnUrl() = apply {
-        // We don't need a real return URL since we won't be launching into the payment flow
-        returnUrl = DEFAULT_RETURN_URL
-    }
+    // We don't need a real return URL since we won't be launching into the payment flow
+    private fun ConfirmPaymentIntentParams.withReturnUrl() = copy(returnUrl = DEFAULT_RETURN_URL)
+    private fun ConfirmSetupIntentParams.withReturnUrl() = copy(returnUrl = DEFAULT_RETURN_URL)
 
     private companion object {
         const val STRIPE_VERSION = "2020-03-02"

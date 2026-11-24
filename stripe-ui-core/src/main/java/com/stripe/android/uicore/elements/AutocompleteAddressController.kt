@@ -33,8 +33,7 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
-    private val inlineAutocompleteActive =
-        config.isInlineAutocompleteEnabled && config.shouldUseStripeHostedAutocomplete
+    private val inlineAutocompleteActive = config.shouldUseStripeHostedAutocomplete
 
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
         if (inlineAutocompleteActive) {
@@ -182,14 +181,12 @@ class AutocompleteAddressController(
         expandForm: Boolean,
         values: Map<FormFieldId, String?>
     ): AddressInputMode {
-        val googlePlacesApiKey = config.googlePlacesApiKey
         val countrySupported = isCountrySupported(values[FormFieldId.Country])
 
         val showInline = inlineAutocompleteActive && !expandForm &&
             countrySupported && values[FormFieldId.Line1].isNullOrEmpty()
         return if (showInline) {
             AddressInputMode.AutocompleteInline(
-                googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,

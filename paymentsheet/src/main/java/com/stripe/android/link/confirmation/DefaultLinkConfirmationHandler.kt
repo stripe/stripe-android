@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.R
@@ -99,7 +100,10 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 )
                 Result.Failed(result.message)
             }
-            is ConfirmationHandler.Result.Succeeded -> Result.Succeeded
+            is ConfirmationHandler.Result.Succeeded -> Result.Succeeded(
+                intent = result.intent,
+                checkoutSessionResponse = result.metadata[CheckoutSessionResponseKey],
+            )
             null -> {
                 logger.error("DefaultLinkConfirmationHandler: Payment confirmation returned null")
                 Result.Failed(R.string.stripe_something_went_wrong.resolvableString)

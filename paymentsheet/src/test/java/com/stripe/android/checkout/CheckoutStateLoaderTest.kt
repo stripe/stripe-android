@@ -21,10 +21,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -44,10 +41,7 @@ import com.stripe.android.uicore.StripeShapes
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import com.stripe.android.utils.FakeIsNfcScanningAvailable
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -586,18 +580,38 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
     }
 
-    private fun realSelectionChooser(savedStateHandle: SavedStateHandle): EmbeddedSelectionChooser =
-        DefaultEmbeddedSelectionChooser(
-            savedStateHandle = savedStateHandle,
-            formHelperFactory = EmbeddedFormHelperFactory(
-                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                embeddedSelectionHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle),
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                savedStateHandle = savedStateHandle,
-                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-            ),
-            internalRowSelectionCallback = { null },
+    @Test
+    fun `reload preserves a new card selection when the session gains a customer`() = runScenario(
+        loaderSelection = PaymentSelection.GooglePay,
+        isGooglePayAvailable = true,
+        selectionChooser = ::realSelectionChooser,
+    ) {
+        val selected = loadInitial().state.copy(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         )
+        // A failed confirmation can create the guest Customer that the session saves payment methods to.
+        paymentElementLoader.updateCustomer(CustomerState(paymentMethods = emptyList(), defaultPaymentMethodId = null))
+        loader.reload(selected)
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `reload preserves a new card selection when the collected email changes`() = runScenario(
+        loaderSelection = PaymentSelection.GooglePay,
+        isGooglePayAvailable = true,
+        selectionChooser = ::realSelectionChooser,
+    ) {
+        val initialState = loadInitial().state
+        val selected = initialState.copy(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            collectedDetails = initialState.collectedDetails.copy(email = "updated@example.com"),
+        )
+        loader.reload(selected)
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    private fun realSelectionChooser(): EmbeddedSelectionChooser =
+        CheckoutSelectionChooser(internalRowSelectionCallback = { null })
 
     private fun defaultConfiguration() = CheckoutElementsController.Configuration()
         .paymentElement(PaymentElement.Configuration())
@@ -669,8 +683,8 @@ internal class CheckoutStateLoaderTest {
         paymentElementLoaderDelay: Duration = Duration.ZERO,
         initializationModes: Turbine<PaymentElementLoader.InitializationMode>? = null,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
-        // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
-        selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
+        // CheckoutSelectionChooser.
+        selectionChooser: (() -> EmbeddedSelectionChooser)? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val application = ApplicationProvider.getApplicationContext<Application>()
@@ -698,7 +712,7 @@ internal class CheckoutStateLoaderTest {
             },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
-        val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
+        val chooser = selectionChooser?.invoke() ?: recordingChooser
         val paymentElementLoader = FakePaymentElementLoader(
             paymentSelection = loaderSelection,
             shouldFail = shouldFail,

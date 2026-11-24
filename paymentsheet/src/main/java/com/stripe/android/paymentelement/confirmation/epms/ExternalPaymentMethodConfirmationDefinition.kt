@@ -10,7 +10,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import javax.inject.Inject
@@ -18,7 +17,9 @@ import javax.inject.Provider
 
 internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    private val externalPaymentMethodConfirmHandlerProvider: Provider<ExternalPaymentMethodConfirmHandler?>,
+    @Suppress("DEPRECATION")
+    private val externalPaymentMethodConfirmHandlerProvider:
+        Provider<com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler?>,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<
     ExternalPaymentMethodConfirmationOption,

@@ -5,9 +5,7 @@
 # determine whether to create a new key in Lokalise or update an existing one. The latter happens
 # if we already have a key in Lokalise with the same value.
 #
-# This script is meant to be run locally. On CI, we run
-# `scripts/localise/check_untranslated_strings.rb` to fail a build if any string isn't translated
-# yet.
+# Run this script locally from the scripts directory.
 
 require_relative 'lokalise_client'
 require_relative 'processor'

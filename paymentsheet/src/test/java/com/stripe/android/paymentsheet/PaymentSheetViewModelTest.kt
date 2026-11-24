@@ -4,7 +4,7 @@ import android.app.Application
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
@@ -1228,7 +1228,6 @@ internal class PaymentSheetViewModelTest {
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .shippingDetails(null)
-                    .allowsPaymentMethodsRequiringShippingAddress(false)
                     .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
@@ -1244,9 +1243,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .build()
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
@@ -1261,9 +1258,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .build()
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
@@ -2186,13 +2181,12 @@ internal class PaymentSheetViewModelTest {
 
     private fun FakeConfirmationHandler.Scenario.createWebLinkDeferredSetupViewModel(): PaymentSheetViewModel {
         val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-            ),
+            mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession),
         )
         return createViewModel(
             args = ARGS_DEFERRED_INTENT.copy(
-                initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
+                initializationMode = InitializationMode.DeferredIntent(intentConfiguration.build()),
             ),
             stripeIntent = SETUP_INTENT.copy(
                 id = null,
@@ -3742,7 +3736,6 @@ internal class PaymentSheetViewModelTest {
                 },
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                placesClient = null,
                 linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
                 addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
@@ -3789,11 +3782,15 @@ internal class PaymentSheetViewModelTest {
         val deferredIntent = paymentIntent.copy(id = null, clientSecret = null)
 
         val intentConfig = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 12345, currency = "usd"),
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 12345,
+                currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+            ),
         )
 
         return createViewModel(
-            args = args.copy(initializationMode = InitializationMode.DeferredIntent(intentConfig)),
+            args = args.copy(initializationMode = InitializationMode.DeferredIntent(intentConfig.build())),
             confirmationHandlerFactory = confirmationHandlerFactory,
             stripeIntent = deferredIntent,
         )

@@ -27,6 +27,11 @@ internal class LinkWalletPage(
         }
     }
 
+    fun pay() {
+        waitUntilVisible()
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_PAY_BUTTON).performClick()
+    }
+
     fun logOut() {
         waitUntilVisible()
 

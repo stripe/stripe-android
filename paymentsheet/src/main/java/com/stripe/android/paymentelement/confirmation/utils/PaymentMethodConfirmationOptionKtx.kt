@@ -10,7 +10,7 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePre
 import com.stripe.android.paymentsheet.PaymentSheet
 
 internal fun PaymentMethodCreateParams.updatedWithProductUsage(
-    intentConfiguration: PaymentSheet.IntentConfiguration,
+    intentConfiguration: PaymentSheet.IntentConfiguration.State,
 ): PaymentMethodCreateParams {
     val productUsage = buildSet {
         addAll(attribution)
@@ -32,10 +32,10 @@ internal fun PaymentMethodCreateParams.updatedWithProductUsage(
 @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
 internal fun PaymentMethodOptionsParams?.updatedWithPmoSfu(
     code: PaymentMethodCode?,
-    intentConfiguration: PaymentSheet.IntentConfiguration,
+    intentConfiguration: PaymentSheet.IntentConfiguration.State,
 ): PaymentMethodOptionsParams? {
     val paymentMethodType = PaymentMethod.Type.fromCode(code) ?: return this
-    return (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+    return (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment.State)
         ?.paymentMethodOptions
         ?.setupFutureUsageValues?.let { values ->
             values[paymentMethodType]?.toConfirmParamsSetupFutureUsage()?.let { configPmoSfu ->

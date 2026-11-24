@@ -1,7 +1,38 @@
 #!/usr/bin/env ruby
 
-require 'octokit'
+require 'json'
 require 'open3'
+require 'ostruct'
+
+# The SDK is developed in GitHub Enterprise. The public tree lives in the
+# `stripe-android` directory of this repository, which is where these scripts run from.
+GITHUB_HOST = "git.corp.stripe.com"
+GITHUB_REPO = "stripe-internal/oss-android-sdk"
+GITHUB_REPO_URL = "https://#{GITHUB_HOST}/#{GITHUB_REPO}"
+
+# Calls the GitHub Enterprise API through the `gh` CLI, which owns authentication.
+# Responses are parsed so that fields can be read as `response.html_url`.
+def github_api(path, method: "GET", params: nil)
+    command = ["gh", "api", "--hostname", GITHUB_HOST, "--method", method]
+    stdin_data = ""
+
+    if method == "GET"
+        (params || {}).each { |key, value| command += ["-f", "#{key}=#{value}"] }
+    elsif params
+        command += ["--input", "-"]
+        stdin_data = JSON.generate(params)
+    end
+
+    command << path
+
+    stdout, stderr, status = Open3.capture3(*command, stdin_data: stdin_data)
+
+    unless status.success?
+        raise "#{method} #{path} on #{GITHUB_HOST} failed: #{stdout.strip} #{stderr.strip}".strip
+    end
+
+    JSON.parse(stdout, object_class: OpenStruct)
+end
 
 def fetch_password(password)
     stdout, stderr, status = Open3.capture3("fetch-password --raw #{password}")
@@ -111,13 +142,16 @@ def create_pr(
     pr_description,
     user_message
 )
-    response = github_login.create_pull_request(
-        "stripe/stripe-android",
-        @deploy_branch,
-        pr_branch,
-        pr_title,
-        pr_description,
-        draft: @is_dry_run,
+    response = github_api(
+        "repos/#{GITHUB_REPO}/pulls",
+        method: "POST",
+        params: {
+            base: @deploy_branch,
+            head: pr_branch,
+            title: pr_title,
+            body: pr_description,
+            draft: @is_dry_run,
+        },
     )
 
     pr_url = response.html_url
@@ -125,26 +159,4 @@ def create_pr(
 
     rputs user_message
     wait_for_user
-end
-
-private def octokit_client
-  @octokit_client ||= begin
-    token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
-    if token.nil? || token == ""
-      raise "Got empty Github token from password-vault"
-    end
-
-    Octokit::Client.new(access_token: token)
-  end
-end
-
-private def github_login
-  token = `fetch-password -q bindings/gh-tokens/$USER`
-  if $?.exitstatus != 0
-    rputs "Couldn't fetch GitHub token"
-    exit(1)
-  end
-  client = Octokit::Client.new(access_token: token)
-  abort('Invalid GitHub token. Follow the wiki instructions for setting up a GitHub token.') unless client.login
-  client
 end

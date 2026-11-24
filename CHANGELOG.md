@@ -1,18 +1,39 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: MAJOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### All SDKs
+* [CHANGED] Bumped `compileSdkVersion` from 36 to 37.
+* [CHANGED] Bumped `minSdkVersion` from 23 to 24.
+* [CHANGED] Bumped Kotlin from 2.2.21 to 2.3.21.
+* [CHANGED] Bumped Jetpack Compose from 1.10.6 to 1.12.1
+* [CHANGED] Bumped Dagger from 2.58 to 2.59.
+* [CHANGED] Bumped AndroidX Lifecycle from 2.10.0 to 2.11.0.
+
+### Payments
+* [REMOVED] `returnUrl` setters from `ConfirmPaymentIntentParams` & `ConfirmSetupIntentParams` have been removed.
+
 ### PaymentSheet
-* [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
-* [FIXED][15399](https://github.com/stripe/stripe-android/pull/15399) Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
+* [DEPRECATED] External payment methods (EPMs) is now deprecated in favor of custom payment methods (CPMs). Existing EPM integrations continue working but will no longer be maintained. We recommend migrating configuration, confirmation callbacks, and result handling to the CPM APIs.
+* [DEPRECATED] `allowsPaymentMethodsRequiringShippingAddress` is now deprecated. All payment methods that require a shipping address will be shown by Payment Element by default.
+* [REMOVED] Removed `PaymentSheet.Configuration.Builder.googlePlacesApiKey`. Payment Element autocomplete will continue to work without a Google Places API key.
+* [ADDED] Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.
+* [Changed] Payment method icons now follow the selected light or dark theme, including when using custom component colors.
+* [Added] Added explicit control for the light or dark appearance color set used by PaymentSheet, Embedded Payment Element, CustomerSheet, and Address Element on Android. You can now use PaymentSheet.Appearance.Builder.themeMode() to set the appearance to AlwaysLight or AlwaysDark for a consistent experience, overriding the system light/dark mode setting for supported Payment Element surfaces.
+* [FIXED] Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
+* [FIXED] Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
+* [ADDED] Added builder methods to `PaymentSheet.IntentConfiguration`, `IntentConfiguration.Mode.Payment`, `IntentConfiguration.Mode.Setup`, and `IntentConfiguration.Mode.Payment.PaymentMethodOptions`. For example, `PaymentSheet.IntentConfiguration(mode).paymentMethodTypes(listOf("card")).onBehalfOf("acct_123")`.
+* [DEPRECATED] Deprecated the `PaymentSheet.IntentConfiguration`, `Mode.Payment`, `Mode.Setup`, and `PaymentMethodOptions` constructor overloads that accept optional values in favor of the new builder methods.
+* [CHANGED] Removed the property getters from `PaymentSheet.IntentConfiguration`, `IntentConfiguration.Mode.Payment`, `IntentConfiguration.Mode.Setup`, and `IntentConfiguration.SellerDetails`. These classes, along with `IntentConfiguration.Mode` and `IntentConfiguration.Mode.Payment.PaymentMethodOptions`, are no longer `Parcelable` and no longer implement value-based `equals`, `hashCode`, or `toString`.
 
 ### AddressElement
-* [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
+* [REMOVED] Removed `AddressLauncher.Configuration.Builder.googlePlacesApiKey` and the `googlePlacesApiKey` constructor parameters for AddressLauncher. Address autocomplete will continue to work without a Google Places API key.
+* [FIXED] Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 
 ### Crypto Onramp
-* [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
-* [FIXED][15268](https://github.com/stripe/stripe-android/pull/15268) Fixed stale customer and checkout state persisting or being restored by in-flight operations after logging out.
+* [Added] Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
+* [FIXED] Fixed stale customer and checkout state persisting or being restored by in-flight operations after logging out.
 
 ### Financial Connections
 * [CHANGED] Updated Link-branded Financial Connections flows, including Instant Debits, to the new Link design system.

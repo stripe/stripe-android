@@ -12,6 +12,7 @@ import com.stripe.android.checkout.CheckoutElementsControllerState
 import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.checkout.TestCheckoutAnalyticsPerformerFactory
 import com.stripe.android.core.Logger
@@ -22,7 +23,6 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption

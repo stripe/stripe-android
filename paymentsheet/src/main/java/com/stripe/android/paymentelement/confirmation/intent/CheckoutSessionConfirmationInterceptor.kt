@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
@@ -15,7 +16,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -112,7 +112,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         } else {
             checkoutSessionResponse
         }
-        val finalEstimatedTotal = updatedCheckoutSessionResponse?.amount
+        val finalEstimatedTotal = updatedCheckoutSessionResponse.amount
         if (initialEstimatedTotal != finalEstimatedTotal) {
             val error = LocalStripeException(
                 displayMessage = genericErrorMessage,

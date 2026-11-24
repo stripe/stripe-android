@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -17,16 +19,154 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class PaymentSelectionTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+
+    @Test
+    fun `isSupportedBy checks new payment method type`(@TestParameter supported: Boolean) {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = if (supported) listOf("card", "cashapp") else listOf("card"),
+            ),
+        )
+
+        assertThat(
+            PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION.isSupportedBy(metadata, paymentMethods = null)
+        ).isEqualTo(supported)
+    }
+
+    @Test
+    fun `isSupportedBy checks saved payment method type even when it is in the customer list`(
+        @TestParameter supported: Boolean,
+    ) {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = if (supported) listOf("card", "cashapp") else listOf("cashapp"),
+            ),
+            hasCustomerConfiguration = true,
+        )
+
+        assertThat(
+            PaymentSelection.Saved(paymentMethod).isSupportedBy(metadata, listOf(paymentMethod))
+        ).isEqualTo(supported)
+    }
+
+    @Test
+    fun `isSupportedBy requires saved payment method in the customer list`(@TestParameter available: Boolean) {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        assertThat(
+            PaymentSelection.Saved(paymentMethod).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(hasCustomerConfiguration = true),
+                paymentMethods = if (available) listOf(paymentMethod.copy()) else emptyList(),
+            )
+        ).isEqualTo(available)
+    }
+
+    @Test
+    fun `isSupportedBy rejects saved payment method when customer list is null`() {
+        assertThat(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                paymentMethods = null,
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun `isSupportedBy compares whole saved payment method rather than just its id`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val updatedPaymentMethod = paymentMethod.copy(
+            billingDetails = PaymentMethod.BillingDetails(email = "updated@example.com"),
+        )
+        assertThat(updatedPaymentMethod.id).isEqualTo(paymentMethod.id)
+        assertThat(updatedPaymentMethod).isNotEqualTo(paymentMethod)
+
+        assertThat(
+            PaymentSelection.Saved(paymentMethod).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(hasCustomerConfiguration = true),
+                paymentMethods = listOf(updatedPaymentMethod),
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun `isSupportedBy rejects saved payment method with unknown type`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(type = null)
+
+        assertThat(
+            PaymentSelection.Saved(paymentMethod).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                paymentMethods = listOf(paymentMethod),
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun `isSupportedBy checks Google Pay readiness`(@TestParameter ready: Boolean) {
+        assertThat(
+            PaymentSelection.GooglePay.isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = ready),
+                paymentMethods = null,
+            )
+        ).isEqualTo(ready)
+    }
+
+    @Test
+    fun `isSupportedBy checks Link availability`(@TestParameter available: Boolean) {
+        val linkState = LinkState(
+            configuration = TestFactory.LINK_CONFIGURATION,
+            loginState = LinkState.LoginState.LoggedOut,
+            signupMode = null,
+        )
+
+        assertThat(
+            PaymentSelection.Link(brand = LinkBrand.Link).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    linkState = linkState.takeIf { available },
+                ),
+                paymentMethods = null,
+            )
+        ).isEqualTo(available)
+    }
+
+    @Test
+    fun `isSupportedBy checks external payment method availability`(@TestParameter available: Boolean) {
+        val spec = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+
+        assertThat(
+            PaymentMethodFixtures.createExternalPaymentMethod(spec).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    externalPaymentMethodSpecs = if (available) listOf(spec) else emptyList(),
+                ),
+                paymentMethods = null,
+            )
+        ).isEqualTo(available)
+    }
+
+    @Test
+    fun `isSupportedBy checks custom payment method availability`(@TestParameter available: Boolean) {
+        val paymentMethod = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD
+
+        assertThat(
+            PaymentMethodFixtures.createCustomPaymentMethod(paymentMethod).isSupportedBy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    displayableCustomPaymentMethods = if (available) listOf(paymentMethod) else emptyList(),
+                ),
+                paymentMethods = null,
+            )
+        ).isEqualTo(available)
+    }
 
     @Test
     fun `Doesn't display a mandate for Link`() {
@@ -125,7 +265,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Saved Link passthrough US bank label uses linkBrand`() {
-        val pm = PaymentMethodFixtures.US_BANK_ACCOUNT!!.copy(isLinkPassthroughMode = true)
+        val pm = PaymentMethodFixtures.US_BANK_ACCOUNT.copy(isLinkPassthroughMode = true)
         val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Onelink).resolve(context)
 
         assertThat(label).isEqualTo("Onelink")

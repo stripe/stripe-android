@@ -3,7 +3,6 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -11,8 +10,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.CurrencySelectorViewModel
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -20,7 +19,6 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CurrencySelectorElement @Inject internal constructor(
     private val checkoutElementsController: CheckoutElementsController,
     private val viewModelFactory: CurrencySelectorViewModel.Factory,
@@ -54,7 +52,6 @@ class CurrencySelectorElement @Inject internal constructor(
     }
 
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var appearance: Appearance = Appearance()
 
@@ -74,12 +71,10 @@ class CurrencySelectorElement @Inject internal constructor(
         )
 
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
         class Appearance {
 
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class LabelContent {
                 AUTOMATIC,
                 CURRENCY_CODE,
@@ -204,9 +199,9 @@ class CurrencySelectorElement @Inject internal constructor(
             )
 
             internal companion object {
-                const val DEFAULT_VERTICAL_PADDING_DP = 4f
-                const val DEFAULT_SIZE_SCALE_FACTOR = 1.0f
-                const val MIN_SECONDARY_ALPHA = 0.5f
+                private const val DEFAULT_VERTICAL_PADDING_DP = 4f
+                private const val DEFAULT_SIZE_SCALE_FACTOR = 1.0f
+                private const val MIN_SECONDARY_ALPHA = 0.5f
             }
         }
     }

@@ -80,7 +80,6 @@ class InlineAddressFormState(
 
 private object NoAutocompleteAddressInteractor : AutocompleteAddressInteractor {
     override val autocompleteConfig = AutocompleteAddressInteractor.Config(
-        googlePlacesApiKey = null,
         autocompleteCountries = emptySet(),
     )
 

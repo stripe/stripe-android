@@ -11,7 +11,6 @@ import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

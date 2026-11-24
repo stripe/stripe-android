@@ -91,12 +91,13 @@ internal class CustomerSheetScreenshotTest {
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain.emptyRuleChain()
-        .around(closeInteractorRule)
         .around(paparazzi)
         .around(paparazziWithEveryAppearance)
         .around(scopedThemePaparazzi)
         .around(localeRule)
         .around(coroutineRule)
+        // Must be inside `coroutineRule` so cleanup runs before `Dispatchers.Main` is reset.
+        .around(closeInteractorRule)
         .around(coroutineScopeCleanupRule)
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
@@ -456,6 +457,7 @@ internal class CustomerSheetScreenshotTest {
                 allowedBillingCountries = emptySet(),
                 removeMessage = null,
                 onUpdateSuccess = {},
+                requiresBillingAddressForAutomaticTax = false,
                 autocompleteAddressInteractorFactory = null,
             ).also { closeInteractorRule.track(it) },
         )

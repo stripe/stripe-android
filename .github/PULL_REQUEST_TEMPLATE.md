@@ -25,6 +25,7 @@ Why are you making this change? For bug fixes, include a code snippet or example
 ## Changelog
 <!--
 Add a line to `CHANGELOG.md` only for notable, public, user-visible changes, and include the same line here.
+Never mention or link to pull requests (including PR numbers) in changelog files or changelog text in descriptions, release notes, and summaries.
 Do not add entries for WIP or internal-only projects, including APIs guarded by @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP). An internal implementation change warrants an entry only if it changes behavior users can observe through a public API or feature.
 If no entry is needed, explain why here. Otherwise, prefix the entry with one of the following:
     - [Added] for new features.

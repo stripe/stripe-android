@@ -35,7 +35,6 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -83,7 +82,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration.build())
         return configurationCoordinator.configure(configuration, initializationMode)
     }
 
@@ -168,7 +167,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
             resultCallback = resultCallback,
         )
 
-        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+        @Suppress("DEPRECATION")
+        internal var externalPaymentMethodConfirmHandler:
+            com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler? = null
             private set
 
         internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
@@ -187,7 +188,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
         /**
          * Called when a user confirms payment for an external payment method.
          */
-        fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+        @Deprecated(
+            message = "External payment methods are deprecated. " +
+                "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+                "instead.",
+            level = DeprecationLevel.WARNING,
+        )
+        @Suppress("DEPRECATION")
+        fun externalPaymentMethodConfirmHandler(
+            handler: com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+        ) = apply {
             this.externalPaymentMethodConfirmHandler = handler
         }
 
@@ -366,6 +376,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: The payment element considers this property `true` if `shipping` details are present
              * on the PaymentIntent/SetupIntent when loaded.
              */
+            @Deprecated(
+                message = "This no longer has an effect. Payment methods that require a shipping " +
+                    "address are always allowed"
+            )
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
             ) = apply {
@@ -438,13 +452,20 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * External payment methods to display.
              *
              * If you specify any external payment methods here, you must also pass an
-             * [ExternalPaymentMethodConfirmHandler] when creating the embedded payment element.
+             * [com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler] when creating the embedded
+             * payment element.
              *
              * To learn more about external payment methods, see
              * https://docs.stripe.com/payments/external-payment-methods?platform=android. For the full list of
              * supported payment methods, see
              * https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-payment-methods.
              */
+            @Deprecated(
+                message = "External payment methods are deprecated. " +
+                    "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+                    "instead.",
+                level = DeprecationLevel.WARNING,
+            )
             fun externalPaymentMethods(externalPaymentMethods: List<String>): Builder = apply {
                 this.externalPaymentMethods = externalPaymentMethods
             }
@@ -585,13 +606,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             CardFundingFilteringPrivatePreview::class,
         )
+        @Suppress("DEPRECATION")
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
             .googlePay(googlePay)
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
-            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

@@ -2,8 +2,8 @@
 
 package com.stripe.android.elements.ece
 
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 
 internal sealed class ExpressButtonType {
     data object Link : ExpressButtonType()

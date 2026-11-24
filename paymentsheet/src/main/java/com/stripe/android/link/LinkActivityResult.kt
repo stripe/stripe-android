@@ -4,6 +4,8 @@ import android.os.Parcelable
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.parcelize.Parcelize
 
 internal sealed class LinkActivityResult : Parcelable {
@@ -19,6 +21,8 @@ internal sealed class LinkActivityResult : Parcelable {
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
         val authorizationConsentGranted: Boolean? = null,
+        val intent: StripeIntent? = null,
+        val checkoutSessionResponse: CheckoutSessionResponse? = null,
     ) : LinkActivityResult()
 
     /**

@@ -38,7 +38,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
-    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration.State,
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
@@ -321,7 +321,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @AssistedFactory
     interface Factory {
         fun create(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
+            intentConfiguration: PaymentSheet.IntentConfiguration.State,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
             customerMetadata: CustomerMetadata?,
             @Assisted clientAttributionMetadata: ClientAttributionMetadata,

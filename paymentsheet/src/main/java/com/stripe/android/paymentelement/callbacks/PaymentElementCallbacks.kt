@@ -13,7 +13,6 @@ import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 
 @OptIn(
     ExperimentalAnalyticEventCallbackApi::class,
@@ -25,7 +24,8 @@ internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
     val createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback?,
     val confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?,
-    val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
+    @Suppress("DEPRECATION")
+    val externalPaymentMethodConfirmHandler: com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
@@ -35,7 +35,11 @@ internal data class PaymentElementCallbacks private constructor(
         private var createIntentCallback: CreateIntentCallback? = null
         private var createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null
         private var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
-        private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+
+        @Suppress("DEPRECATION")
+        private var externalPaymentMethodConfirmHandler:
+            com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler? = null
+
         private var analyticEventCallback: AnalyticEventCallback? = null
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
@@ -57,8 +61,9 @@ internal data class PaymentElementCallbacks private constructor(
             this.confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback
         }
 
+        @Suppress("DEPRECATION")
         fun externalPaymentMethodConfirmHandler(
-            externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+            externalPaymentMethodConfirmHandler: com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler?
         ) = apply {
             this.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
         }

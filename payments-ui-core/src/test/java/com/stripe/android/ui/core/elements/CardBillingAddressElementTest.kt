@@ -387,7 +387,6 @@ internal class CardBillingAddressElementTest {
                     object : AutocompleteAddressInteractor {
                         override val autocompleteConfig: AutocompleteAddressInteractor.Config =
                             AutocompleteAddressInteractor.Config(
-                                googlePlacesApiKey = null,
                                 autocompleteCountries = emptySet()
                             )
 

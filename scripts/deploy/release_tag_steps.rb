@@ -141,12 +141,14 @@ private def prepare_dry_run_release_source
 end
 
 private def fetch_release_pr
-    octokit_client.auto_paginate = true
-    pull_requests = octokit_client.pull_requests(
-        "stripe/stripe-android",
-        state: "all",
-        head: "stripe:#{release_branch}",
-        base: @deploy_branch,
+    pull_requests = github_api(
+        "repos/#{GITHUB_REPO}/pulls",
+        params: {
+            state: "all",
+            head: "stripe-internal:#{release_branch}",
+            base: @deploy_branch,
+            per_page: 100,
+        },
     )
 
     matching_prs = pull_requests.select do |pr|

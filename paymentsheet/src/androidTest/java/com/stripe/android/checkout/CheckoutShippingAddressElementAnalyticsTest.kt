@@ -18,7 +18,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.replaceText
@@ -234,7 +233,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             conditionDescription = "Checkout session shipping address to be committed",
         ) {
             val address = controller.session.value?.shippingAddress?.address
-            address?.line1 == line1 && address?.city == city
+            address?.line1 == line1 && address.city == city
         }
 
         assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo(line1)

@@ -4,11 +4,12 @@ import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.createComposeCleanupRule
@@ -41,10 +42,10 @@ class PaymentSheetTopBarTest {
             ) {
                 PaymentSheetTopBar(
                     state = mockState(),
+                    title = null,
                     canNavigateBack = true,
                     isEnabled = true,
-                    elevation = 0.dp,
-                    onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
+                        onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
                 )
             }
         }
@@ -68,10 +69,10 @@ class PaymentSheetTopBarTest {
             ) {
                 PaymentSheetTopBar(
                     state = mockState(),
+                    title = null,
                     canNavigateBack = true,
                     isEnabled = false,
-                    elevation = 0.dp,
-                    onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
+                        onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
                 )
             }
         }
@@ -90,9 +91,9 @@ class PaymentSheetTopBarTest {
         composeTestRule.setContent {
             PaymentSheetTopBar(
                 state = mockState(showEditMenu = true, onEditIconPressed = { didCallOnEditIconPressed = true }),
+                title = null,
                 canNavigateBack = true,
                 isEnabled = true,
-                elevation = 0.dp,
                 onNavigationIconPressed = { throw AssertionError("Not expected") },
             )
         }
@@ -102,6 +103,40 @@ class PaymentSheetTopBarTest {
             .performClick()
 
         assertThat(didCallOnEditIconPressed).isTrue()
+    }
+
+    @Test
+    fun `Displays title when provided`() {
+        composeTestRule.setContent {
+            PaymentSheetTopBar(
+                state = mockState(),
+                title = "Select your payment method",
+                canNavigateBack = false,
+                isEnabled = true,
+                onNavigationIconPressed = { throw AssertionError("Not expected") },
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(SHEET_TITLE_TEST_TAG)
+            .assertTextEquals("Select your payment method")
+    }
+
+    @Test
+    fun `Does not display title when null`() {
+        composeTestRule.setContent {
+            PaymentSheetTopBar(
+                state = mockState(),
+                title = null,
+                canNavigateBack = false,
+                isEnabled = true,
+                onNavigationIconPressed = { throw AssertionError("Not expected") },
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(SHEET_TITLE_TEST_TAG)
+            .assertDoesNotExist()
     }
 
     private fun mockState(

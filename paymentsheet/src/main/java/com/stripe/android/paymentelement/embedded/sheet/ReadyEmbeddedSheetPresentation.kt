@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,10 +29,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
-import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -202,32 +198,21 @@ internal fun EmbeddedSheetScreenContent(
             val topBarState by remember(screen) {
                 screen.topBarState()
             }.collectAsState()
+            val headerText by remember(screen) {
+                screen.title()
+            }.collectAsState()
             val isPerformingNetworkOperation by remember(screen) {
                 screen.isPerformingNetworkOperation()
             }.collectAsState()
             PaymentSheetTopBar(
                 state = topBarState,
+                title = headerText?.takeIf { walletsHeaderState == null }?.resolve(),
                 canNavigateBack = navigator.canGoBack,
                 isEnabled = !isPerformingNetworkOperation,
-                handleBackPressed = { navigator.performAction(EmbeddedNavigator.Action.Back) },
+                onNavigationIconPressed = { navigator.performAction(EmbeddedNavigator.Action.Back) },
             )
         },
         content = {
-            val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
-            val headerText by remember(screen) {
-                screen.title()
-            }.collectAsState()
-            if (walletsHeaderState == null) {
-                headerText?.let { text ->
-                    H4Text(
-                        text = text.resolve(),
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .padding(horizontalPadding),
-                    )
-                }
-            }
-
             walletsHeaderState?.let { state ->
                 SheetWalletsHeaderContent(
                     state = state.walletsState,

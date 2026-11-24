@@ -42,8 +42,9 @@ class ClientAttributionMetadataKtxTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 100L,
                     currency = "usd",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 )
-            )
+            ).build()
         )
 
         val clientAttributionMetadata = createClientAttributionMetadata(

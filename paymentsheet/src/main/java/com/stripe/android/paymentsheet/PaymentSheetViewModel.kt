@@ -71,7 +71,6 @@ import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -102,7 +101,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    private val errorReporter: ErrorReporter,
+    errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
@@ -112,7 +111,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
-    placesClient: PlacesClientProxy?,
     linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
@@ -128,8 +126,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
-    placesClient = placesClient,
     linkAccountHolder = linkAccountHolder,
+    errorReporter = errorReporter,
     stripeAutocompleteRepository = stripeAutocompleteRepository,
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {

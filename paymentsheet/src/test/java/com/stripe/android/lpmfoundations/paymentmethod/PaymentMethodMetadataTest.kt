@@ -43,6 +43,8 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccount
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -336,7 +338,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm", "klarna"),
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -351,7 +352,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("affirm", "klarna", "card"),
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
@@ -368,7 +368,6 @@ internal class PaymentMethodMetadataTest {
                 unactivatedPaymentMethods = listOf("klarna"),
                 isLiveMode = true,
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
@@ -396,7 +395,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("affirm", "klarna", "card"),
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
             paymentMethodOrder = listOf("klarna", "affirm", "card", "ignored"),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -412,7 +410,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("klarna", "affirm", "card"),
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
             paymentMethodOrder = listOf("card"),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -744,7 +741,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
-                allowsPaymentMethodsRequiringShippingAddress = true,
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
             )
             val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -762,7 +758,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
-                allowsPaymentMethodsRequiringShippingAddress = true,
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
             )
@@ -781,7 +776,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
-                allowsPaymentMethodsRequiringShippingAddress = true,
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm")
             )
@@ -914,7 +908,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
-                allowsPaymentMethodsRequiringShippingAddress = true,
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
             )
@@ -934,7 +927,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
-                allowsPaymentMethodsRequiringShippingAddress = true,
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
                 paymentMethodOrder = listOf("affirm", "cpmt_paypal", "external_paypal")
@@ -955,7 +947,6 @@ internal class PaymentMethodMetadataTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "affirm", "klarna"),
                 ),
-                allowsPaymentMethodsRequiringShippingAddress = true,
                 externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
@@ -1150,13 +1141,13 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = true,
-            allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
             availableWallets = listOf(WalletType.Link),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
@@ -1226,6 +1217,7 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1287,6 +1279,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1332,7 +1325,6 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = true,
-            allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
             availableWallets = emptyList(),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
@@ -1387,6 +1379,7 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2139,6 +2132,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.availableWallets)
@@ -2281,6 +2275,41 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement sets the buyer's Stripe balance financial accounts`() {
+        val financialAccounts = StripeBalanceFinancialAccounts(
+            accounts = listOf(
+                StripeBalanceFinancialAccount(
+                    id = "fa_123",
+                    displayName = "Operating account",
+                    availableBalances = mapOf("usd" to 10_000L),
+                    eligible = true,
+                    ineligibleReason = null,
+                )
+            ),
+            currency = "usd",
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = createElementsSession(intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = financialAccounts,
+        )
+
+        assertThat(metadata.stripeBalanceFinancialAccounts).isEqualTo(financialAccounts)
+    }
+
+    @Test
     fun `createForPaymentElement maps isTapToAddAvailable to isTapToAddSupported when customer present`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2300,6 +2329,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2325,6 +2355,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2354,6 +2385,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2508,6 +2540,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
     }
 
@@ -2716,7 +2749,6 @@ internal class PaymentMethodMetadataTest {
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
         allowsDelayedPaymentMethods = true,
-        allowsPaymentMethodsRequiringShippingAddress = false,
         paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),

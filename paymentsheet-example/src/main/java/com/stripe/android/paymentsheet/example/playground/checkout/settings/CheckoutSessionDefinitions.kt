@@ -46,6 +46,7 @@ internal object CheckoutSessionDefinitions {
         defaultValue = "email@example.com",
         validate = optionalEmail,
     )
+    val customerUpdate = CheckoutCustomerUpdateDefinitions()
     val currency = choice(
         key = "session.currency",
         displayName = "Currency",
@@ -157,6 +158,7 @@ internal object CheckoutSessionDefinitions {
             paymentMethodSave,
             paymentMethodRemove,
             customerEmail,
+            customerUpdate.configuration,
             currency,
             merchant,
             customSecretKey,
@@ -193,4 +195,28 @@ internal enum class AdaptivePricingCountry(
 
     val testEmail: String?
         get() = countryCode?.let { "test+location_${it.uppercase()}@example.com" }
+}
+
+internal class CheckoutCustomerUpdateDefinitions {
+    val address = field("address", "Address")
+    val name = field("name", "Name")
+    val shipping = field("shipping", "Shipping")
+    val configuration = configuration(
+        key = "session.customer_update",
+        displayName = "Customer update",
+        children = arrayOf(address, name, shipping),
+    )
+
+    private fun field(key: String, displayName: String) = choice(
+        key = "session.customer_update.$key",
+        displayName = displayName,
+        options = CheckoutCustomerUpdate.entries.map { it.name to it },
+        serialize = CheckoutCustomerUpdate::serializedValue,
+    )
+}
+
+internal enum class CheckoutCustomerUpdate(val serializedValue: String) {
+    Default(""),
+    Auto("auto"),
+    Never("never"),
 }

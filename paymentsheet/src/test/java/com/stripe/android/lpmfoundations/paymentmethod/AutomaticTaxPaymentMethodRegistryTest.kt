@@ -25,7 +25,10 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
         )
         val argumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create()
         val directDefinitions = PaymentMethodRegistry.all.filter { definition ->
-            definition.uiDefinitionFactory(metadata) is UiDefinitionFactory.Simple
+            definition.uiDefinitionFactory(metadata) is UiDefinitionFactory.Simple &&
+                // Automatic tax comes from a Checkout Session, which doesn't offer these
+                AddPaymentMethodRequirement.UnsupportedForCheckoutSession !in
+                definition.requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup = false)
         }
 
         directDefinitions.forEach { definition ->
@@ -94,7 +97,6 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             integrationMetadata = IntegrationMetadata.CheckoutSession(

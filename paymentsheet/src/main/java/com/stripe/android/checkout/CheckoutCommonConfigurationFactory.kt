@@ -6,7 +6,6 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
@@ -89,6 +88,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
+        useRemoteMobileSession = false,
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
@@ -98,7 +98,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         ),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = true,
-        allowsPaymentMethodsRequiringShippingAddress = true,
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         preferredNetworks = paymentElementConfiguration?.preferredNetworks
             ?: ConfigurationDefaults.preferredNetworks,
@@ -110,7 +109,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             ?: ConfigurationDefaults.cardBrandAcceptance,
         allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
         customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
-        googlePlacesApiKey = null,
         termsDisplay = paymentElementConfiguration?.termsDisplay?.asPaymentSheet() ?: emptyMap(),
         walletButtons = null,
         opensCardScannerAutomatically = paymentElementConfiguration?.opensCardScannerAutomatically

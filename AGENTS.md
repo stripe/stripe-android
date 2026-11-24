@@ -10,9 +10,13 @@
 - `./gradlew detekt` - Static analysis
 - `./gradlew :dokkaGenerate` - API docs (outputs to docs/)
 
-**GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
+**GitHub Issues** — user-reported issues remain on public GitHub. Use `gh` CLI with `-R github.com/stripe/stripe-android`. Always use `--state all` when searching. Check existing issues before investigating user reports.
 
-**Pull requests** — always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
+**Pull requests** — the source repo is https://git.corp.stripe.com/stripe-internal/oss-android-sdk. `gh` infers it from `origin`; pass `-R git.corp.stripe.com/stripe-internal/oss-android-sdk` when a command must not depend on the working directory or `GH_HOST`. Always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
+
+**Stacked pull requests** — Use `pay stack`. Use `pay stack track` for an existing branch, `pay stack create <branch> --current` to stack a new branch on the current one, `pay stack show` to inspect the stack, and `pay stack restack` to update dependent branches. Push stacked branches with `pay stack push`, not `git push`, so the stack stays consistent. After pushing, create draft PRs with `gh pr create --draft` following the pull request requirements above.
+
+**Changelogs** — Describe user-visible changes without mentioning or linking to pull requests (including PR numbers). This applies to changelog files and changelog text in descriptions, release notes, and summaries.
 
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
@@ -28,7 +32,7 @@ Multi-module Android library for payment processing and financial services.
 **Key Patterns**
 - Kotlin coroutines for async; Jetpack Compose + traditional Views
 - Dagger/Hilt DI in some modules; binary-compatibility-validator for API compat
-- Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
+- Gradle with shared deps (dependencies.gradle), AGP 9.4.x, Kotlin 2.3.x
 - Detekt for static analysis, Paparazzi for screenshot testing
 - Parameter defaults: public APIs give parameters defaults (`= null`, `= false`) for ergonomic construction. Non-public code (`internal` or `@RestrictTo`) keeps model fields and function parameters explicit by default.
   Prefer one function with a default parameter when an overload would only forward the same arguments and supply an unambiguous value that preserves existing behavior. Do not add a forwarding overload solely to avoid a default. Check source and binary compatibility before removing an existing overload.

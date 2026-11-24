@@ -23,6 +23,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -93,9 +94,7 @@ class ConsumersApiServiceImplTest {
         val email = "email@example.com"
         val requestSurface = "android_payment_element"
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
+        networkRule.enqueueConsumerSessionLookup(
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
@@ -125,13 +124,31 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `lookupConsumerSession() returns no account with default lookup response`() = runTest {
+        networkRule.enqueueConsumerSessionLookup()
+
+        val lookup = consumersApiService.lookupConsumerSession(
+            email = "email@example.com",
+            linkAuthIntentId = null,
+            requestSurface = "android_payment_element",
+            sessionId = DEFAULT_SESSION_ID,
+            requestOptions = DEFAULT_OPTIONS,
+            doNotLogConsumerFunnelEvent = false,
+            supportedVerificationTypes = null,
+            customerId = null,
+        )
+
+        assertThat(lookup.exists).isFalse()
+        assertThat(lookup.consumerSession).isNull()
+        assertThat(lookup.errorMessage).isNull()
+    }
+
+    @Test
     fun `lookupConsumerSession() returns error message with invalid json`() = runTest {
         val email = "email@example.com"
         val requestSurface = "android_payment_element"
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
+        networkRule.enqueueConsumerSessionLookup(
             ensureResponseIsValidJson = false
         ) { response ->
             response.setResponseCode(400)

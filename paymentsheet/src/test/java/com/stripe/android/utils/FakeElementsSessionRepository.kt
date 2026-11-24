@@ -5,6 +5,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.MobileSession
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
@@ -46,6 +47,7 @@ internal class FakeElementsSessionRepository(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         apiConfiguration: ApiConfiguration.State,
+        mobileSessionConfig: MobileSession.Config?,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         lastParams = Params(

@@ -54,7 +54,6 @@ import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsIntera
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -73,7 +72,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
-    private val errorReporter: ErrorReporter,
+    errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     savedPaymentMethodRepository: SavedPaymentMethodRepository,
@@ -88,7 +87,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
-    placesClient: PlacesClientProxy?,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : BaseSheetViewModel(
@@ -103,8 +101,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
-    placesClient = placesClient,
     linkAccountHolder = linkAccountHolder,
+    errorReporter = errorReporter,
     stripeAutocompleteRepository = stripeAutocompleteRepository,
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {

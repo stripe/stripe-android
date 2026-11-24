@@ -109,7 +109,7 @@ Important details:
 - Use the fully qualified test class and one method while reproducing.
 - Keep one device and one shard so iterations remain serial and attributable.
 - Use `pixel2api33chrome` for Chrome flows. For tests that do not need Chrome, select the module's appropriate managed device and confirm the exact task with `./gradlew :MODULE:tasks --all`.
-- Do not add an outer command retry or resurrect `scripts/retry_with_emulator_cleanup.sh`; outer retries obscure the first failure.
+- Do not wrap local reproductions in `retry_with_emulator_cleanup.sh` or any other outer retry; it obscures the first failure.
 
 ## Escalate Shampoo iterations
 
@@ -183,7 +183,9 @@ Do not consider the task complete until this simplification attempt is complete 
 
 ## Keep Shampoo out of commits and PRs
 
-Before any `git add`, `git commit`, `gh stack push`, `gh stack submit`, or PR creation:
+For stacked PRs, use `pay stack` following the workflow in `AGENTS.md`.
+
+Before any `git add`, `git commit`, `pay stack push`, or PR creation:
 
 1. Restore the rule file to its pre-soak `RetryRule` configuration using `apply_patch`. Do not discard unrelated or pre-existing changes.
 2. Inspect both unstaged and staged rule-file diffs:
@@ -206,8 +208,8 @@ Document the 2- and 50-iteration Shampoo results in the PR's Testing section, bu
 When a pull request is opened for the flake fix, add the `flake-fix` label and verify it is present before treating PR submission as complete:
 
 ```bash
-GH_HOST=github.com gh pr edit <number> --add-label flake-fix
-GH_HOST=github.com gh pr view <number> --json labels
+gh pr edit <number> -R git.corp.stripe.com/stripe-internal/oss-android-sdk --add-label flake-fix
+gh pr view <number> -R git.corp.stripe.com/stripe-internal/oss-android-sdk --json labels
 ```
 
 ## Finish cleanly

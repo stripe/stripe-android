@@ -6,8 +6,8 @@ import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
 import com.stripe.android.checkout.CheckoutElementsControllerState
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter

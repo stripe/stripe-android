@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
 

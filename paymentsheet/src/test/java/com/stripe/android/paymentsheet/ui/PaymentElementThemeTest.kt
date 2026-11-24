@@ -4,16 +4,13 @@ import android.os.Build
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.toPaymentElementThemeValues
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.FormInsets
@@ -38,11 +35,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
-@RunWith(RobolectricTestParameterInjector::class)
+@RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentElementThemeTest {
     @get:Rule
@@ -53,12 +50,6 @@ internal class PaymentElementThemeTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
-
-    @get:Rule
-    val disableLuminanceBasedThemesRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.disableLuminanceBasedThemes,
-        isEnabled = false,
-    )
 
     @Test
     @Config(qualifiers = "notnight")
@@ -100,48 +91,26 @@ internal class PaymentElementThemeTest {
 
     @Test
     @Config(qualifiers = "notnight")
-    fun `always dark with light component selects icon according to luminance flag`(
-        @TestParameter disableLuminanceBasedThemes: Boolean,
+    fun `always dark with light component selects dark icon`() = runScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        colorsLight = DEFAULT_LIGHT_COLORS,
+        colorsDark = LIGHT_COMPONENT_DARK_COLORS,
     ) {
-        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
-        runScenario(
-            themeMode = PaymentSheet.ThemeMode.AlwaysDark,
-            colorsLight = DEFAULT_LIGHT_COLORS,
-            colorsDark = LIGHT_COMPONENT_DARK_COLORS,
-        ) {
-            assertThat(isDark).isTrue()
-            assertThat(iconUrl).isEqualTo(if (disableLuminanceBasedThemes) DARK_ICON_URL else LIGHT_ICON_URL)
-            assertThat(iconRes).isEqualTo(
-                if (disableLuminanceBasedThemes) {
-                    R.drawable.stripe_ic_paymentsheet_pm_paypal_night
-                } else {
-                    R.drawable.stripe_ic_paymentsheet_pm_paypal_day
-                }
-            )
-        }
+        assertThat(isDark).isTrue()
+        assertThat(iconUrl).isEqualTo(DARK_ICON_URL)
+        assertThat(iconRes).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_paypal_night)
     }
 
     @Test
     @Config(qualifiers = "night")
-    fun `always light with dark component selects icon according to luminance flag`(
-        @TestParameter disableLuminanceBasedThemes: Boolean,
+    fun `always light with dark component selects light icon`() = runScenario(
+        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+        colorsLight = DARK_COMPONENT_LIGHT_COLORS,
+        colorsDark = DEFAULT_DARK_COLORS,
     ) {
-        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
-        runScenario(
-            themeMode = PaymentSheet.ThemeMode.AlwaysLight,
-            colorsLight = DARK_COMPONENT_LIGHT_COLORS,
-            colorsDark = DEFAULT_DARK_COLORS,
-        ) {
-            assertThat(isDark).isFalse()
-            assertThat(iconUrl).isEqualTo(if (disableLuminanceBasedThemes) LIGHT_ICON_URL else DARK_ICON_URL)
-            assertThat(iconRes).isEqualTo(
-                if (disableLuminanceBasedThemes) {
-                    R.drawable.stripe_ic_paymentsheet_pm_paypal_day
-                } else {
-                    R.drawable.stripe_ic_paymentsheet_pm_paypal_night
-                }
-            )
-        }
+        assertThat(isDark).isFalse()
+        assertThat(iconUrl).isEqualTo(LIGHT_ICON_URL)
+        assertThat(iconRes).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_paypal_day)
     }
 
     @Test

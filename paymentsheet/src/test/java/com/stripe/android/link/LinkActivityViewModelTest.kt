@@ -47,6 +47,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -256,8 +257,13 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
+        val confirmedIntent = PaymentIntentFixtures.PI_SUCCEEDED
+        val confirmedSession = CheckoutSessionResponseFactory.create().withIntent(confirmedIntent)
         val confirmationHandler = FakeLinkConfirmationHandler()
-        confirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
+        confirmationHandler.confirmResult = LinkConfirmationResult.Succeeded(
+            intent = confirmedIntent,
+            checkoutSessionResponse = confirmedSession,
+        )
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -267,7 +273,9 @@ internal class LinkActivityViewModelTest {
 
         vm.result.test {
             vm.onCreate(mock())
-            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Completed::class.java)
+            val result = awaitItem() as LinkActivityResult.Completed
+            assertThat(result.intent).isEqualTo(confirmedIntent)
+            assertThat(result.checkoutSessionResponse).isEqualTo(confirmedSession)
         }
     }
 

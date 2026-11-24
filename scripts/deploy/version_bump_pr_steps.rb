@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'open3'
-require 'octokit'
 
 require_relative 'common'
 
@@ -23,14 +22,29 @@ def revert_version_bump_changes()
     delete_git_branch(release_branch, @deploy_branch)
 end
 
+def fetch_release_translations()
+    api_token = fetch_password('lokalise-api-token-manual').strip
+
+    puts "Fetching latest translations from Lokalise..."
+    scripts_dir = File.expand_path('..', __dir__)
+    system({ 'LOKALISE_API_TOKEN' => api_token }, './localize.sh', chdir: scripts_dir) or
+        raise "Failed to fetch translations from Lokalise"
+
+    execute_or_fail("git add -- ':(glob)*/res/values*/strings.xml'")
+end
+
 def create_version_bump_pr()
     switch_to_release_branch()
+    fetch_release_translations()
     update_read_me()
     update_stripe_sdk_version()
     update_gradle_properties()
     update_changelog()
     update_version()
     update_3ds2_version()
+    execute_or_fail("rm -rf docs/")
+    execute_or_fail("./gradlew :dokkaGenerate")
+    execute_or_fail("git add -A docs/")
     execute_or_fail("git commit -m \"Bump version to #{@version}\"")
 
     begin
@@ -38,9 +52,9 @@ def create_version_bump_pr()
     
         pr_description = create_pr_description()
         if (@is_dry_run)
-          user_message = "Verify that a draft PR containing version number bumps was opened."
+          user_message = "Verify that a draft PR containing version number bumps, updated translations, and Dokka documentation was opened."
         else
-          user_message = "Verify that a PR containing version number bumps was opened. Press enter once you've confirmed the PR was created."
+          user_message = "Verify that a PR containing version number bumps, updated translations, and Dokka documentation was opened. Press enter once you've confirmed the PR was created."
         end
 
         create_pr(
@@ -61,15 +75,11 @@ private def release_branch
 end
 
 private def create_pr_description()
-    template_file_path = File.join(File.dirname(__FILE__), '../../.github/PULL_REQUEST_TEMPLATE.md')
-    template_file = File.open(template_file_path)
-    template = template_file.read
-    template_file.close
+    template = File.read(File.join(File.dirname(__FILE__), '../../../.github/pull_request_template.md'))
 
-    summary = <<~EOS
-    Bump version to `#{@version}`
+    <<~EOS
+    Bump version to `#{@version}`, fetch the latest translations from Lokalise, and regenerate Dokka documentation.
+
+    #{template}
     EOS
-
-    template["<!-- Simple summary of what was changed. -->"] = summary
-    template
 end

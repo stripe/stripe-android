@@ -1,8 +1,9 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.checkout.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.uicore.StripeThemeDefaults
 
 internal object CheckoutExpressDefinitions {
     val shouldSetConfiguration = boolean(
@@ -34,34 +35,39 @@ internal object CheckoutExpressDefinitions {
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
-        val theme = enumChoice(
-            key = "express.appearance.theme",
-            displayName = "Button theme",
-            defaultValue = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-        )
+        val buttonLayout = ButtonLayoutDefinitions()
 
-        val layout = LayoutDefinitions()
-
-        internal class LayoutDefinitions {
-            val columns = optionalInt(
-                key = "express.appearance.layout.columns",
-                displayName = "Maximum columns",
+        internal class ButtonLayoutDefinitions {
+            val maxColumns = optionalInt(
+                key = "express.appearance.button_layout.max_columns",
+                displayName = "maxColumns",
             )
-            val rows = optionalInt(
-                key = "express.appearance.layout.rows",
-                displayName = "Maximum rows",
+            val maxRows = optionalInt(
+                key = "express.appearance.button_layout.max_rows",
+                displayName = "maxRows",
             )
             val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                key = "express.appearance.layout",
-                displayName = "Button layout",
-                children = arrayOf(columns, rows),
+                key = "express.appearance.button_layout",
+                displayName = "buttonLayout",
+                children = arrayOf(maxColumns, maxRows),
             )
         }
 
+        val buttonTheme = enumChoice(
+            key = "express.appearance.button_theme",
+            displayName = "buttonTheme",
+            defaultValue = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
+        )
+        val cornerRadiusDp = decimal(
+            key = "express.appearance.corner_radius_dp",
+            displayName = "cornerRadiusDp",
+            defaultValue = StripeThemeDefaults.shapes.cornerRadius,
+        )
+
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
             key = "express.appearance",
-            displayName = "Appearance",
-            children = arrayOf(theme, layout.configuration),
+            displayName = "appearance",
+            children = arrayOf(buttonLayout.configuration, buttonTheme, cornerRadiusDp),
         )
     }
 

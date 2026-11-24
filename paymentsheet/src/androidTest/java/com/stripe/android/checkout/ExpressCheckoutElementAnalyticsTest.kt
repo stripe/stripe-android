@@ -18,8 +18,8 @@ import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
@@ -165,7 +165,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             // Confirmation reloads Link state for both PE and ECE.
             repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+                networkRule.enqueueConsumerSessionLookup()
                 validateLinkAccountLookupAnalyticsRequest()
             }
 
@@ -473,7 +473,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         if (linkEnabled) {
             // PE and ECE each load Link state.
             repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+                networkRule.enqueueConsumerSessionLookup()
                 validateLinkAccountLookupAnalyticsRequest()
             }
         }

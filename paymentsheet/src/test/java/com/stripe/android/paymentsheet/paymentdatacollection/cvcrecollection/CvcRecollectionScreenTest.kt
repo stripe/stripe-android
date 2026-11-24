@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import android.os.Build
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
@@ -83,6 +83,5 @@ internal class CvcRecollectionScreenTest {
         cvcPage.assertCvcField(hasText("555"))
         cvcPage.assertCvcField(isEnabled())
         cvcPage.hasLabel("CVC")
-        cvcPage.hasTitle("Confirm your CVC")
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
@@ -8,15 +9,13 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButtonAction
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
-import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.StripeHostedAddressAutocompleteClient
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.CheckoutShippingAddressElementEventReporter
@@ -24,7 +23,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddres
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -39,7 +38,7 @@ import javax.inject.Singleton
 )
 internal class AddressElementViewModelModule {
     companion object {
-        internal const val INLINE_PLACES_CLIENT = "inline_places_client"
+        internal const val INLINE_AUTOCOMPLETE_CLIENT = "inline_autocomplete_client"
     }
 
     @Provides
@@ -102,40 +101,20 @@ internal class AddressElementViewModelModule {
 
     @Provides
     @Singleton
-    @Named(INLINE_PLACES_CLIENT)
-    internal fun provideInlinePlacesClient(
+    @Named(INLINE_AUTOCOMPLETE_CLIENT)
+    internal fun provideInlineAutocompleteClient(
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
-        googlePlacesClient: PlacesClientProxy?,
         addressLauncherEventReporter: AddressLauncherEventReporter,
-    ): PlacesClientProxy? {
+    ): AddressAutocompleteClient? {
         val config = args.config ?: return null
         return if (config.useStripeHostedAutocomplete) {
-            StripeHostedPlacesClientProxy(
+            StripeHostedAddressAutocompleteClient(
                 repository = stripeAutocompleteRepository,
                 eventReporter = addressLauncherEventReporter,
             )
         } else {
-            googlePlacesClient
-        }
-    }
-
-    @Provides
-    @Singleton
-    internal fun provideGooglePlacesClient(
-        context: Context,
-        args: AddressElementActivityContract.Args,
-    ): PlacesClientProxy? {
-        val config = args.config ?: return null
-        return config.googlePlacesApiKey?.let {
-            PlacesClientProxy.create(
-                context,
-                it,
-                errorReporter = ErrorReporter.createFallbackInstance(
-                    context = context,
-                    apiConfigurationProvider = { args.apiConfiguration },
-                ),
-            )
+            null
         }
     }
 

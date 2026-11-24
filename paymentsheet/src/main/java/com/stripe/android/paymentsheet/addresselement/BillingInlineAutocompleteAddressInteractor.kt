@@ -1,20 +1,20 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 internal class BillingInlineAutocompleteAddressInteractor(
-    placesClient: PlacesClientProxy,
+    autocompleteClient: AddressAutocompleteClient,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
     coroutineScope: CoroutineScope,
 ) : AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
     private val inlineController = InlineAutocompleteController(
-        placesClient = placesClient,
+        autocompleteClient = autocompleteClient,
         config = autocompleteConfig,
         coroutineScope = coroutineScope,
         eventListenerProvider = { eventListener },

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -10,7 +11,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -34,10 +34,8 @@ internal class EmbeddedActivityModuleTest {
         shouldUseAutocompleteProxyEndpoints = true,
     ) {
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
-        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isNull()
         assertThat(interactor.autocompleteConfig.autocompleteCountries)
             .isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
-        assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
         assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
     }
 
@@ -47,7 +45,6 @@ internal class EmbeddedActivityModuleTest {
             shouldUseAutocompleteProxyEndpoints = false,
         ) {
             assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
-            assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isNull()
             assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
         }
 

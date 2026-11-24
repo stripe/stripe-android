@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.os.Parcelable
 import com.stripe.android.checkout.CheckoutElementsController.Address
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 
 @OptIn(CheckoutSessionPreview::class)

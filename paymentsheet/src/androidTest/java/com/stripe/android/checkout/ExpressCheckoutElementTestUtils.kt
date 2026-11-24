@@ -22,9 +22,6 @@ import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
-import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentMethodFactory
@@ -32,15 +29,6 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
-
-internal fun NetworkRule.enqueueLinkAccountLookup() {
-    enqueue(
-        method("POST"),
-        path("/v1/consumers/sessions/lookup"),
-    ) { response ->
-        response.testBodyFromFile("consumer-session-lookup-success.json")
-    }
-}
 
 internal fun enqueueSuccessfulGooglePayPayment(
     paymentMethod: PaymentMethod,
@@ -56,7 +44,10 @@ internal fun enqueueSuccessfulGooglePayPayment(
     )
 }
 
-internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response: MockResponse) {
+internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(
+    response: MockResponse,
+    modify: (JSONObject) -> Unit = {},
+) {
     createCheckoutInitResponseWithRequiredShippingAddress(response) { json ->
         json.put(
             "automatic_tax",
@@ -66,6 +57,7 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTa
                 .put("address_source", "shipping")
         )
         json.getJSONObject("automatic_tax").put("status", "requires_address")
+        modify(json)
     }
 }
 

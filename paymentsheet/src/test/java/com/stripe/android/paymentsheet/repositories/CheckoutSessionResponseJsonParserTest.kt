@@ -63,7 +63,7 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(paymentIntent.id).isEqualTo("pi_checkout123")
         assertThat(paymentIntent.clientSecret).isEqualTo("pi_checkout123_secret_example")
         assertThat(paymentIntent.paymentMethod?.id).isEqualTo("pm_cs_example")
-        assertThat(result.paymentResponse?.setupIntent).isNull()
+        assertThat(result.paymentResponse.setupIntent).isNull()
     }
 
     @Test
@@ -73,7 +73,7 @@ class CheckoutSessionResponseJsonParserTest {
         val setupIntent = requireNotNull(result.paymentResponse?.setupIntent)
         assertThat(setupIntent.id).isEqualTo("seti_checkout123")
         assertThat(setupIntent.paymentMethod?.id).isEqualTo("pm_cs_example")
-        assertThat(result.paymentResponse?.paymentIntent).isNull()
+        assertThat(result.paymentResponse.paymentIntent).isNull()
     }
 
     @Test

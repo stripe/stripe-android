@@ -1477,7 +1477,7 @@ internal class PlaygroundTestDriver(
                         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                             runCatching {
                                 composeTestRule
-                                    .onNodeWithText(authAction.expectedError)
+                                    .onNodeWithTag(SHEET_ERROR_TEST_TAG)
                                     .assertIsDisplayed()
                             }.isSuccess
                         }

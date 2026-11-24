@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEv
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressElementEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
@@ -48,7 +48,7 @@ class InputAddressViewModelTest {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
         eventReporter: AddressElementEventReporter,
-        placesClient: PlacesClientProxy? = null,
+        autocompleteClient: AddressAutocompleteClient? = null,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
@@ -61,7 +61,7 @@ class InputAddressViewModelTest {
             argsFactory(config),
             resultStateHolder,
             eventReporter,
-            placesClient = placesClient,
+            autocompleteClient = autocompleteClient,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
     }
@@ -117,7 +117,7 @@ class InputAddressViewModelTest {
 
         runScenario(
             address = expectedAddress,
-            withPlacesClient = false,
+            withAutocompleteClient = false,
         ) {
             val formValues = viewModel.addressFormController.getCurrentFormValues()
             assertThat(formValues[FormFieldId.Name]?.value).isEqualTo("skyler")
@@ -129,7 +129,7 @@ class InputAddressViewModelTest {
     fun `default configuration enables stripe-hosted autocomplete with hosted countries`() =
         runScenario(
             config = AddressLauncher.Configuration(),
-            withPlacesClient = false,
+            withAutocompleteClient = false,
         ) {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries)
@@ -144,7 +144,7 @@ class InputAddressViewModelTest {
             config = AddressLauncher.Configuration.Builder()
                 .autocompleteCountries(customCountries)
                 .build(),
-            withPlacesClient = false,
+            withAutocompleteClient = false,
         ) {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries).isEqualTo(customCountries)
@@ -522,7 +522,7 @@ class InputAddressViewModelTest {
         address = AddressDetails(
             isCheckboxSelected = true
         ),
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         assertThat(viewModel.checkboxChecked.value).isTrue()
     }
@@ -532,13 +532,13 @@ class InputAddressViewModelTest {
         address = AddressDetails(
             isCheckboxSelected = false
         ),
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
     }
 
     @Test
-    fun `default checkbox should emit false to start by default`() = runScenario(withPlacesClient = false) {
+    fun `default checkbox should emit false to start by default`() = runScenario(withAutocompleteClient = false) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
     }
 
@@ -646,7 +646,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clicking the checkbox should change the internal state`() = runScenario(withPlacesClient = false) {
+    fun `clicking the checkbox should change the internal state`() = runScenario(withAutocompleteClient = false) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
 
         viewModel.clickCheckbox(true)
@@ -793,7 +793,7 @@ class InputAddressViewModelTest {
                 )
             )
             .build(),
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
@@ -960,7 +960,7 @@ class InputAddressViewModelTest {
                 )
             )
             .build(),
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
@@ -1052,7 +1052,7 @@ class InputAddressViewModelTest {
                 )
             )
             .build(),
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
@@ -1127,7 +1127,7 @@ class InputAddressViewModelTest {
                     )
                 )
                 .build(),
-            withPlacesClient = false,
+            withAutocompleteClient = false,
         ) {
             turbineScope {
                 val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
@@ -1293,7 +1293,7 @@ class InputAddressViewModelTest {
                     )
                 )
                 .build(),
-            withPlacesClient = false,
+            withAutocompleteClient = false,
         ) {
             viewModel.shippingSameAsBillingState.test {
                 // Should be checked
@@ -1305,7 +1305,7 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration,
     ) = runScenario(
         config = config,
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
@@ -1338,7 +1338,7 @@ class InputAddressViewModelTest {
             .address(address)
             .billingAddress(billingAddress)
             .build(),
-        withPlacesClient = false,
+        withAutocompleteClient = false,
     ) {
         viewModel.shippingSameAsBillingState.test {
             assertThat(awaitItem()).isEqualTo(expectedShippingSameAsBillingState)
@@ -1381,7 +1381,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `clickPrimaryButton with null triggers validation errors without a result`() =
-        runScenario(withPlacesClient = false) {
+        runScenario(withAutocompleteClient = false) {
             val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
             val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
             val controller = autocompleteElement.sectionFieldErrorController()
@@ -1399,7 +1399,7 @@ class InputAddressViewModelTest {
         }
 
     @Test
-    fun `standalone save emits standalone success`() = runScenario(withPlacesClient = false) {
+    fun `standalone save emits standalone success`() = runScenario(withAutocompleteClient = false) {
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         val addressCall = FakeAddressElementEventReporter.AddressCall(
@@ -1413,11 +1413,6 @@ class InputAddressViewModelTest {
         )
     }
 
-    @Test
-    fun `isInlineAutocompleteEnabled is always true`() = runScenario(withPlacesClient = false) {
-        assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
-    }
-
     // --- Inline Autocomplete Tests ---
     // Core controller logic (predictions, debouncing, selection, suppression, dismissal)
     // is tested in InlineAutocompleteControllerTest.
@@ -1427,7 +1422,6 @@ class InputAddressViewModelTest {
     fun `onEnterManuallyFromInline emits OnExpandForm with current country when query is empty`() =
         runScenario(
             config = AddressLauncher.Configuration.Builder()
-                .googlePlacesApiKey("test_key")
                 .autocompleteCountries(emptySet())
                 .build(),
         ) {
@@ -1449,7 +1443,6 @@ class InputAddressViewModelTest {
     fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() =
         runScenario(
             config = AddressLauncher.Configuration.Builder()
-                .googlePlacesApiKey("test_key")
                 .autocompleteCountries(emptySet())
                 .build(),
         ) {
@@ -1574,12 +1567,12 @@ class InputAddressViewModelTest {
         primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
-        withPlacesClient: Boolean = true,
+        withAutocompleteClient: Boolean = true,
         beforeViewModelCreation: () -> Unit = {},
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeAddressElementEventReporter()
-        val placesClient = FakePlacesClientProxy(
+        val autocompleteClient = FakeAddressAutocompleteClient(
             findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
             fetchPlaceResult = Result.success(Address()),
         )
@@ -1588,31 +1581,31 @@ class InputAddressViewModelTest {
             config = config,
             primaryButtonAction = primaryButtonAction,
             eventReporter = eventReporter,
-            placesClient = placesClient.takeIf { withPlacesClient },
+            autocompleteClient = autocompleteClient.takeIf { withAutocompleteClient },
         )
 
         Scenario(
             viewModel = viewModel,
             eventReporter = eventReporter,
-            placesClient = placesClient,
+            autocompleteClient = autocompleteClient,
         ).apply { block() }
 
         eventReporter.validate()
-        placesClient.ensureAllEventsConsumed()
+        autocompleteClient.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val viewModel: InputAddressViewModel,
         val eventReporter: FakeAddressElementEventReporter,
-        val placesClient: FakePlacesClientProxy,
+        val autocompleteClient: FakeAddressAutocompleteClient,
     ) {
         suspend fun selectAutocompletePrediction(address: Address) {
-            placesClient.fetchPlaceResult = Result.success(address)
+            autocompleteClient.fetchPlaceResult = Result.success(address)
 
             viewModel.onPredictionSelected("selected-place")
 
-            assertThat(placesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("selected-place")
-            placesClient.resetSessionCalls.awaitItem()
+            assertThat(autocompleteClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("selected-place")
+            autocompleteClient.resetSessionCalls.awaitItem()
         }
     }
 

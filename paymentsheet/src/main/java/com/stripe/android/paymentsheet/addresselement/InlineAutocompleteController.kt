@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 internal class InlineAutocompleteController(
-    private val placesClient: PlacesClientProxy,
+    private val autocompleteClient: AddressAutocompleteClient,
     private val config: AutocompleteAddressInteractor.Config,
     private val coroutineScope: CoroutineScope,
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
@@ -125,14 +125,14 @@ internal class InlineAutocompleteController(
         val job = coroutineScope.launch {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             try {
-                val result = placesClient.fetchPlace(predictionId, locale)
+                val result = autocompleteClient.fetchPlace(predictionId, locale)
                 ensureActive()
                 result.fold(
                     onSuccess = { handleFetchPlaceSuccess(it) },
                     onFailure = { handleFailure(queryFlow?.value, countryFlow?.value) }
                 )
             } finally {
-                placesClient.resetSession()
+                autocompleteClient.resetSession()
             }
         }
         activeWork = ActiveWork.Selecting(job)
@@ -219,7 +219,7 @@ internal class InlineAutocompleteController(
         if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
             _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
         }
-        val result = placesClient.findAutocompletePredictions(
+        val result = autocompleteClient.findAutocompletePredictions(
             query = query,
             country = country,
             limit = MAX_DISPLAYED_RESULTS,

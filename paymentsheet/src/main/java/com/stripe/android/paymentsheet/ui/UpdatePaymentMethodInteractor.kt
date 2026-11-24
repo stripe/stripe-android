@@ -119,6 +119,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     override val allowedBillingCountries: Set<String>,
     override val canUpdateCardExpiryAndBillingDetails: Boolean,
     override val canChangeCbc: Boolean,
@@ -212,6 +213,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 allowedCountries = allowedBillingCountries,
             ),
             requiresModification = true,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
@@ -241,6 +243,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 allowedCountries = allowedBillingCountries,
             ),
             requiresModification = true,
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = null,
         )
     }
@@ -307,11 +310,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
-            val updateCardBrandResult = maybeUpdateCard()
+            val updateCardResult = maybeUpdateCard()
             val setDefaultPaymentMethodResult = maybeSetDefaultPaymentMethod()
 
             val updateResult = getUpdateResult(
-                updateCardBrandResult = updateCardBrandResult,
+                updateCardResult = updateCardResult,
                 setDefaultPaymentMethodResult = setDefaultPaymentMethodResult,
             )
 
@@ -352,17 +355,15 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun getUpdateResult(
-        updateCardBrandResult: Result<PaymentMethod>?,
+        updateCardResult: Result<PaymentMethod>?,
         setDefaultPaymentMethodResult: Result<Unit>?,
     ): UpdateResult {
-        if (updateCardBrandResult == null && setDefaultPaymentMethodResult == null) {
+        if (updateCardResult == null && setDefaultPaymentMethodResult == null) {
             return UpdateResult.NoUpdatesMade
         }
 
-        return if (updateCardBrandResult?.isFailure == true && setDefaultPaymentMethodResult?.isFailure == true) {
-            UpdateResult.Error(updatesFailedErrorMessage)
-        } else if (updateCardBrandResult?.isFailure == true) {
-            UpdateResult.Error(updateCardBrandErrorMessage)
+        return if (updateCardResult?.isFailure == true) {
+            UpdateResult.Error(updateCardErrorMessage)
         } else if (setDefaultPaymentMethodResult?.isFailure == true) {
             UpdateResult.Error(setDefaultPaymentMethodErrorMessage)
         } else {
@@ -406,11 +407,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
 
         @VisibleForTesting
-        internal val updateCardBrandErrorMessage =
-            R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
-
-        @VisibleForTesting
-        internal val updatesFailedErrorMessage =
+        internal val updateCardErrorMessage =
             R.string.stripe_paymentsheet_card_updates_failed_error_message.resolvableString
     }
 }

@@ -15,7 +15,6 @@ class AddressTextFieldElementTest {
             inlineAutocompleteHandler = null,
             reportsFormValue = false,
             initialQuery = "",
-            showEnterManually = true,
         )
 
         element.getTextFieldIdentifiers().test {

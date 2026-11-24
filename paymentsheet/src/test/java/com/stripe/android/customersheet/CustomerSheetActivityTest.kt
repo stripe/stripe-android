@@ -3,7 +3,7 @@ package com.stripe.android.customersheet
 import android.content.Context
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -18,12 +18,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -35,8 +37,12 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val composeRuleChain: RuleChain = RuleChain
+        .outerRule(createComposeCleanupRule())
+        .around(composeTestRule)
 
     @get:Rule
     override val viewModelStoreTestRule = ViewModelStoreTestRule()
@@ -222,6 +228,7 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
         ) {
             page.waitForText("Card number")
             page.inputText("Card number", "4242424242424242")
+            composeTestRule.waitForIdle()
 
             verify(eventReporter).onCardNumberCompleted()
         }

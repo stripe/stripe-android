@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -48,6 +49,7 @@ internal class DefaultFormDefinitionFactory(
     private val tapToAddHelper: TapToAddHelper?,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
     private val isNfcScanningAvailable: IsNfcScanningAvailable?,
+    private val errorReporter: ErrorReporter?,
 ) : FormDefinitionFactory {
     private val formTypes = mutableMapOf<String, FormHelper.FormType>()
 
@@ -120,6 +122,7 @@ internal class DefaultFormDefinitionFactory(
             tapToAddHelper = tapToAddHelper,
             paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = isNfcScanningAvailable,
+            errorReporter = errorReporter,
         )
     }
 
@@ -133,6 +136,7 @@ internal class DefaultFormDefinitionFactory(
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 savedStateHandle = viewModel.savedStateHandle,
                 isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
+                errorReporter = viewModel.errorReporter,
             )
             return formFactory.createFormDefinitionFactory(
                 PaymentMethodFormFactory.FormDefinitionArguments(

@@ -538,7 +538,6 @@ internal class PlaygroundSettings private constructor(
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
             AllowedBillingCountriesSettingsDefinition,
-            AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
@@ -555,6 +554,14 @@ internal class PlaygroundSettings private constructor(
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
             CardFundingAcceptanceSettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.serverPaymentMethodAvailabilityEnabled,
+                listOf(
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+                    PlaygroundConfigurationData.IntegrationType.FlowController,
+                    PlaygroundConfigurationData.IntegrationType.Embedded,
+                ),
+            ),
             FeatureFlagSettingsDefinition(
                 FeatureFlags.enableKlarnaFormRemoval,
                 listOf(

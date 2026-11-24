@@ -29,6 +29,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
@@ -290,8 +291,9 @@ internal class FlowControllerTest(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5099,
                             currency = "usd",
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                         )
+                            .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
                     ),
                     configuration = apiConfigurationTestType.applyTo(
                         PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -604,7 +606,8 @@ internal class FlowControllerTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
@@ -675,7 +678,8 @@ internal class FlowControllerTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
@@ -746,7 +750,8 @@ internal class FlowControllerTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
@@ -800,7 +805,8 @@ internal class FlowControllerTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 2000,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
@@ -863,6 +869,7 @@ internal class FlowControllerTest(
                         // will cause the validator to fail this transaction.
                         amount = 5099,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
@@ -1080,7 +1087,6 @@ internal class FlowControllerTest(
                 configuration = apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
                         .allowsDelayedPaymentMethods(true)
-                        .allowsPaymentMethodsRequiringShippingAddress(true)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                         .build()
                 ),
@@ -1137,12 +1143,7 @@ internal class FlowControllerTest(
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         testContext.flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = "pi_123_secret_123",
@@ -1201,12 +1202,7 @@ internal class FlowControllerTest(
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
 
@@ -1290,8 +1286,9 @@ internal class FlowControllerTest(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
+                        .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
                 ),
                 configuration = apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -1343,9 +1340,10 @@ internal class FlowControllerTest(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    onBehalfOf = oboMerchantID
-                ),
+                )
+                    .onBehalfOf(oboMerchantID),
                 configuration = apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
                         .build()

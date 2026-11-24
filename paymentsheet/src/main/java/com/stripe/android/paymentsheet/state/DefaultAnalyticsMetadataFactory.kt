@@ -170,10 +170,6 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("default_billing_details", SimpleBoolean(defaultBillingDetails?.isFilledOut() == true))
         put("allows_delayed_payment_methods", SimpleBoolean(allowsDelayedPaymentMethods))
         putNonEmpty("payment_method_order", paymentMethodOrder)
-        put(
-            "allows_payment_methods_requiring_shipping_address",
-            SimpleBoolean(allowsPaymentMethodsRequiringShippingAddress)
-        )
         put("allows_removal_of_last_saved_payment_method", SimpleBoolean(allowsRemovalOfLastSavedPaymentMethod))
         putNonEmpty("preferred_networks", preferredNetworks.map { it.code })
         putNonEmpty("custom_payment_methods", customPaymentMethods.map { it.id })
@@ -277,8 +273,8 @@ private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: Strin
         is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             when (this.intentConfiguration.mode) {
-                is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
-                is PaymentSheet.IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
+                is PaymentSheet.IntentConfiguration.Mode.Payment.State -> "deferred_payment_intent"
+                is PaymentSheet.IntentConfiguration.Mode.Setup.State -> "deferred_setup_intent"
             }
         }
         is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"

@@ -1,10 +1,10 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse

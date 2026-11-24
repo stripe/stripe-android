@@ -287,9 +287,10 @@ class DefaultAnalyticsMetadataFactoryTest {
         val intentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 5000,
-                currency = intent.currency!!
+                currency = intent.currency!!,
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             )
-        )
+        ).build()
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration),
@@ -312,10 +313,9 @@ class DefaultAnalyticsMetadataFactoryTest {
     fun `create returns expected values for deferred setup intent`() = runScenario {
         val intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.asDeferred()
         val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                currency = "usd"
-            )
-        )
+            mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                .currency("usd")
+        ).build()
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration),
@@ -342,15 +342,15 @@ class DefaultAnalyticsMetadataFactoryTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 5000,
                 currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-            intentBehavior = PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken(
-                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                    businessName = "Jays Shop",
-                    networkId = "",
-                    externalId = "",
-                )
+        ).sharedPaymentTokenSession(
+            PaymentSheet.IntentConfiguration.SellerDetails(
+                businessName = "Jays Shop",
+                networkId = "",
+                externalId = "",
             )
-        )
+        ).build()
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration),
@@ -1096,7 +1096,6 @@ class DefaultAnalyticsMetadataFactoryTest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                 defaultBillingDetails = null,
                 allowDefaultOptIn = false,
-                googlePlacesApiKey = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = false,
                 allowUserEmailEdits = true,
                 allowLogOut = true,

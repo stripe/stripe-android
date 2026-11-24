@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -689,7 +690,7 @@ internal class EmbeddedNavigatorTest {
     fun `SavedPaymentMethodConfirm topBarState hides edit menu`() {
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
 
-        val topBarState = screen.topBarState().value!!
+        val topBarState = screen.topBarState().value
 
         assertThat(topBarState.showEditMenu).isFalse()
         assertThat(topBarState.isEditing).isFalse()
@@ -697,10 +698,10 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `SavedPaymentMethodConfirm title returns null`() {
+    fun `SavedPaymentMethodConfirm title returns added card`() {
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
 
-        assertThat(screen.title().value).isNull()
+        assertThat(screen.title().value).isEqualTo(PaymentSheetR.string.stripe_paymentsheet_added_card.resolvableString)
         interactor.validate()
     }
 
@@ -834,6 +835,7 @@ internal class EmbeddedNavigatorTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         ),
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),

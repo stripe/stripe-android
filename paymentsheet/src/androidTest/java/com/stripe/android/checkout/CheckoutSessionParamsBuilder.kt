@@ -45,6 +45,7 @@ internal class CheckoutSessionParamsBuilder(
         putCustomer(customerId, automaticTax)
         if (automaticTax) {
             put("automatic_tax", buildJsonObject { put("enabled", true) })
+            put("invoice_creation", buildJsonObject { put("enabled", true) })
             put("billing_address_collection", "required")
         }
         paymentMethodSave?.let { putSavedPaymentMethodOptions(it) }

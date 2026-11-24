@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -86,6 +87,7 @@ internal sealed interface UiDefinitionFactory {
         val tapToAddHelper: TapToAddHelper? = null,
         val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
         val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+        val errorReporter: ErrorReporter? = null,
     ) {
         interface Factory {
             fun create(
@@ -113,6 +115,7 @@ internal sealed interface UiDefinitionFactory {
                 private val tapToAddHelper: TapToAddHelper? = null,
                 private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
                 private val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+                private val errorReporter: ErrorReporter? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -147,6 +150,7 @@ internal sealed interface UiDefinitionFactory {
                         tapToAddHelper = tapToAddHelper,
                         paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper,
                         isNfcScanningAvailable = isNfcScanningAvailable,
+                        errorReporter = errorReporter,
                     )
                 }
 

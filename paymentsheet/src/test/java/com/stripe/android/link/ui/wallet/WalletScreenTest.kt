@@ -17,7 +17,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
@@ -486,12 +486,8 @@ internal class WalletScreenTest {
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
-        val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Succeeded
-
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             navigationManager = TestNavigationManager()
         )
         composeTestRule.setContent {

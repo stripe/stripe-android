@@ -1,9 +1,10 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.checkout.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -29,6 +30,8 @@ internal class CheckoutElementsControllerExampleViewModel(
     private val savedStateHandle: SavedStateHandle,
     application: Application,
 ) : ViewModel() {
+    private val applicationContext = application.applicationContext
+
     val settings = CheckoutPlaygroundSettings.create(application)
 
     val controller = CheckoutElementsController.Builder(
@@ -47,9 +50,6 @@ internal class CheckoutElementsControllerExampleViewModel(
 
     private val _confirmationMessage = MutableStateFlow<String?>(null)
     val confirmationMessage: StateFlow<String?> = _confirmationMessage.asStateFlow()
-
-    private val _isConfirmationCompleted = MutableStateFlow(false)
-    val isConfirmationCompleted: StateFlow<Boolean> = _isConfirmationCompleted.asStateFlow()
 
     private val _operationMessage = MutableStateFlow<String?>(null)
     val operationMessage: StateFlow<String?> = _operationMessage.asStateFlow()
@@ -170,7 +170,8 @@ internal class CheckoutElementsControllerExampleViewModel(
         Log.d(TAG, "Result: $result")
         _confirmationMessage.value = when (result) {
             is CheckoutElementsController.Result.Completed -> {
-                _isConfirmationCompleted.value = true
+                Toast.makeText(applicationContext, "Payment complete!", Toast.LENGTH_SHORT).show()
+                if (_status.value is Status.Configured) retry()
                 null
             }
             is CheckoutElementsController.Result.Canceled -> "Confirmation canceled"
@@ -187,7 +188,6 @@ internal class CheckoutElementsControllerExampleViewModel(
 
     private fun clearMessages() {
         _confirmationMessage.value = null
-        _isConfirmationCompleted.value = false
         _operationMessage.value = null
     }
 

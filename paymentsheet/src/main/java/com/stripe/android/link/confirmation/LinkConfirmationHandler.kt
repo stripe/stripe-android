@@ -4,7 +4,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal interface LinkConfirmationHandler {
     suspend fun confirm(
@@ -27,7 +29,10 @@ internal interface LinkConfirmationHandler {
 }
 
 internal sealed interface Result {
-    data object Succeeded : Result
+    data class Succeeded(
+        val intent: StripeIntent,
+        val checkoutSessionResponse: CheckoutSessionResponse?,
+    ) : Result
     data object Canceled : Result
     data class Failed(val message: ResolvableString) : Result
 }

@@ -32,7 +32,6 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -835,7 +834,38 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
-    fun `destroy clears persisted state`() = runConfigureScenario {
+    fun `configure after destroy fails without a request`() = runTest {
+        val controller = createController()
+        controller.destroy()
+
+        // No response is enqueued, so NetworkRule fails the test if a request is sent.
+        val result = controller.configure(DEFAULT_CLIENT_SECRET)
+
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error.message)
+            .isEqualTo("Cannot configure checkout session after the controller has been destroyed.")
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(controller.session.value).isNull()
+        assertThat(controller.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `configure after destroy rejects malformed client secret before validation`() = runTest {
+        val controller = createController()
+        controller.destroy()
+
+        val result = controller.configure("cs_test_malformed")
+
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error.message)
+            .isEqualTo("Cannot configure checkout session after the controller has been destroyed.")
+    }
+
+    @Test
+    fun `destroy clears persisted state and rejects background reconfiguration`() = runConfigureScenario {
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         // Pre-condition: configure committed a non-null state so the clear is observable.
         assertThat(committedState).isNotNull()
@@ -846,6 +876,17 @@ internal class CheckoutElementsControllerTest {
         assertThat(controller.session.value).isNull()
         assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
         assertThat(createController(savedStateHandle.simulateProcessDeath()).session.value).isNull()
+
+        // The initial configure consumed the only response, so no further requests are allowed.
+        val reconfigureResult = fromBackgroundThread { controller.configure(DEFAULT_CLIENT_SECRET) }
+
+        val failure = reconfigureResult as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error.message)
+            .isEqualTo("Cannot configure checkout session after the controller has been destroyed.")
+        assertThat(committedState).isNull()
+        assertThat(controller.session.value).isNull()
+        assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
     }
 
     @Test
@@ -1211,13 +1252,72 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
-    fun `session customer email takes precedence over updateEmail`() = runMutationScenario {
+    fun `updateEmail trims whitespace before storing the email`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
+        val result = controller.updateEmail("  local@example.com  ")
+
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail returns failure and preserves email when email is invalid`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
         assertThat(controller.updateEmail("local@example.com"))
             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
-        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        val result = controller.updateEmail("not-an-email")
+
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(failure.error).hasMessageThat()
+            .isEqualTo("Email 'not-an-email' is not a valid email address")
+        assertThat(failure.displayMessage).isEqualTo("Your email is invalid.")
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
         assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
-            .isEqualTo("checkout@example.com")
+            .isEqualTo("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail returns failure when email is blank`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
+        val result = controller.updateEmail("   ")
+
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(failure.displayMessage).isEqualTo("Your email is invalid.")
+        assertThat(controller.session.value?.email).isNull()
+    }
+
+    @Test
+    fun `updateEmail fails when session has customer_email`() = runMutationScenario {
+        assertEmailUpdateRejected("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail fails when Customer has email`() = runMutationScenario(
+        initModifier = { json ->
+            json.remove("customer_email")
+            json.put(
+                "customer",
+                JSONObject()
+                    .put("id", "cus_email")
+                    .put("email", "customer@example.com")
+                    .put("payment_methods", JSONArray()),
+            )
+        },
+    ) {
+        assertEmailUpdateRejected("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail cannot clear server email`() = runMutationScenario {
+        assertEmailUpdateRejected(null)
     }
 
     @Test
@@ -1888,6 +1988,27 @@ internal class CheckoutElementsControllerTest {
         }
 
     // endregion
+
+    private suspend fun MutationScenario.assertEmailUpdateRejected(email: String?) {
+        val before = committedState()
+        val sessionBefore = controller.session.value
+
+        controller.session.test {
+            assertThat(awaitItem()).isEqualTo(sessionBefore)
+
+            val result = controller.updateEmail(email)
+
+            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+            val error = (result as CheckoutElementsController.OperationResult.Failed).error
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error).hasMessageThat().isEqualTo(
+                "Email cannot be set locally when the Checkout Session was created with " +
+                    "customer_email or a Customer with an email."
+            )
+            assertThat(committedState()).isSameInstanceAs(before)
+            expectNoEvents()
+        }
+    }
 
     private suspend fun <T> fromBackgroundThread(block: suspend () -> T): T = withContext(Dispatchers.IO) {
         // A test dispatcher alone does not move the caller off Robolectric's main thread.

@@ -31,16 +31,6 @@ require_relative 'common'
             request_membership_at_link("https://ldapmanager.corp.stripe.com/request?group=password-bindings-gnupg-fingerprint")
         }
     },
-    {
-        "password_key" => "bindings/gh-tokens/$USER",
-        "error_actions" => -> {
-            rputs "Follow the instructions at the opened link to create a github access token."
-            open_url("https://go/android-release#first-time-setup")
-            wait_for_user
-            puts "Enter your access token from github to add it to the vault"
-            execute("add-password -n \"$USER\" bindings/gh-tokens/$USER")
-        }
-    },
 ]
 
 private def request_membership_at_link(link)
@@ -53,7 +43,18 @@ private def get_password_from_coworker()
     rputs "bundle install && bundle exec ./scripts/deploy/add_new_user --user <your user name>"
 end
 
+private def check_github_access
+    github_api("repos/#{GITHUB_REPO}")
+    puts "Successfully reached #{GITHUB_REPO} on #{GITHUB_HOST}!".green
+rescue StandardError => e
+    rputs "Failed to reach #{GITHUB_REPO} on #{GITHUB_HOST} with the GitHub CLI: #{e.message}"
+    rputs "Run `gh auth login --hostname #{GITHUB_HOST}`, and make sure you have write access to #{GITHUB_REPO_URL}."
+    wait_for_user
+end
+
 def check_permissions
+    check_github_access
+
     @required_passwords.each do |required_password|
         password_key = required_password["password_key"]
         begin

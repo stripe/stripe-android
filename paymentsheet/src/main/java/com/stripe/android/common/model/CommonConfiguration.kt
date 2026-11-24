@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -21,13 +22,14 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
+    /** Whether to send this integration's configuration to MobileSession. */
+    val useRemoteMobileSession: Boolean,
     val customer: PaymentSheet.CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
     val link: PaymentSheet.LinkConfiguration,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val allowsDelayedPaymentMethods: Boolean,
-    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val preferredNetworks: List<CardBrand>,
     val allowsRemovalOfLastSavedPaymentMethod: Boolean,
@@ -36,7 +38,6 @@ internal data class CommonConfiguration(
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
     internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-    val googlePlacesApiKey: String?,
     val linkAppearance: LinkAppearance.State? = null,
     val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
     val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
@@ -227,12 +228,12 @@ internal data class CommonConfiguration(
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    useRemoteMobileSession = FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
     shippingDetails = shippingDetails,
     allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-    allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
     billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
     preferredNetworks = preferredNetworks,
     allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
@@ -241,7 +242,6 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    googlePlacesApiKey = googlePlacesApiKey,
     termsDisplay = termsDisplay,
     walletButtons = walletButtons,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
@@ -253,12 +253,12 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    useRemoteMobileSession = FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
     shippingDetails = shippingDetails,
     allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-    allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
     billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
     preferredNetworks = preferredNetworks,
     allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
@@ -267,7 +267,6 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    googlePlacesApiKey = null,
     termsDisplay = termsDisplay,
     walletButtons = null,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
@@ -279,12 +278,12 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    useRemoteMobileSession = false,
     customer = null,
     googlePay = null,
     defaultBillingDetails = defaultBillingDetails,
     shippingDetails = null,
     allowsDelayedPaymentMethods = ConfigurationDefaults.allowsDelayedPaymentMethods,
-    allowsPaymentMethodsRequiringShippingAddress = ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
     billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
     preferredNetworks = ConfigurationDefaults.preferredNetworks,
     allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
@@ -299,7 +298,6 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
         allowLogOut = allowLogout,
         disallowFundingSourceCreation = emptySet(),
     ),
-    googlePlacesApiKey = null,
     linkAppearance = linkAppearance,
     termsDisplay = emptyMap(),
     walletButtons = null,

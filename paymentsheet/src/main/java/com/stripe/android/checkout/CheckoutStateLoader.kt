@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
@@ -157,9 +156,9 @@ internal class CheckoutStateLoader @Inject constructor(
         return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null || commonConfiguration == null) {
             null
         } else {
-            // Preserve the customer's existing selection across reloads when it's still valid, rather
-            // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
-            // previous selection comes from the incoming state, not a separate holder. An empty
+            // Preserve the customer's existing selection across reloads while it's still supported,
+            // rather than blindly adopting the loader's recomputed selection (see CheckoutSelectionChooser).
+            // The previous selection comes from the incoming state, not a separate holder. An empty
             // selection on reload must stay empty until the customer selects again or reconfigures.
             selectionChooser.choose(
                 paymentMethodMetadata = loadResults.paymentMethodMetadata,

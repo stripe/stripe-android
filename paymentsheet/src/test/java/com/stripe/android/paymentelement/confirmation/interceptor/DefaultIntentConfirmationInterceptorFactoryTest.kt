@@ -29,16 +29,20 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
         runScenario(
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                        businessName = "My business, Inc.",
-                        networkId = "network_id",
-                        externalId = "external_id"
+                )
+                    .sharedPaymentTokenSession(
+                        PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
                     )
-                ),
+                    .build(),
             ),
             preparePaymentMethodHandlerProvider = Provider { PreparePaymentMethodHandler { _, _ -> } },
         ) {
@@ -53,8 +57,9 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             intentCreationCallbackProvider = Provider {
                 CreateIntentCallback { _, _ ->
@@ -73,8 +78,9 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             intentCreationConfirmationTokenCallbackProvider = Provider {
                 CreateIntentWithConfirmationTokenCallback { _ ->

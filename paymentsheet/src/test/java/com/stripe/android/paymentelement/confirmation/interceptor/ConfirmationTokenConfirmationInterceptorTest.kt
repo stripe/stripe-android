@@ -72,8 +72,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1099L,
                 currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        ),
+        ).build(),
     )
 
     @Test
@@ -850,9 +851,11 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    requireCvcRecollection = true
                 )
+                    .requireCvcRecollection(true)
+                    .build()
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -905,9 +908,11 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    requireCvcRecollection = false
                 )
+                    .requireCvcRecollection(false)
+                    .build()
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -961,9 +966,11 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    requireCvcRecollection = true
                 )
+                    .requireCvcRecollection(true)
+                    .build()
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -1282,19 +1289,21 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val paymentMode = PaymentSheet.IntentConfiguration.Mode.Payment(
             amount = 1099L,
             currency = "usd",
-            setupFutureUse = intentSfu,
-            paymentMethodOptions = pmoSfu?.let {
-                PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                    mapOf(PaymentMethod.Type.Card to it)
-                )
-            }
+            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
         )
+            .setupFutureUse(intentSfu)
+            .paymentMethodOptions(
+                pmoSfu?.let {
+                    PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                        .setupFutureUsageValues(mapOf(PaymentMethod.Type.Card to it))
+                }
+            )
 
         runConfirmationTokenInterceptorScenario(
             observedParams = observedParams,
             isLiveMode = false,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
-                intentConfiguration = PaymentSheet.IntentConfiguration(mode = paymentMode)
+                intentConfiguration = PaymentSheet.IntentConfiguration(mode = paymentMode).build()
             ),
         ) { interceptor ->
             if (userCheckbox) {
@@ -1368,11 +1377,15 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,
                     currency = "usd",
-                    paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                        mapOf(paymentMethodType to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
-                    )
-                ),
-            ),
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                )
+                    .paymentMethodOptions(
+                        PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                            .setupFutureUsageValues(
+                                mapOf(paymentMethodType to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
+                            )
+                    ),
+            ).build(),
         )
 
         runConfirmationTokenInterceptorScenario(

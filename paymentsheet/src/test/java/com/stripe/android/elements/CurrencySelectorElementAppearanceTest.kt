@@ -3,7 +3,7 @@ package com.stripe.android.elements
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.checkout.CheckoutSessionPreview
 import org.junit.Test
 import kotlin.test.assertFailsWith
 

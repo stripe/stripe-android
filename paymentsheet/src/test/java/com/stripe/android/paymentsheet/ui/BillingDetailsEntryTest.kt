@@ -84,6 +84,37 @@ internal class BillingDetailsEntryTest {
     }
 
     @Test
+    fun `Automatic mode validates collected street addresses`() = assertIncompleteAutomaticAddress(
+        billingDetailsFormState(line1 = FormFieldEntry("", isComplete = false))
+    )
+
+    @Test
+    fun `Automatic mode validates collected cities`() = assertIncompleteAutomaticAddress(
+        billingDetailsFormState(city = FormFieldEntry("", isComplete = false))
+    )
+
+    @Test
+    fun `Automatic mode validates collected states`() = assertIncompleteAutomaticAddress(
+        billingDetailsFormState(state = FormFieldEntry("", isComplete = false))
+    )
+
+    @Test
+    fun `Automatic mode detects changes to collected street addresses`() {
+        val entry = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                line1 = FormFieldEntry("510 Townsend St", isComplete = true),
+            )
+        )
+
+        assertThat(
+            entry.hasChanged(
+                billingDetails = BILLING_DETAILS_FORM_DETAILS,
+                billingDetailsCollectionConfiguration = automaticAddressConfig,
+            )
+        ).isTrue()
+    }
+
+    @Test
     fun `isComplete() always returns true in Never mode`() {
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -152,6 +183,10 @@ internal class BillingDetailsEntryTest {
 
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
                 postalCode = FormFieldEntry("94107", isComplete = true),
                 country = FormFieldEntry("US", isComplete = true),
             )
@@ -500,6 +535,12 @@ internal class BillingDetailsEntryTest {
             billingDetailsCollectionConfiguration = configWithPhone
         )
         assertThat(hasChanged).isTrue()
+    }
+
+    private fun assertIncompleteAutomaticAddress(formState: BillingDetailsFormState) {
+        val entry = billingDetailsEntry(formState)
+
+        assertThat(entry.isComplete(automaticAddressConfig)).isFalse()
     }
 
     private fun billingDetailsEntry(

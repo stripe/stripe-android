@@ -6,7 +6,6 @@ import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOpt
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.model.DefaultPaymentOptionResource

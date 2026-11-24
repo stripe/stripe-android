@@ -66,7 +66,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             "us_bank_account",
             "sepa_debit"
         )
-        assertThat(intentConfiguration.mode).isInstanceOf<PaymentSheet.IntentConfiguration.Mode.Setup>()
+        assertThat(intentConfiguration.mode).isInstanceOf<PaymentSheet.IntentConfiguration.Mode.Setup.State>()
 
         val customer = lastParams?.customer
         assertThat(customer?.id).isEqualTo("cus_1")
@@ -126,7 +126,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(intentConfiguration.onBehalfOf).isEqualTo(
             "acct_connected_account_a"
         )
-        assertThat(intentConfiguration.mode).isInstanceOf<PaymentSheet.IntentConfiguration.Mode.Setup>()
+        assertThat(intentConfiguration.mode).isInstanceOf<PaymentSheet.IntentConfiguration.Mode.Setup.State>()
 
         val customer = lastParams?.customer
         assertThat(customer?.id).isEqualTo("cus_1")

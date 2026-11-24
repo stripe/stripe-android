@@ -387,8 +387,10 @@ internal class LinkActivityViewModel @Inject constructor(
                     IllegalStateException("Failed to confirm Link payment: ${confirmResult.message}"),
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
-                LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed)
+                is LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                    intent = confirmResult.intent,
+                    checkoutSessionResponse = confirmResult.checkoutSessionResponse,
                 )
             }
         )

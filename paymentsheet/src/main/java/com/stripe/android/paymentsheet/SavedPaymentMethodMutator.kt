@@ -389,6 +389,8 @@ internal class SavedPaymentMethodMutator(
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
+                            requiresBillingAddressForAutomaticTax =
+                                paymentMethodMetadata?.requiresBillingAddressForAutomaticTax == true,
                             allowedBillingCountries =
                                 viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->

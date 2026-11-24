@@ -22,7 +22,6 @@ import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -158,10 +157,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
         networkRule.validateCheckoutSessionAnalyticsRequest("mc_dismiss")
         // The session refresh reloads the Payment Element with the kept card selection.
         networkRule.validateCheckoutSessionAnalyticsRequest("mc_initial_displayed_payment_methods")
-        networkRule.validateAnalyticsRequest(
-            eventName = "stripe_android.card_metadata_pk_available",
-            productUsage = setOf("checkout_elements"),
-        )
         formPage.clickPrimaryButton()
 
         testRules.compose.waitUntilWithIdle {
@@ -416,6 +411,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
     @Test
     fun testUpdateEmailReportsSucceededWithoutDurationOrConfiguration() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
+        checkoutInitResponse = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.remove("customer_email")
+                json.remove("link_settings")
+            }
+        },
         renderPaymentElementContent = false,
         setup = { controller ->
             networkRule.validateCheckoutInitStartedAndSucceeded()

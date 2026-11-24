@@ -4,10 +4,10 @@ package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.injection.CheckoutIsUpdating
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'socket'
 require 'subprocess'
 
 require_relative 'common'

@@ -560,7 +560,8 @@ class WalletViewModelTest {
             .isEqualTo(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
-                    selectedPayment = null
+                    selectedPayment = null,
+                    intent = TestFactory.LINK_CONFIGURATION.stripeIntent,
                 )
             )
     }

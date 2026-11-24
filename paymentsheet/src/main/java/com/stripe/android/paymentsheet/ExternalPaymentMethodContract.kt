@@ -24,6 +24,7 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
             .putExtra(ExternalPaymentMethodProxyActivity.EXTRA_BILLING_DETAILS, input.billingDetails)
     }
 
+    @Suppress("DEPRECATION")
     override fun parseResult(resultCode: Int, intent: Intent?): PaymentResult {
         return when (resultCode) {
             ExternalPaymentMethodResult.Completed.RESULT_CODE -> PaymentResult.Completed

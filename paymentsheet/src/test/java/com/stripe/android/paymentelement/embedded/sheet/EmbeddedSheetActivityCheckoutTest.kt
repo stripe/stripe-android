@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import android.os.Bundle
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -34,12 +34,10 @@ import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.waitUntilWithIdle
-import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.EditPage
@@ -166,7 +164,9 @@ internal class EmbeddedSheetActivityCheckoutTest {
         }
         editPage.update()
 
-        editPage.assertSaveError(updateCardBrandErrorMessage.resolve(applicationContext))
+        editPage.assertSaveError(
+            applicationContext.getString(R.string.stripe_paymentsheet_card_updates_failed_error_message)
+        )
 
         enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
         enqueueTaxRegionUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
@@ -264,7 +264,9 @@ internal class EmbeddedSheetActivityCheckoutTest {
             response.setBody("""{"error":{"message":"Could not update card"}}""")
         }
         editPage.update()
-        editPage.assertSaveError(updateCardBrandErrorMessage.resolve(applicationContext))
+        editPage.assertSaveError(
+            applicationContext.getString(R.string.stripe_paymentsheet_card_updates_failed_error_message)
+        )
         Espresso.pressBack()
         managePage.waitUntilVisible()
         Espresso.pressBack()

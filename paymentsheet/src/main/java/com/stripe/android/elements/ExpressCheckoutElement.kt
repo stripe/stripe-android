@@ -1,17 +1,15 @@
 package com.stripe.android.elements
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExpressCheckoutElement @Inject internal constructor(
     private val interactor: ExpressCheckoutElementInteractor,
 ) {
@@ -26,14 +24,12 @@ class ExpressCheckoutElement @Inject internal constructor(
         ExpressCheckoutElementContent(interactor = interactor)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     /** Payment methods supported by the Express Checkout Element. */
     abstract class PaymentMethod private constructor() {
 
         /** The payment method type, such as `"google_pay"` or `"link"`. */
         abstract val type: String
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class GooglePay internal constructor() : PaymentMethod() {
             override val type: String = "google_pay"
 
@@ -42,7 +38,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             override fun hashCode(): Int = GooglePay::class.java.hashCode()
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Link internal constructor() : PaymentMethod() {
             override val type: String = "link"
 
@@ -53,13 +48,11 @@ class ExpressCheckoutElement @Inject internal constructor(
     }
 
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         /**
          * Configuration related to Link.
          */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class LinkConfiguration {
             private var display: Display = Display.Automatic
 
@@ -67,7 +60,6 @@ class ExpressCheckoutElement @Inject internal constructor(
              * Display configuration for Link.
              */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
                  * Link will be displayed when available.
@@ -98,14 +90,12 @@ class ExpressCheckoutElement @Inject internal constructor(
         /**
          * Configuration related to Google Pay.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @CheckoutSessionPreview
         class GooglePayConfiguration {
 
             /**
              * Display configuration for Google Pay.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
                  * Google Pay will be displayed when available.
@@ -174,7 +164,6 @@ class ExpressCheckoutElement @Inject internal constructor(
              * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
              * for more information on button types.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class ButtonType {
                 /**
                  * Displays "Buy with" alongside the Google Pay logo.
@@ -226,7 +215,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
 
         /** Appearance configuration for the Express Checkout Element. */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @CheckoutSessionPreview
         class Appearance {
             private var buttonLayout: ButtonLayout = ButtonLayout()
@@ -234,7 +222,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
 
             /** Themes for express buttons. */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @CheckoutSessionPreview
             enum class ButtonTheme {
                 /** Light theme which contrasts with a dark background. */
@@ -248,7 +235,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
 
             /** Determines how express buttons are arranged. */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @CheckoutSessionPreview
             class ButtonLayout {
                 private var maxColumns: Int? = null
@@ -292,7 +278,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 )
 
                 private companion object {
-                    const val MAX_LAYOUT_DIMENSION = 10
+                    private const val MAX_LAYOUT_DIMENSION = 10
                 }
             }
 

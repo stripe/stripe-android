@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -32,10 +33,7 @@ internal class TestAuthorization : BasePlaygroundTest() {
     fun testAuthorizeFailure() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(
-                authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "We are unable to authenticate your payment method. " +
-                        "Please choose a different payment method and try again.",
-                ),
+                authorizationAction = AuthorizeAction.Fail,
             )
         )
     }

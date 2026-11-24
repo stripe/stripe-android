@@ -31,18 +31,16 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
     @Test
     fun `switching country unsupported then back to supported reverts to inline mode`() =
         runTest(UnconfinedTestDispatcher()) {
-            val fakePlaces = FakePlacesClientProxy(
+            val fakeAutocomplete = FakeAddressAutocompleteClient(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             )
             val config = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
             )
             val interactor = BillingInlineAutocompleteAddressInteractor(
-                placesClient = fakePlaces,
+                autocompleteClient = fakeAutocomplete,
                 autocompleteConfig = config,
                 coroutineScope = backgroundScope,
             )

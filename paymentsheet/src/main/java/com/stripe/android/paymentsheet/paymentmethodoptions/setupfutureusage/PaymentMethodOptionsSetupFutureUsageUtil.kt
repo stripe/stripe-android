@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration.SetupFutureUse
 
 @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
-internal fun PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions?.toJsonObjectString(
+internal fun PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions.State?.toJsonObjectString(
     requireCvcRecollection: Boolean
 ): String? {
     val map = this?.setupFutureUsageValues?.mapKeys {

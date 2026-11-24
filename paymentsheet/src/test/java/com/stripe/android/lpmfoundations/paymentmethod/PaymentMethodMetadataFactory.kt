@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkStateResult
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 
@@ -32,7 +33,6 @@ internal object PaymentMethodMetadataFactory {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         allowsDelayedPaymentMethods: Boolean = true,
-        allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         allowsLinkInSavedPaymentMethods: Boolean = false,
         availableWallets: List<WalletType> = listOf(WalletType.GooglePay),
         paymentMethodOrder: List<String> = emptyList(),
@@ -84,12 +84,12 @@ internal object PaymentMethodMetadataFactory {
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        stripeBalanceFinancialAccounts: StripeBalanceFinancialAccounts? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
             availableWallets = availableWallets,
             paymentMethodOrder = paymentMethodOrder,
@@ -159,6 +159,7 @@ internal object PaymentMethodMetadataFactory {
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
             apiConfiguration = apiConfiguration,
+            stripeBalanceFinancialAccounts = stripeBalanceFinancialAccounts,
         )
     }
 
@@ -174,18 +175,18 @@ internal object PaymentMethodMetadataFactory {
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount ?: 5000,
-                            currency = currency ?: "usd"
+                            currency = currency ?: "usd",
+                            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                         )
-                    )
+                    ).build()
                 )
             }
             is SetupIntent -> {
                 IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                            currency = "usd"
-                        )
-                    )
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                            .currency("usd")
+                    ).build()
                 )
             }
         }

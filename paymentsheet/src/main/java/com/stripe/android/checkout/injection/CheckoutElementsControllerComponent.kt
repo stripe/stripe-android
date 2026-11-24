@@ -18,6 +18,8 @@ import com.stripe.android.checkout.CheckoutLoadingEventReporter
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
+import com.stripe.android.checkout.CheckoutSelectionChooser
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutConfirmationFinalizer
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
@@ -43,7 +45,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -56,7 +57,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedHostProcessing
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -76,6 +76,7 @@ import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PreselectLinkExperimentModule
+import com.stripe.android.paymentsheet.injection.StripeBalanceModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -139,6 +140,7 @@ import javax.inject.Singleton
         ApiConfigurationFromPaymentConfigurationModule::class,
         ApiRequestOptionsModule::class,
         ApiConfigurationResolverModule::class,
+        StripeBalanceModule::class,
     ],
 )
 internal interface CheckoutElementsControllerComponent {
@@ -221,7 +223,7 @@ internal interface CheckoutElementsControllerModule {
     ): AnalyticsRequestFactory
 
     @Binds
-    fun bindsEmbeddedSelectionChooser(impl: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser
+    fun bindsEmbeddedSelectionChooser(impl: CheckoutSelectionChooser): EmbeddedSelectionChooser
 
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutElementsControllerStateHolder): EmbeddedSelectionHolder

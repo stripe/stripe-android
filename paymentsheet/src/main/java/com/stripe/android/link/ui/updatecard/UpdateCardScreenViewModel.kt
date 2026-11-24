@@ -226,6 +226,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             // We prefill in the billing details update flow, so the form might
             // already be complete on first render. The user can submit without modifying.
             requiresModification = state.value.isBillingDetailsUpdateFlow.not(),
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = null,
         )
     }

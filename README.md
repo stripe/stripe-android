@@ -2,7 +2,6 @@
 
 # Stripe Android SDK
 
-[![CI](https://github.com/stripe/stripe-android/workflows/CI/badge.svg)](https://github.com/stripe/stripe-android/actions?query=workflow%3ACI)
 [![GitHub release](https://img.shields.io/github/release/stripe/stripe-android.svg?maxAge=60)](https://github.com/stripe/stripe-android/releases)
 [![License](https://img.shields.io/github/license/stripe/stripe-android)](https://github.com/stripe/stripe-android/blob/master/LICENSE)
 
@@ -55,11 +54,11 @@ Table of contents
 
 ### Requirements
 
-* Android 6.0 (API level 23) and above
-* `compileSdkVersion` 36 and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.13.2
-* [Gradle](https://gradle.org/releases/) 9.3.1
-* [Kotlin](https://kotlinlang.org/docs/releases.html) 2.3.10
+* Android 7.0 (API level 24) and above
+* `compileSdkVersion` 37 and above
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 9.4.0
+* [Gradle](https://gradle.org/releases/) 9.6.0
+* [Kotlin](https://kotlinlang.org/docs/releases.html) 2.3.21
 
 ### Configuration
 
@@ -91,7 +90,10 @@ To ensure broad compatibility across the ecosystem, `stripe-android` updates its
   <td>22.7.0-22.8.1</td><td>Compose UI 1.9.x</td>
  </tr>
  <tr>
-  <td>23.0.0-Current</td><td>Compose UI 1.10.x</td>
+  <td>23.0.0-23.26.0</td><td>Compose UI 1.10.x</td>
+ </tr>
+ <tr>
+  <td>24.0.0-Current</td><td>Compose UI 1.12.x</td>
  </tr>
 </table>
 

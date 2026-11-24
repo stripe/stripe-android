@@ -120,6 +120,7 @@ fun rememberPaymentSheetFlowController(
 )
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback? = null,
+    @Suppress("DEPRECATION")
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,

@@ -2,14 +2,12 @@ package com.stripe.android.checkout
 
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
-import androidx.annotation.RestrictTo
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterScope
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +16,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @CheckoutElementsPresenterScope
 class CheckoutElementsPresenter @Inject internal constructor(
     private val paymentElementProvider: Lazy<PaymentElement>,

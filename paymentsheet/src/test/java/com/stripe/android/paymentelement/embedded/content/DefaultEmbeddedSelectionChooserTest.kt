@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -126,6 +127,20 @@ internal class DefaultEmbeddedSelectionChooserTest {
             formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `Falls back to loader selection when previous selection is no longer supported`() = runScenario {
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethods = null,
+            previousSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            newSelection = PaymentSelection.GooglePay,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+
+        assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -481,6 +496,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(

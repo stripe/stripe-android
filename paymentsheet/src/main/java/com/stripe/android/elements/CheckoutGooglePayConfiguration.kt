@@ -1,7 +1,7 @@
 package com.stripe.android.elements
 
 import android.os.Parcelable
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration as EceGooglePayConfiguration

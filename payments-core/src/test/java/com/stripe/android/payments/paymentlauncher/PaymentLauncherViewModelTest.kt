@@ -91,9 +91,8 @@ class PaymentLauncherViewModelTest {
         runScenario {
             val intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             repository.confirmPaymentIntentResult = Result.success(intent)
-            confirmPaymentIntentParams.returnUrl = RETURN_URL
 
-            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(returnUrl = RETURN_URL), authHost)
 
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
@@ -118,9 +117,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm PaymentIntent when no action is required does not invoke authenticator`() =
         runScenario {
-            confirmPaymentIntentParams.returnUrl = RETURN_URL
-
-            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(returnUrl = RETURN_URL), authHost)
 
             assertThat(paymentResults.awaitItem()).isEqualTo(
                 InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
@@ -176,9 +173,8 @@ class PaymentLauncherViewModelTest {
         runScenario(isPaymentIntent = false) {
             val intent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
             repository.confirmSetupIntentResult = Result.success(intent)
-            confirmSetupIntentParams.returnUrl = RETURN_URL
 
-            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(returnUrl = RETURN_URL), authHost)
 
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(

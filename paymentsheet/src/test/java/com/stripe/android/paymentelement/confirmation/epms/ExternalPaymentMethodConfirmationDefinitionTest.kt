@@ -23,7 +23,6 @@ import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.R
@@ -191,7 +190,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val errorReporter = FakeErrorReporter()
         val definition = createExternalPaymentMethodConfirmationDefinition(
             externalPaymentMethodConfirmHandler = { _, _ ->
-                ExternalPaymentMethodConfirmHandler { _, _ ->
+                com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")
                 }
             },
@@ -248,7 +247,9 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     }
 
     private fun createExternalPaymentMethodConfirmationDefinition(
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        @Suppress("DEPRECATION")
+        externalPaymentMethodConfirmHandler: com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler? =
+            null,
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): ExternalPaymentMethodConfirmationDefinition {
         return ExternalPaymentMethodConfirmationDefinition(

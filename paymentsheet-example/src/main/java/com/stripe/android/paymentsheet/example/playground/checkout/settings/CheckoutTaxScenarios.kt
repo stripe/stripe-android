@@ -1,4 +1,4 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.checkout.CheckoutSessionPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
@@ -23,12 +23,14 @@ internal object CheckoutTaxScenarios {
             set(session.merchant, Merchant.US_TAX)
             set(session.automaticTax, true)
             set(session.billingAddressCollection, true)
+            set(session.customerUpdate.address, CheckoutCustomerUpdate.Auto)
         },
         leaf("automatic_tax_shipping", "Automatic tax — shipping") {
             set(session.merchant, Merchant.US_TAX)
             set(session.automaticTax, true)
             set(controller.shippingAddress.shouldSetConfiguration, true)
             set(session.shippingAddressCollection, true)
+            set(session.customerUpdate.shipping, CheckoutCustomerUpdate.Auto)
         },
     )
 }

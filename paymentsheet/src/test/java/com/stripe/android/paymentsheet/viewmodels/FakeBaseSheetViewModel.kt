@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
@@ -59,8 +60,8 @@ internal class FakeBaseSheetViewModel private constructor(
     mode = EventReporter.Mode.Complete,
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
-    placesClient = null,
     linkAccountHolder = LinkAccountHolder(savedStateHandle),
+    errorReporter = FakeErrorReporter(),
     stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
     addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
 ) {

@@ -121,6 +121,7 @@ internal object PaymentSheetFixtures {
             .googlePay(ConfigFixtures.GOOGLE_PAY)
             .build()
 
+    @Suppress("DEPRECATION")
     internal val CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
         get() = CONFIG_CUSTOMER.newBuilder()
             .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
@@ -240,9 +241,10 @@ internal object PaymentSheetFixtures {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 10L,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
-                )
+                ).build()
             ),
             config = CONFIG_CUSTOMER,
             paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,

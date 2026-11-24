@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,8 +19,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
-import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
@@ -51,13 +51,19 @@ internal fun InputAddressScreen(
         backgroundColor = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.onSurface,
         topBar = {
-            AddressOptionsAppBar(
-                isRootScreen = true,
+            PaymentSheetTopBar(
+                state = PaymentSheetTopBarState(
+                    showEditMenu = false,
+                    isEditing = false,
+                    onEditIconPressed = {},
+                ),
+                title = title,
+                canNavigateBack = false,
                 isEnabled = closeButtonEnabled,
-                onButtonClick = {
+                onNavigationIconPressed = {
                     focusManager.clearFocus()
                     onCloseClick()
-                }
+                },
             )
         }
     ) {
@@ -70,11 +76,6 @@ internal fun InputAddressScreen(
                     .padding(top = MaterialTheme.stripeFormInsets.top.dp)
                     .padding(bottom = MaterialTheme.stripeFormInsets.bottom.dp)
             ) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
                 topContent()
                 formContent()
                 bottomContent()

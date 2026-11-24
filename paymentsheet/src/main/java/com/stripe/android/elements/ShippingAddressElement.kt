@@ -6,13 +6,13 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
@@ -20,7 +20,6 @@ import com.stripe.android.checkout.toShippingDetails
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -43,7 +42,6 @@ internal fun interface CommitShippingAddress {
 }
 
 @CheckoutSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ShippingAddressElement internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
@@ -165,7 +163,6 @@ class ShippingAddressElement internal constructor(
     }
 
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Suppress("TooManyFunctions")
     class Configuration {
         private var title: String? = null
@@ -202,7 +199,6 @@ class ShippingAddressElement internal constructor(
 
         /** Appearance configuration for the address form. */
         @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
         @OptIn(AppearanceAPIAdditionsPreview::class)
         class Appearance {
@@ -260,7 +256,6 @@ class ShippingAddressElement internal constructor(
 
             /** Shapes used for inputs, buttons, and sheets. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Shapes {
                 private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
                 private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
@@ -300,7 +295,6 @@ class ShippingAddressElement internal constructor(
 
             /** Typography used for shipping address form text. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Typography {
                 private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
 
@@ -347,7 +341,6 @@ class ShippingAddressElement internal constructor(
                 /** Font overrides for specific text styles. */
                 @CheckoutSessionPreview
                 @AppearanceAPIAdditionsPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Custom {
                     private var h1: Font? = null
 
@@ -367,7 +360,6 @@ class ShippingAddressElement internal constructor(
                 /** Font configuration for a text style. */
                 @CheckoutSessionPreview
                 @AppearanceAPIAdditionsPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Font {
                     @FontRes
                     private var fontFamily: Int? = null
@@ -406,7 +398,6 @@ class ShippingAddressElement internal constructor(
 
             /** Colors used to render the address form. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Suppress("TooManyFunctions")
             class Colors private constructor(
                 @ColorInt private var primary: Int,
@@ -516,7 +507,6 @@ class ShippingAddressElement internal constructor(
                     error = error,
                 )
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 companion object {
                     /** Creates colors initialized with the default light-mode values. */
                     fun light(): Colors = defaults(StripeThemeDefaults.colorsLight)
@@ -541,7 +531,6 @@ class ShippingAddressElement internal constructor(
             }
 
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             /** Color modes available for the address form. */
             enum class ThemeMode {
                 /** Follow the system's light or dark mode. */
@@ -556,7 +545,6 @@ class ShippingAddressElement internal constructor(
 
             /** Insets used to position address form content, in dp. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class Insets(
                 private val startDp: Float,
                 private val topDp: Float,
@@ -588,7 +576,6 @@ class ShippingAddressElement internal constructor(
 
             /** Configures the primary button. */
             @CheckoutSessionPreview
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class PrimaryButton {
                 private var colorsLight = Colors.light()
                 private var colorsDark = Colors.dark()
@@ -624,7 +611,6 @@ class ShippingAddressElement internal constructor(
 
                 /** Colors used to render the primary button. */
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Suppress("TooManyFunctions")
                 class Colors private constructor(
                     @ColorInt private var background: Int?,
@@ -671,7 +657,6 @@ class ShippingAddressElement internal constructor(
                         onSuccessBackgroundColor,
                     )
 
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     companion object {
                         fun light(): Colors = defaults(StripeThemeDefaults.primaryButtonStyle.colorsLight)
                         fun dark(): Colors = defaults(StripeThemeDefaults.primaryButtonStyle.colorsDark)
@@ -688,7 +673,6 @@ class ShippingAddressElement internal constructor(
 
                 /** Configures the shape of the primary button. */
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Shape {
                     private var cornerRadiusDp: Float? = null
                     private var borderStrokeWidthDp: Float? = null
@@ -715,7 +699,6 @@ class ShippingAddressElement internal constructor(
 
                 /** Configures the typography of the primary button. */
                 @CheckoutSessionPreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Typography {
                     @FontRes
                     private var fontResId: Int? = null

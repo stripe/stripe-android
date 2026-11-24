@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -59,7 +60,6 @@ internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
-    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val allowsLinkInSavedPaymentMethods: Boolean,
     val availableWallets: List<WalletType>,
     val paymentMethodOrder: List<String>,
@@ -103,6 +103,8 @@ internal data class PaymentMethodMetadata(
     val shouldUseAutocompleteProxyEndpoints: Boolean,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
     val apiConfiguration: ApiConfiguration.State,
+    /** The buyer's financial accounts, or `null` if Stripe balance isn't offered. */
+    val stripeBalanceFinancialAccounts: StripeBalanceFinancialAccounts?,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
@@ -399,6 +401,7 @@ internal data class PaymentMethodMetadata(
             isTapToAddAvailable: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
             apiConfiguration: ApiConfiguration.State,
+            stripeBalanceFinancialAccounts: StripeBalanceFinancialAccounts?,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
@@ -406,8 +409,6 @@ internal data class PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = configuration
-                    .allowsPaymentMethodsRequiringShippingAddress,
                 allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm,
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
@@ -465,6 +466,7 @@ internal data class PaymentMethodMetadata(
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = paymentMethodLayout,
                 apiConfiguration = apiConfiguration,
+                stripeBalanceFinancialAccounts = stripeBalanceFinancialAccounts,
             )
         }
 
@@ -481,7 +483,6 @@ internal data class PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,
-                allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
@@ -538,6 +539,8 @@ internal data class PaymentMethodMetadata(
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 apiConfiguration = apiConfiguration,
+                // CustomerSheet doesn't offer Stripe balance
+                stripeBalanceFinancialAccounts = null,
             )
         }
     }

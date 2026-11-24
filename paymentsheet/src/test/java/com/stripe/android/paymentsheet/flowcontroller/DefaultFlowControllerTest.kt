@@ -15,6 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
@@ -54,7 +55,6 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -291,6 +291,7 @@ internal class DefaultFlowControllerTest {
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5000,
                             currency = "USD",
+                            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                         ),
                     ),
                     callback = { _, _ -> }
@@ -513,6 +514,7 @@ internal class DefaultFlowControllerTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 5000,
                 currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
         )
 
@@ -529,8 +531,8 @@ internal class DefaultFlowControllerTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 5000,
                 currency = "usd",
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-            ),
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+            ).setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession),
         )
         flowController.configureWithIntentConfigurationExpectingSuccess(intentConfigWithSFU)
 
@@ -1703,7 +1705,8 @@ internal class DefaultFlowControllerTest {
         val intentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 12345,
-                currency = "usd"
+                currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             )
         )
         val flowController = createAndConfigureFlowControllerForDeferred(
@@ -1736,7 +1739,7 @@ internal class DefaultFlowControllerTest {
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
-            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
+            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration.build()))
     }
 
     @Test
@@ -2375,7 +2378,8 @@ internal class DefaultFlowControllerTest {
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 12345,
-                currency = "usd"
+                currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             )
         ),
     ): DefaultFlowController {

@@ -1,5 +1,6 @@
 @file:OptIn(
-    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    com.stripe.android.checkout.CheckoutSessionPreview::class,
 )
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
@@ -11,6 +12,7 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.Controller
+import com.stripe.android.elements.PaymentElement.Configuration.Appearance.Embedded.RowStyle as EmbeddedRowStyle
 
 internal fun CheckoutPlaygroundSettings.Snapshot.checkoutElementsControllerConfiguration():
     CheckoutElementsController.Configuration {
@@ -114,21 +116,27 @@ private fun CheckoutPlaygroundSettings.Snapshot.termsDisplay():
 }
 
 private fun CheckoutPlaygroundSettings.Snapshot.paymentAppearance(): PaymentElement.Configuration.Appearance {
+    val definitions = Controller.payment.appearance
     return PaymentElement.Configuration.Appearance()
-        .colorsLight(paymentColors(Controller.payment.appearance.lightColors, light = true))
-        .colorsDark(paymentColors(Controller.payment.appearance.darkColors, light = false))
-        .themeMode(this[Controller.payment.appearance.themeMode])
-        .primaryButton(primaryButtonAppearance())
+        .colorsLight(paymentColors(definitions.colorsLight, light = true))
+        .colorsDark(paymentColors(definitions.colorsDark, light = false))
+        .themeMode(this[definitions.themeMode])
+        .primaryButton(paymentPrimaryButton(definitions.primaryButton))
+        .typography(paymentTypography(definitions.typography))
+        .shapes(paymentShapes(definitions.shapes))
+        .embeddedAppearance(embeddedAppearance(definitions.embeddedAppearance))
         .formInsetValues(
             PaymentElement.Configuration.Appearance.Insets(
-                horizontalDp = this[Controller.payment.appearance.insets.horizontal],
-                verticalDp = this[Controller.payment.appearance.insets.vertical],
+                startDp = this[definitions.formInsetValues.startDp],
+                topDp = this[definitions.formInsetValues.topDp],
+                endDp = this[definitions.formInsetValues.endDp],
+                bottomDp = this[definitions.formInsetValues.bottomDp],
             )
         )
 }
 
 private fun CheckoutPlaygroundSettings.Snapshot.paymentColors(
-    definitions: CheckoutPaymentColorsDefinitions,
+    definitions: CheckoutColorsDefinitions,
     light: Boolean,
 ): PaymentElement.Configuration.Appearance.Colors {
     val colors = if (light) {
@@ -151,26 +159,27 @@ private fun CheckoutPlaygroundSettings.Snapshot.paymentColors(
     }
 }
 
-private fun CheckoutPlaygroundSettings.Snapshot.primaryButtonAppearance():
-    PaymentElement.Configuration.Appearance.PrimaryButton {
+private fun CheckoutPlaygroundSettings.Snapshot.paymentPrimaryButton(
+    definitions: CheckoutPrimaryButtonDefinitions,
+): PaymentElement.Configuration.Appearance.PrimaryButton {
     return PaymentElement.Configuration.Appearance.PrimaryButton()
-        .colorsLight(primaryButtonColors(Controller.payment.appearance.primaryButton.lightColors, light = true))
-        .colorsDark(primaryButtonColors(Controller.payment.appearance.primaryButton.darkColors, light = false))
+        .colorsLight(paymentPrimaryButtonColors(definitions.colorsLight, light = true))
+        .colorsDark(paymentPrimaryButtonColors(definitions.colorsDark, light = false))
         .shape(
             PaymentElement.Configuration.Appearance.PrimaryButton.Shape()
-                .cornerRadiusDp(this[Controller.payment.appearance.primaryButton.shape.cornerRadius])
-                .borderStrokeWidthDp(this[Controller.payment.appearance.primaryButton.shape.borderWidth])
-                .heightDp(this[Controller.payment.appearance.primaryButton.shape.height])
+                .cornerRadiusDp(this[definitions.shape.cornerRadiusDp])
+                .borderStrokeWidthDp(this[definitions.shape.borderStrokeWidthDp])
+                .heightDp(this[definitions.shape.heightDp])
         )
         .typography(
             PaymentElement.Configuration.Appearance.PrimaryButton.Typography()
-                .fontResId(this[Controller.payment.appearance.primaryButton.typography.font].resourceId)
-                .fontSizeSp(this[Controller.payment.appearance.primaryButton.typography.size])
+                .fontResId(this[definitions.typography.fontResId].resourceId)
+                .fontSizeSp(this[definitions.typography.fontSizeSp])
         )
 }
 
-private fun CheckoutPlaygroundSettings.Snapshot.primaryButtonColors(
-    definitions: CheckoutPrimaryButtonColorsDefinitions,
+private fun CheckoutPlaygroundSettings.Snapshot.paymentPrimaryButtonColors(
+    definitions: CheckoutPrimaryButtonDefinitions.ColorsDefinitions,
     light: Boolean,
 ): PaymentElement.Configuration.Appearance.PrimaryButton.Colors {
     val colors = if (light) {
@@ -179,11 +188,181 @@ private fun CheckoutPlaygroundSettings.Snapshot.primaryButtonColors(
         PaymentElement.Configuration.Appearance.PrimaryButton.Colors.dark()
     }
     return colors.apply {
-        this@primaryButtonColors[definitions.background]?.let(::background)
-        this@primaryButtonColors[definitions.onBackground]?.let(::onBackground)
-        this@primaryButtonColors[definitions.border]?.let(::border)
-        this@primaryButtonColors[definitions.successBackground]?.let(::successBackgroundColor)
-        this@primaryButtonColors[definitions.onSuccessBackground]?.let(::onSuccessBackgroundColor)
+        this@paymentPrimaryButtonColors[definitions.background]?.let(::background)
+        this@paymentPrimaryButtonColors[definitions.onBackground]?.let(::onBackground)
+        this@paymentPrimaryButtonColors[definitions.border]?.let(::border)
+        this@paymentPrimaryButtonColors[definitions.successBackgroundColor]?.let(::successBackgroundColor)
+        this@paymentPrimaryButtonColors[definitions.onSuccessBackgroundColor]?.let(::onSuccessBackgroundColor)
+    }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.paymentTypography(
+    definitions: CheckoutTypographyDefinitions,
+): PaymentElement.Configuration.Appearance.Typography {
+    return PaymentElement.Configuration.Appearance.Typography()
+        .sizeScaleFactor(this[definitions.sizeScaleFactor])
+        .fontResId(this[definitions.fontResId].resourceId)
+        .custom(
+            PaymentElement.Configuration.Appearance.Typography.Custom()
+                .h1(paymentFont(definitions.custom.h1))
+        )
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.paymentFont(
+    definitions: CheckoutFontDefinitions,
+): PaymentElement.Configuration.Appearance.Typography.Font? {
+    if (!definitions.isSet(this)) return null
+    return PaymentElement.Configuration.Appearance.Typography.Font()
+        .fontFamily(this[definitions.fontFamily].resourceId)
+        .fontSizeSp(this[definitions.fontSizeSp])
+        .fontWeight(this[definitions.fontWeight])
+        .letterSpacingSp(this[definitions.letterSpacingSp])
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.paymentShapes(
+    definitions: CheckoutShapesDefinitions,
+): PaymentElement.Configuration.Appearance.Shapes {
+    return PaymentElement.Configuration.Appearance.Shapes()
+        .cornerRadiusDp(this[definitions.cornerRadiusDp])
+        .borderStrokeWidthDp(this[definitions.borderStrokeWidthDp])
+        .apply {
+            this@paymentShapes[definitions.bottomSheetCornerRadiusDp]?.let(::bottomSheetCornerRadiusDp)
+        }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.embeddedAppearance(
+    definitions: CheckoutEmbeddedAppearanceDefinitions,
+): PaymentElement.Configuration.Appearance.Embedded {
+    val rowStyle = definitions.rowStyle
+    return PaymentElement.Configuration.Appearance.Embedded()
+        .rowStyle(
+            when (this[rowStyle.type]) {
+                CheckoutEmbeddedRowStyle.FlatWithRadio -> flatWithRadio(rowStyle.flatWithRadio)
+                CheckoutEmbeddedRowStyle.FlatWithCheckmark -> flatWithCheckmark(rowStyle.flatWithCheckmark)
+                CheckoutEmbeddedRowStyle.FloatingButton -> floatingButton(rowStyle.floatingButton)
+                CheckoutEmbeddedRowStyle.FlatWithDisclosure -> flatWithDisclosure(rowStyle.flatWithDisclosure)
+            }
+        )
+        .paymentMethodIconMargins(paymentMethodIconMargins(definitions.paymentMethodIconMargins))
+        .titleFont(paymentFont(definitions.titleFont))
+        .subtitleFont(paymentFont(definitions.subtitleFont))
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.paymentMethodIconMargins(
+    definitions: CheckoutOptionalInsetsDefinitions,
+): PaymentElement.Configuration.Appearance.Insets? {
+    if (!definitions.isSet(this)) return null
+    return PaymentElement.Configuration.Appearance.Insets(
+        startDp = this[definitions.startDp] ?: 0f,
+        topDp = this[definitions.topDp] ?: 0f,
+        endDp = this[definitions.endDp] ?: 0f,
+        bottomDp = this[definitions.bottomDp] ?: 0f,
+    )
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.flatWithRadio(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.FlatWithRadioDefinitions,
+): EmbeddedRowStyle.FlatWithRadio {
+    val flat = definitions.flat
+    return EmbeddedRowStyle.FlatWithRadio()
+        .separatorThicknessDp(this[flat.separatorThicknessDp])
+        .startSeparatorInsetDp(this[flat.startSeparatorInsetDp])
+        .endSeparatorInsetDp(this[flat.endSeparatorInsetDp])
+        .topSeparatorEnabled(this[flat.topSeparatorEnabled])
+        .bottomSeparatorEnabled(this[flat.bottomSeparatorEnabled])
+        .additionalVerticalInsetsDp(this[flat.additionalVerticalInsetsDp])
+        .horizontalInsetsDp(this[flat.horizontalInsetsDp])
+        .colorsLight(radioColors(definitions.colorsLight, light = true))
+        .colorsDark(radioColors(definitions.colorsDark, light = false))
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.radioColors(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.RadioColorsDefinitions,
+    light: Boolean,
+): EmbeddedRowStyle.FlatWithRadio.Colors {
+    val colors = if (light) {
+        EmbeddedRowStyle.FlatWithRadio.Colors.light()
+    } else {
+        EmbeddedRowStyle.FlatWithRadio.Colors.dark()
+    }
+    return colors.apply {
+        this@radioColors[definitions.separatorColor]?.let(::separatorColor)
+        this@radioColors[definitions.selectedColor]?.let(::selectedColor)
+        this@radioColors[definitions.unselectedColor]?.let(::unselectedColor)
+    }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.flatWithCheckmark(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.FlatWithCheckmarkDefinitions,
+): EmbeddedRowStyle.FlatWithCheckmark {
+    val flat = definitions.flat
+    return EmbeddedRowStyle.FlatWithCheckmark()
+        .separatorThicknessDp(this[flat.separatorThicknessDp])
+        .startSeparatorInsetDp(this[flat.startSeparatorInsetDp])
+        .endSeparatorInsetDp(this[flat.endSeparatorInsetDp])
+        .topSeparatorEnabled(this[flat.topSeparatorEnabled])
+        .bottomSeparatorEnabled(this[flat.bottomSeparatorEnabled])
+        .checkmarkInsetDp(this[definitions.checkmarkInsetDp])
+        .additionalVerticalInsetsDp(this[flat.additionalVerticalInsetsDp])
+        .horizontalInsetsDp(this[flat.horizontalInsetsDp])
+        .colorsLight(checkmarkColors(definitions.colorsLight, light = true))
+        .colorsDark(checkmarkColors(definitions.colorsDark, light = false))
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.checkmarkColors(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.CheckmarkColorsDefinitions,
+    light: Boolean,
+): EmbeddedRowStyle.FlatWithCheckmark.Colors {
+    val colors = if (light) {
+        EmbeddedRowStyle.FlatWithCheckmark.Colors.light()
+    } else {
+        EmbeddedRowStyle.FlatWithCheckmark.Colors.dark()
+    }
+    return colors.apply {
+        this@checkmarkColors[definitions.separatorColor]?.let(::separatorColor)
+        this@checkmarkColors[definitions.checkmarkColor]?.let(::checkmarkColor)
+    }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.floatingButton(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.FloatingButtonDefinitions,
+): EmbeddedRowStyle.FloatingButton {
+    return EmbeddedRowStyle.FloatingButton()
+        .spacingDp(this[definitions.spacingDp])
+        .additionalInsetsDp(this[definitions.additionalInsetsDp])
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.flatWithDisclosure(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.FlatWithDisclosureDefinitions,
+): EmbeddedRowStyle.FlatWithDisclosure {
+    val flat = definitions.flat
+    return EmbeddedRowStyle.FlatWithDisclosure()
+        .separatorThicknessDp(this[flat.separatorThicknessDp])
+        .startSeparatorInsetDp(this[flat.startSeparatorInsetDp])
+        .endSeparatorInsetDp(this[flat.endSeparatorInsetDp])
+        .topSeparatorEnabled(this[flat.topSeparatorEnabled])
+        .bottomSeparatorEnabled(this[flat.bottomSeparatorEnabled])
+        .additionalVerticalInsetsDp(this[flat.additionalVerticalInsetsDp])
+        .horizontalInsetsDp(this[flat.horizontalInsetsDp])
+        .colorsLight(disclosureColors(definitions.colorsLight, light = true))
+        .colorsDark(disclosureColors(definitions.colorsDark, light = false))
+        .apply {
+            this@flatWithDisclosure[definitions.disclosureIconRes].resourceId?.let(::disclosureIconRes)
+        }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.disclosureColors(
+    definitions: CheckoutEmbeddedAppearanceDefinitions.DisclosureColorsDefinitions,
+    light: Boolean,
+): EmbeddedRowStyle.FlatWithDisclosure.Colors {
+    val colors = if (light) {
+        EmbeddedRowStyle.FlatWithDisclosure.Colors.light()
+    } else {
+        EmbeddedRowStyle.FlatWithDisclosure.Colors.dark()
+    }
+    return colors.apply {
+        this@disclosureColors[definitions.separatorColor]?.let(::separatorColor)
+        this@disclosureColors[definitions.disclosureColor]?.let(::disclosureColor)
     }
 }
 
@@ -203,21 +382,21 @@ private fun CheckoutPlaygroundSettings.Snapshot.currencySelectorConfiguration():
     CurrencySelectorElement.Configuration {
     val definitions = Controller.currencySelector.appearance
     val appearance = CurrencySelectorElement.Configuration.Appearance()
-        .contentVerticalPaddingDp(this[definitions.verticalPadding])
-        .sizeScaleFactor(this[definitions.scale])
-        .labelContent(this[definitions.label])
-        .fontResId(this[definitions.font].resourceId)
+        .contentVerticalPaddingDp(this[definitions.contentVerticalPaddingDp])
         .apply {
-            this@currencySelectorConfiguration[definitions.cornerRadius]?.let(::cornerRadiusDp)
-            this@currencySelectorConfiguration[definitions.borderWidth]?.let(::borderWidthDp)
+            this@currencySelectorConfiguration[definitions.cornerRadiusDp]?.let(::cornerRadiusDp)
+            this@currencySelectorConfiguration[definitions.borderWidthDp]?.let(::borderWidthDp)
             this@currencySelectorConfiguration[definitions.borderColor]?.let(::borderColor)
             this@currencySelectorConfiguration[definitions.background]?.let(::background)
             this@currencySelectorConfiguration[definitions.selectedBackground]?.let(::selectedBackground)
             this@currencySelectorConfiguration[definitions.textColor]?.let(::textColor)
             this@currencySelectorConfiguration[definitions.selectedTextColor]?.let(::selectedTextColor)
-            this@currencySelectorConfiguration[definitions.secondaryTextColor]?.let(::textSecondaryColor)
+            this@currencySelectorConfiguration[definitions.textSecondaryColor]?.let(::textSecondaryColor)
             this@currencySelectorConfiguration[definitions.dangerColor]?.let(::dangerColor)
         }
+        .fontResId(this[definitions.fontResId].resourceId)
+        .sizeScaleFactor(this[definitions.sizeScaleFactor])
+        .labelContent(this[definitions.labelContent])
     return CurrencySelectorElement.Configuration().appearance(appearance)
 }
 
@@ -235,22 +414,40 @@ private fun CheckoutPlaygroundSettings.Snapshot.shippingAddressElementConfigurat
 private fun CheckoutPlaygroundSettings.Snapshot.shippingAppearance(): ShippingAddressElement.Configuration.Appearance {
     val definitions = Controller.shippingAddress.appearance
     return ShippingAddressElement.Configuration.Appearance()
-        .colorsLight(shippingColors(definitions.lightColors, light = true))
-        .colorsDark(shippingColors(definitions.darkColors, light = false))
+        .colorsLight(shippingColors(definitions.colorsLight, light = true))
+        .colorsDark(shippingColors(definitions.colorsDark, light = false))
         .themeMode(this[definitions.themeMode])
-        .primaryButton(shippingPrimaryButtonAppearance())
+        .primaryButton(shippingPrimaryButton(definitions.primaryButton))
         .formInsetValues(
             ShippingAddressElement.Configuration.Appearance.Insets(
-                startDp = this[definitions.insets.start],
-                topDp = this[definitions.insets.top],
-                endDp = this[definitions.insets.end],
-                bottomDp = this[definitions.insets.bottom],
+                startDp = this[definitions.formInsetValues.startDp],
+                topDp = this[definitions.formInsetValues.topDp],
+                endDp = this[definitions.formInsetValues.endDp],
+                bottomDp = this[definitions.formInsetValues.bottomDp],
             )
+        )
+        .shapes(
+            ShippingAddressElement.Configuration.Appearance.Shapes()
+                .cornerRadiusDp(this[definitions.shapes.cornerRadiusDp])
+                .borderStrokeWidthDp(this[definitions.shapes.borderStrokeWidthDp])
+                .apply {
+                    this@shippingAppearance[definitions.shapes.bottomSheetCornerRadiusDp]
+                        ?.let(::bottomSheetCornerRadiusDp)
+                }
+        )
+        .typography(
+            ShippingAddressElement.Configuration.Appearance.Typography()
+                .sizeScaleFactor(this[definitions.typography.sizeScaleFactor])
+                .fontResId(this[definitions.typography.fontResId].resourceId)
+                .custom(
+                    ShippingAddressElement.Configuration.Appearance.Typography.Custom()
+                        .h1(shippingFont(definitions.typography.custom.h1))
+                )
         )
 }
 
 private fun CheckoutPlaygroundSettings.Snapshot.shippingColors(
-    definitions: CheckoutPaymentColorsDefinitions,
+    definitions: CheckoutColorsDefinitions,
     light: Boolean,
 ): ShippingAddressElement.Configuration.Appearance.Colors {
     val colors = if (light) {
@@ -273,27 +470,27 @@ private fun CheckoutPlaygroundSettings.Snapshot.shippingColors(
     }
 }
 
-private fun CheckoutPlaygroundSettings.Snapshot.shippingPrimaryButtonAppearance():
-    ShippingAddressElement.Configuration.Appearance.PrimaryButton {
-    val definitions = Controller.shippingAddress.appearance.primaryButton
+private fun CheckoutPlaygroundSettings.Snapshot.shippingPrimaryButton(
+    definitions: CheckoutPrimaryButtonDefinitions,
+): ShippingAddressElement.Configuration.Appearance.PrimaryButton {
     return ShippingAddressElement.Configuration.Appearance.PrimaryButton()
-        .colorsLight(shippingPrimaryButtonColors(definitions.lightColors, light = true))
-        .colorsDark(shippingPrimaryButtonColors(definitions.darkColors, light = false))
+        .colorsLight(shippingPrimaryButtonColors(definitions.colorsLight, light = true))
+        .colorsDark(shippingPrimaryButtonColors(definitions.colorsDark, light = false))
         .shape(
             ShippingAddressElement.Configuration.Appearance.PrimaryButton.Shape()
-                .cornerRadiusDp(this[definitions.shape.cornerRadius])
-                .borderStrokeWidthDp(this[definitions.shape.borderWidth])
-                .heightDp(this[definitions.shape.height])
+                .cornerRadiusDp(this[definitions.shape.cornerRadiusDp])
+                .borderStrokeWidthDp(this[definitions.shape.borderStrokeWidthDp])
+                .heightDp(this[definitions.shape.heightDp])
         )
         .typography(
             ShippingAddressElement.Configuration.Appearance.PrimaryButton.Typography()
-                .fontResId(this[definitions.typography.font].resourceId)
-                .fontSizeSp(this[definitions.typography.size])
+                .fontResId(this[definitions.typography.fontResId].resourceId)
+                .fontSizeSp(this[definitions.typography.fontSizeSp])
         )
 }
 
 private fun CheckoutPlaygroundSettings.Snapshot.shippingPrimaryButtonColors(
-    definitions: CheckoutPrimaryButtonColorsDefinitions,
+    definitions: CheckoutPrimaryButtonDefinitions.ColorsDefinitions,
     light: Boolean,
 ): ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors {
     val colors = if (light) {
@@ -308,7 +505,19 @@ private fun CheckoutPlaygroundSettings.Snapshot.shippingPrimaryButtonColors(
     }
 }
 
+private fun CheckoutPlaygroundSettings.Snapshot.shippingFont(
+    definitions: CheckoutFontDefinitions,
+): ShippingAddressElement.Configuration.Appearance.Typography.Font? {
+    if (!definitions.isSet(this)) return null
+    return ShippingAddressElement.Configuration.Appearance.Typography.Font()
+        .fontFamily(this[definitions.fontFamily].resourceId)
+        .fontSizeSp(this[definitions.fontSizeSp])
+        .fontWeight(this[definitions.fontWeight])
+        .letterSpacingSp(this[definitions.letterSpacingSp])
+}
+
 private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): ExpressCheckoutElement.Configuration {
+    val appearance = Controller.express.appearance
     return ExpressCheckoutElement.Configuration()
         .linkConfiguration(
             ExpressCheckoutElement.Configuration.LinkConfiguration()
@@ -317,12 +526,13 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
         .googlePayConfiguration(expressGooglePayConfiguration())
         .appearance(
             ExpressCheckoutElement.Configuration.Appearance()
-                .buttonTheme(this[Controller.express.appearance.theme])
                 .buttonLayout(
                     ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
-                        .maxColumns(this[Controller.express.appearance.layout.columns])
-                        .maxRows(this[Controller.express.appearance.layout.rows])
+                        .maxColumns(this[appearance.buttonLayout.maxColumns])
+                        .maxRows(this[appearance.buttonLayout.maxRows])
                 )
+                .buttonTheme(this[appearance.buttonTheme])
+                .cornerRadiusDp(this[appearance.cornerRadiusDp])
         )
 }
 

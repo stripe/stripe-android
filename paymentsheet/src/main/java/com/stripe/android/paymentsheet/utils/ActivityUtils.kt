@@ -21,6 +21,6 @@ internal fun Activity.applicationIsTaskOwner(): Boolean {
      */
     return activityManager.appTasks.any { task ->
         @Suppress("DEPRECATION")
-        task.taskInfo.persistentId == taskId
+        task.taskInfo?.persistentId == taskId
     }
 }

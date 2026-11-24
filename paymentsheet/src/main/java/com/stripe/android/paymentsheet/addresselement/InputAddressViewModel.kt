@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateH
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -37,8 +37,8 @@ internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val resultStateHolder: AddressElementResultStateHolder,
     private val eventReporter: AddressElementEventReporter,
-    @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
-    private val placesClient: PlacesClientProxy?,
+    @Named(AddressElementViewModelModule.INLINE_AUTOCOMPLETE_CLIENT)
+    private val autocompleteClient: AddressAutocompleteClient?,
     private val primaryButtonAction: AddressElementPrimaryButtonAction,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
@@ -83,10 +83,7 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val initialAddress = unparsedInitialShippingAddress ?: unparsedInitialBillingAddress
 
-    private val isInlineAutocompleteEnabled = true
-
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
-        googlePlacesApiKey = args.config?.googlePlacesApiKey,
         // If merchant is opting into Stripe-hosted autocomplete and the caller did not
         // override the launcher default countries, use the extended Stripe-hosted list.
         // Otherwise, honor the caller-provided set (or empty set if explicitly set).
@@ -100,13 +97,12 @@ internal class InputAddressViewModel @Inject constructor(
                 provided ?: emptySet()
             }
         },
-        isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
         shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
     )
 
-    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {
+    private val inlineAutocompleteController = if (autocompleteClient != null) {
         InlineAutocompleteController(
-            placesClient = placesClient,
+            autocompleteClient = autocompleteClient,
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },

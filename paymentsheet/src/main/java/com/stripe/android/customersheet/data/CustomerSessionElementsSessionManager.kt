@@ -81,9 +81,10 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                            paymentMethodTypes = intentConfiguration.paymentMethodTypes,
-                            onBehalfOf = intentConfiguration.onBehalfOf,
                         )
+                            .paymentMethodTypes(intentConfiguration.paymentMethodTypes)
+                            .onBehalfOf(intentConfiguration.onBehalfOf)
+                            .build()
                     ),
                     savedPaymentMethodSelectionId = savedSelection?.id,
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
@@ -94,6 +95,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
                     apiConfiguration = apiConfigurationProvider.get(),
+                    mobileSessionConfig = null,
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

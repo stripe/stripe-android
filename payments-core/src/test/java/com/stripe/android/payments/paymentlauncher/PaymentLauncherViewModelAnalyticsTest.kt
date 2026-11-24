@@ -231,11 +231,10 @@ class PaymentLauncherViewModelAnalyticsTest {
         runScenario(isPaymentIntent = false) {
             val intent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
             repository.confirmSetupIntentResult = Result.success(intent)
-            confirmSetupIntentParams.returnUrl = RETURN_URL
             expectEvent(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted)
             expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlCustom)
 
-            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(returnUrl = RETURN_URL), authHost)
             assertThat(repository.confirmSetupIntentCalls.awaitItem().params.returnUrl).isEqualTo(RETURN_URL)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
@@ -329,12 +328,11 @@ class PaymentLauncherViewModelAnalyticsTest {
     @Test
     fun `verify default confirmation return URL sends default return URL analytics`() =
         runScenario {
-            confirmPaymentIntentParams.returnUrl = defaultReturnUrl.value
             expectEvent(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted)
             expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlDefault)
             expectEvent(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished)
 
-            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(returnUrl = defaultReturnUrl.value), authHost)
             assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.returnUrl)
                 .isEqualTo(defaultReturnUrl.value)
         }

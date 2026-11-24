@@ -11,15 +11,19 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
+import com.stripe.android.link.ui.wallet.LinkWalletPage
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitUntilWithIdle
 import org.junit.Rule
 import org.junit.Test
 
@@ -34,11 +38,12 @@ internal class ExpressCheckoutElementTest {
     }
 
     private val page = ExpressCheckoutElementPage(testRules.compose)
+    private val linkWalletPage = LinkWalletPage(testRules.compose)
 
     @Test
     fun testSuccessfulGooglePayPayment() {
         // Link is disabled for ECE in this test, but this is still called for PE.
-        networkRule.enqueueLinkAccountLookup()
+        networkRule.enqueueConsumerSessionLookup()
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
@@ -91,16 +96,13 @@ internal class ExpressCheckoutElementTest {
     fun testSuccessfulNativeLinkPayment() {
         // This is called twice during load - once for ECE, once for PE
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueNativeLinkAccount()
         }
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
-            resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-                assertThat((result as CheckoutElementsController.Result.Completed).paymentStatus)
-                    .isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Unpaid)
-            },
+            initialCheckoutSessionResponseFactory = { response -> createNativeLinkCheckoutInitResponse(response) },
+            resultCallback = ::assertNativeLinkPaymentCompleted,
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
@@ -113,14 +115,13 @@ internal class ExpressCheckoutElementTest {
                 )
             },
         ) {
-            enqueueSuccessfulNativeLinkPayment()
-
-            repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
-            }
-            networkRule.checkoutFetch()
+            networkRule.enqueueNativeLinkPaymentDetails()
+            networkRule.checkoutConfirmNativeLinkPayment(
+                bodyPart("expected_amount", "5099"),
+            )
 
             page.clickLinkButton()
+            linkWalletPage.pay()
         }
 
         assertNativeLinkCalled()
@@ -130,7 +131,7 @@ internal class ExpressCheckoutElementTest {
     fun testGooglePayAndLinkLoad() {
         // This is called for both ECE and PE
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -152,7 +153,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testFailedGooglePayPayment() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         val expectedErrorMessage = "Google Pay failed"
@@ -167,7 +168,7 @@ internal class ExpressCheckoutElementTest {
             enqueueFailedGooglePayPayment(IllegalStateException(expectedErrorMessage))
 
             repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+                networkRule.enqueueConsumerSessionLookup()
             }
             networkRule.checkoutFetch()
 
@@ -180,35 +181,47 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testFailedNativeLinkPayment() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueNativeLinkAccount()
         }
 
+        var checkoutResult: CheckoutElementsController.Result? = null
         val expectedErrorMessage = "Link failed"
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
-            resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
-                val error = (result as CheckoutElementsController.Result.Failed).error
-                assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
-            },
+            initialCheckoutSessionResponseFactory = { response -> createNativeLinkCheckoutInitResponse(response) },
+            resultCallback = { result -> checkoutResult = result },
         ) {
-            enqueueFailedNativeLinkPayment(IllegalStateException(expectedErrorMessage))
-
-            repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/payment_details/list"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody(
+                    """{"error":{"type":"invalid_request_error","message":"$expectedErrorMessage"}}"""
+                )
             }
-            networkRule.checkoutFetch()
+            networkRule.checkoutFetch(
+                responseFactory = { response -> createNativeLinkCheckoutInitResponse(response) },
+            )
 
             page.clickLinkButton()
+            testRules.compose.waitUntilWithIdle(
+                conditionDescription = "Link load failure is reported",
+            ) {
+                checkoutResult != null
+            }
         }
 
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+        val error = (checkoutResult as CheckoutElementsController.Result.Failed).error
+        assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
         assertNativeLinkCalled()
     }
 
     @Test
     fun testLinkIsHiddenWhenShippingAddressIsRequired() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -229,7 +242,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testGooglePayCollectsAndConfirmsRequiredShippingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -275,7 +288,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testGooglePayUpdatesAutomaticTaxForRequiredShippingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -340,7 +353,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testGooglePayCollectsAndConfirmsRequiredBillingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -439,29 +452,40 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun testNativeLinkCollectsAndConfirmsRequiredBillingAddress() {
+    fun testNativeLinkConfirmsRequiredBillingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueNativeLinkAccount()
         }
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
-            initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
-            resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+            initialCheckoutSessionResponseFactory = { response ->
+                createNativeLinkCheckoutInitResponse(response) { json ->
+                    json.put("billing_address_collection", "required")
+                }
             },
+            resultCallback = ::assertNativeLinkPaymentCompleted,
         ) {
-            val paymentMethod = createPaymentMethodWithBillingAddress()
-
-            enqueueNativeLinkPaymentMethod(paymentMethod)
-            networkRule.checkoutConfirm(
-                bodyPart("payment_method", paymentMethod.id),
-                bodyPart("expected_amount", "5099"),
-            ) { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
+            networkRule.enqueueNativeLinkPaymentDetails { paymentDetails ->
+                paymentDetails.getJSONObject("billing_address")
+                    .put("line_1", "510 Townsend St")
+                    .put("line_2", "Floor 3")
+                    .put("locality", "San Francisco")
+                    .put("administrative_area", "CA")
+                    .put("postal_code", "94103")
             }
+            networkRule.checkoutConfirmNativeLinkPayment(
+                bodyPart("expected_amount", "5099"),
+                bodyPart("payment_method_data[billing_details][address][line1]", "510 Townsend St"),
+                bodyPart("payment_method_data[billing_details][address][line2]", "Floor 3"),
+                bodyPart("payment_method_data[billing_details][address][city]", "San Francisco"),
+                bodyPart("payment_method_data[billing_details][address][state]", "CA"),
+                bodyPart("payment_method_data[billing_details][address][postal_code]", "94103"),
+                bodyPart("payment_method_data[billing_details][address][country]", "US"),
+            )
 
             page.clickLinkButton()
+            linkWalletPage.pay()
         }
 
         assertNativeLinkCalledWithRequiredBillingAddress()

@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_T
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
@@ -54,7 +55,8 @@ class CustomerSessionCustomerSheetActivityTest {
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(composeTestRule)
+        .outerRule(createComposeCleanupRule())
+        .around(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(application))
 
