@@ -70,10 +70,17 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import com.stripe.android.testing.ViewModelStoreTestRule
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -83,6 +90,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -1001,6 +1009,115 @@ internal class IdentityViewModelTest {
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
+        }
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - cancelled - stops without error`() = runTest {
+        whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+            .doSuspendableAnswer { awaitCancelledRequest() }
+
+        val post = launch(start = CoroutineStart.UNDISPATCHED) {
+            viewModel.postVerificationPageDataAndMaybeNavigate(
+                mockController,
+                mockCollectedDataParam,
+                ConsentDestination.ROUTE.route,
+                mockOnMissingBack,
+                mockOnMissingPhoneOtp,
+                mockOnReadyToSubmit
+            )
+        }
+        assertThat(viewModel.isSubmitting()).isTrue()
+
+        post.cancelAndJoin()
+
+        assertThat(viewModel.isSubmitting()).isFalse()
+        assertThat(viewModel.errorCause.value).isNull()
+        verify(mockController, never()).navigate(any<String>(), any<NavOptionsBuilder.() -> Unit>())
+    }
+
+    @Test
+    fun `submitAndNavigate - cancelled - stops without error`() = runTest {
+        whenever(mockIdentityRepository.postVerificationPageSubmit(any(), any()))
+            .doSuspendableAnswer { awaitCancelledRequest() }
+
+        val submit = launch(start = CoroutineStart.UNDISPATCHED) {
+            viewModel.submitAndNavigate(mockController, ConsentDestination.ROUTE.route)
+        }
+        assertThat(viewModel.isSubmitting()).isTrue()
+
+        submit.cancelAndJoin()
+
+        assertThat(viewModel.isSubmitting()).isFalse()
+        assertThat(viewModel.errorCause.value).isNull()
+        verify(mockController, never()).navigate(any<String>(), any<NavOptionsBuilder.() -> Unit>())
+    }
+
+    @Test
+    fun `forceConfirm - cancelled - stops without error`() = runTest {
+        viewModel._collectedData.update {
+            CollectedDataParam(
+                idDocumentFront = DocumentUploadParam(
+                    highResImage = "high/res/image/path",
+                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
+                )
+            )
+        }
+        whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+            .doSuspendableAnswer { awaitCancelledRequest() }
+
+        val forceConfirm = launch(start = CoroutineStart.UNDISPATCHED) {
+            viewModel.postVerificationPageDataForForceConfirm(
+                requirementToForceConfirm = Requirement.IDDOCUMENTFRONT,
+                navController = mockController
+            )
+        }
+        assertThat(viewModel.isSubmitting()).isTrue()
+
+        forceConfirm.cancelAndJoin()
+
+        assertThat(viewModel.isSubmitting()).isFalse()
+        assertThat(viewModel.errorCause.value).isNull()
+        verify(mockController, never()).navigate(any<String>(), any<NavOptionsBuilder.() -> Unit>())
+    }
+
+    @Test
+    fun `collectDataForSelfieScreen - cancelled - stops without error`() = runTest {
+        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+            .thenReturn(StripeFile(id = "file_selfie"))
+        viewModel.uploadScanResult(FINAL_FACE_DETECTOR_RESULT, mockVerificationPage)
+        whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+            .doSuspendableAnswer { awaitCancelledRequest() }
+        val transitioner = mock<FaceDetectorTransitioner> {
+            on { selfieFrameForSelfie(any()) } doReturn FaceDetectorTransitioner.SelfieFrame(
+                input = mock(),
+                output = FaceDetectorOutput(boundingBox = BOUNDING_BOX, resultScore = 0.8f),
+                bestFrameScore = 0.8f
+            )
+        }
+
+        // Unconfined runs the collectLatest children eagerly, up to the suspended request.
+        val collect = launch(Dispatchers.Unconfined) {
+            viewModel.collectDataForSelfieScreen(mockController, transitioner, mockVerificationPage)
+        }
+        assertThat(viewModel.isSubmitting()).isTrue()
+
+        collect.cancelAndJoin()
+
+        assertThat(viewModel.isSubmitting()).isFalse()
+        assertThat(viewModel.errorCause.value).isNull()
+        verify(mockController, never()).navigate(any<String>(), any<NavOptionsBuilder.() -> Unit>())
+    }
+
+    /**
+     * Suspends like an in-flight request until cancelled, then throws what
+     * DefaultIdentityRepository throws: the cancellation wrapped in an APIConnectionException.
+     */
+    private suspend fun awaitCancelledRequest(): Nothing {
+        try {
+            awaitCancellation()
+        } catch (e: CancellationException) {
+            throw com.stripe.android.core.exception.APIConnectionException("Failed to execute request", e)
         }
     }
 
