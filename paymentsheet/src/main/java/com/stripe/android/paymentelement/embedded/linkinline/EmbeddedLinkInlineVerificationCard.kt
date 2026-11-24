@@ -44,8 +44,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -98,6 +100,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.stripeTypography
+import kotlinx.coroutines.launch
 
 /**
  * The card a returning Link customer verifies in, shown in place of the Link row in the Embedded Payment Element.
@@ -488,13 +491,19 @@ private fun rememberTypingFocusModifier(
     DisposableEffect(Unit) {
         onDispose(reportInterruption)
     }
+    val scope = rememberCoroutineScope()
     return Modifier
         .focusProperties { canFocus = isTyping }
         .onFocusChanged { focusState ->
-            if (hasFocus && !focusState.hasFocus) {
-                reportInterruption()
-            }
+            val didLoseFocus = hasFocus && !focusState.hasFocus
             hasFocus = focusState.hasFocus
+            if (didLoseFocus) {
+                // Moving from one digit to the next briefly leaves the code, so this waits to see where focus lands.
+                scope.launch {
+                    withFrameNanos {}
+                    if (!hasFocus) reportInterruption()
+                }
+            }
         }
 }
 
