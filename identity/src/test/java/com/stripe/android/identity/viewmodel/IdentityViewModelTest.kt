@@ -1,6 +1,9 @@
 package com.stripe.android.identity.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
@@ -64,6 +67,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.TestModeImage
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
@@ -74,6 +78,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -91,6 +96,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import kotlin.test.assertFailsWith
 
@@ -160,8 +166,10 @@ internal class IdentityViewModelTest {
     private val mockOnReadyToSubmit = mock<() -> Unit>()
     private val mockTfLiteInitializer = mock<InterpreterInitializer>()
 
+    private val viewModel = createViewModel(mockIdentityIO)
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val viewModel = IdentityViewModel(
+    private fun createViewModel(identityIO: IdentityIO) = IdentityViewModel(
         ApplicationProvider.getApplicationContext(),
         IdentityVerificationSheetContract.Args(
             verificationSessionId = VERIFICATION_SESSION_ID,
@@ -176,7 +184,7 @@ internal class IdentityViewModelTest {
         ),
         mockIdentityRepository,
         mockIdentityModelFetcher,
-        mockIdentityIO,
+        identityIO,
         mockIdentityAnalyticsRequestFactory,
         mockScreenTracker,
         mock(),
@@ -373,6 +381,59 @@ internal class IdentityViewModelTest {
             anyOrNull(),
             anyOrNull()
         )
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `MediaPipe defaults pad all three front crops independently of legacy padding`() = runSelfieCropScenario(
+        selfieCapture = SELFIE_CAPTURE.copy(highResImageCropPadding = 0.125f)
+    ) {
+        assertFrontCropDimensions(width = 160, height = 180)
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `MediaPipe front crops use server padding overrides`() = runSelfieCropScenario(
+        selfieCapture = SELFIE_CAPTURE.copy(
+            mediaPipeCropSidePadding = 0.25f,
+            mediaPipeCropTopPadding = 0.5f,
+            mediaPipeCropBottomPadding = 0.1f
+        )
+    ) {
+        assertFrontCropDimensions(width = 120, height = 160)
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `MediaPipe front crops preserve explicit zero padding`() = runSelfieCropScenario(
+        selfieCapture = SELFIE_CAPTURE.copy(
+            mediaPipeCropSidePadding = 0f,
+            mediaPipeCropTopPadding = 0f,
+            mediaPipeCropBottomPadding = 0f
+        )
+    ) {
+        assertFrontCropDimensions(width = 80, height = 100)
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `MediaPipe defaults apply independently to missing padding fields`() = runSelfieCropScenario(
+        selfieCapture = SELFIE_CAPTURE.copy(mediaPipeCropSidePadding = 0f)
+    ) {
+        assertFrontCropDimensions(width = 80, height = 180)
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `legacy front crops ignore MediaPipe padding overrides`() = runSelfieCropScenario(
+        selfieCapture = SELFIE_CAPTURE.copy(
+            mediaPipeCropSidePadding = 0f,
+            mediaPipeCropTopPadding = 0f,
+            mediaPipeCropBottomPadding = 0f
+        ),
+        isFromMediaPipe = false
+    ) {
+        assertFrontCropDimensions(width = 105, height = 125)
     }
 
     @Test
@@ -1305,6 +1366,105 @@ internal class IdentityViewModelTest {
                     )
                 )
             )
+        }
+    }
+
+    private fun runSelfieCropScenario(
+        selfieCapture: VerificationPageStaticContentSelfieCapturePage,
+        isFromMediaPipe: Boolean = true,
+        block: SelfieCropScenario.() -> Unit
+    ) = runTest {
+        mockUploadSuccess()
+        val captureConfig = selfieCapture.copy(
+            highResImageMaxDimension = 1000,
+            lowResImageMaxDimension = 1000,
+            highResImageCompressionQuality = 1f,
+            lowResImageCompressionQuality = 1f
+        )
+        val transitioner = FaceDetectorTransitioner(captureConfig, enable3DFaceCapture = true)
+        val frameColors = listOf(Color.RED, Color.GREEN, Color.BLUE, Color.CYAN, Color.MAGENTA)
+        FaceDetectorTransitioner.Selfie.entries.forEachIndexed { index, selfie ->
+            val bitmap = Bitmap.createBitmap(400, 600, Bitmap.Config.ARGB_8888).apply {
+                eraseColor(frameColors[index])
+            }
+            val frame = FaceDetectorTransitioner.SelfieFrame(
+                input = AnalyzerInput(CameraPreviewImage(bitmap, Rect()), Rect()),
+                output = FaceDetectorOutput(
+                    boundingBox = BoundingBox(0.3f, 0.35f, 0.2f, 0.25f),
+                    fullFrameBoundingBox = BoundingBox(0.3f, 0.4f, 0.2f, 1f / 6f),
+                    resultScore = 1f,
+                    isFromMediaPipe = isFromMediaPipe
+                ),
+                bestFrameScore = 1f,
+                capture = selfie.capture
+            )
+            transitioner.selfieFrameSaver.saveFrame(frame, frame.output)
+        }
+        val best = transitioner.frameForSelfie(FaceDetectorTransitioner.Selfie.BEST)
+        val result = IdentityAggregator.FinalResult(
+            frame = best.first,
+            result = best.second,
+            identityState = IdentityScanState.Finished(IdentityScanState.ScanType.SELFIE, transitioner)
+        )
+        val verificationPage = SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE.copy(
+            livemode = true,
+            selfieCapture = captureConfig,
+            experiments = listOf(
+                VerificationPageStaticContentExperiment(
+                    experimentName = IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT,
+                    eventName = "screen_presented",
+                    eventMetadata = emptyMap()
+                )
+            )
+        )
+        val cropViewModel = createViewModel(DefaultIdentityIO(ApplicationProvider.getApplicationContext()))
+
+        cropViewModel.uploadScanResult(result, verificationPage)
+
+        val files = argumentCaptor<File>()
+        verify(mockIdentityRepository, times(8)).uploadImage(any(), any(), files.capture(), any(), any())
+        val uploads = files.allValues.associate { file ->
+            file.name.removePrefix("${VERIFICATION_SESSION_ID}_") to requireNotNull(
+                BitmapFactory.decodeFile(file.absolutePath)
+            )
+        }
+        SelfieCropScenario(uploads).apply {
+            assertFullFramesAndSources()
+            block()
+        }
+    }
+
+    private class SelfieCropScenario(val uploads: Map<String, Bitmap>) {
+        fun assertFrontCropDimensions(width: Int, height: Int) {
+            listOf("face.jpeg", "face_first_crop_frame.jpeg", "face_last_crop_frame.jpeg").forEach { name ->
+                assertThat(uploads.getValue(name).width).isEqualTo(width)
+                assertThat(uploads.getValue(name).height).isEqualTo(height)
+            }
+        }
+
+        fun assertFullFramesAndSources() {
+            val expectedColors = mapOf(
+                "face_first_crop_frame.jpeg" to Color.RED,
+                "face_first_full_frame.jpeg" to Color.RED,
+                "face.jpeg" to Color.GREEN,
+                "face_full_frame.jpeg" to Color.GREEN,
+                "face_last_crop_frame.jpeg" to Color.BLUE,
+                "face_last_full_frame.jpeg" to Color.BLUE,
+                "face_left_full_frame.jpeg" to Color.CYAN,
+                "face_right_full_frame.jpeg" to Color.MAGENTA
+            )
+            assertThat(uploads.keys).containsExactlyElementsIn(expectedColors.keys)
+            expectedColors.forEach { (name, color) ->
+                val bitmap = uploads.getValue(name)
+                if ("full_frame" in name) {
+                    assertThat(bitmap.width).isEqualTo(400)
+                    assertThat(bitmap.height).isEqualTo(600)
+                }
+                val pixel = bitmap.getPixel(bitmap.width / 2, bitmap.height / 2)
+                assertThat(Color.red(pixel)).isWithin(2).of(Color.red(color))
+                assertThat(Color.green(pixel)).isWithin(2).of(Color.green(color))
+                assertThat(Color.blue(pixel)).isWithin(2).of(Color.blue(color))
+            }
         }
     }
 

@@ -696,6 +696,7 @@ internal class IdentityViewModel(
                 processSelfieScanResultAndUpload(
                     originalBitmap = selfieFrame.first.cameraPreviewImage.image,
                     boundingBox = selfieFrame.second.boundingBox,
+                    isFromMediaPipe = selfieFrame.second.isFromMediaPipe,
                     selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
                     isHighRes = uploadSpec.isHighRes,
                     selfie = uploadSpec.selfie,
@@ -955,6 +956,7 @@ internal class IdentityViewModel(
     private fun processSelfieScanResultAndUpload(
         originalBitmap: Bitmap,
         boundingBox: BoundingBox,
+        isFromMediaPipe: Boolean,
         selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
         isHighRes: Boolean,
         selfie: FaceDetectorTransitioner.Selfie,
@@ -963,10 +965,11 @@ internal class IdentityViewModel(
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
             if (isHighRes) {
-                identityIO.cropAndPadBitmap(
+                cropSelfieBitmap(
                     originalBitmap,
                     boundingBox,
-                    boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH * selfieCapturePage.highResImageCropPadding
+                    isFromMediaPipe,
+                    selfieCapturePage
                 )
             } else {
                 originalBitmap
@@ -1017,6 +1020,27 @@ internal class IdentityViewModel(
                 }
             )
         }
+    }
+
+    private fun cropSelfieBitmap(
+        originalBitmap: Bitmap,
+        boundingBox: BoundingBox,
+        isFromMediaPipe: Boolean,
+        selfieCapturePage: VerificationPageStaticContentSelfieCapturePage
+    ): Bitmap = if (isFromMediaPipe) {
+        identityIO.cropAndPadBitmapAsymmetric(
+            original = originalBitmap,
+            boundingBox = boundingBox,
+            sideFraction = selfieCapturePage.mediaPipeCropSidePadding ?: DEFAULT_MEDIA_PIPE_CROP_SIDE_PADDING,
+            topFraction = selfieCapturePage.mediaPipeCropTopPadding ?: DEFAULT_MEDIA_PIPE_CROP_TOP_PADDING,
+            bottomFraction = selfieCapturePage.mediaPipeCropBottomPadding ?: DEFAULT_MEDIA_PIPE_CROP_BOTTOM_PADDING
+        )
+    } else {
+        identityIO.cropAndPadBitmap(
+            originalBitmap,
+            boundingBox,
+            boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH * selfieCapturePage.highResImageCropPadding
+        )
     }
 
     private fun uploadSelfieImagesAndNotify(
@@ -2486,6 +2510,9 @@ internal class IdentityViewModel(
         const val BACK = "back"
         const val BYTES_IN_KB = 1024
         private const val NANOS_PER_MICRO = 1000L
+        private const val DEFAULT_MEDIA_PIPE_CROP_SIDE_PADDING = 0.5f
+        private const val DEFAULT_MEDIA_PIPE_CROP_TOP_PADDING = 0.45f
+        private const val DEFAULT_MEDIA_PIPE_CROP_BOTTOM_PADDING = 0.35f
         private const val DOCUMENT_FRONT_UPLOAD_STATE = "document_front_upload_state"
         private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
