@@ -835,7 +835,7 @@ class PaymentSheet internal constructor(
                     amount: Long,
                     currency: String,
                     setupFutureUse: SetupFutureUse? = null,
-                    captureMethod: CaptureMethod = CaptureMethod.Automatic,
+                    captureMethod: CaptureMethod,
                 ) : this(amount, currency, captureMethod) {
                     this.setupFutureUse = setupFutureUse
                 }
@@ -852,7 +852,7 @@ class PaymentSheet internal constructor(
                     amount: Long,
                     currency: String,
                     setupFutureUse: SetupFutureUse? = null,
-                    captureMethod: CaptureMethod = CaptureMethod.Automatic,
+                    captureMethod: CaptureMethod,
                     paymentMethodOptions: PaymentMethodOptions?,
                 ) : this(amount, currency, captureMethod) {
                     this.setupFutureUse = setupFutureUse

@@ -125,18 +125,6 @@ internal class PaymentSheetIntentConfigurationTest {
         )
     }
 
-    @Suppress("DEPRECATION")
-    @Test
-    fun `deprecated payment constructor defaults to automatic capture`() {
-        val state = IntentConfiguration.Mode.Payment(
-            amount = 1000,
-            currency = "usd",
-            setupFutureUse = null,
-        ).build()
-
-        assertThat(state.captureMethod).isEqualTo(IntentConfiguration.CaptureMethod.Automatic)
-    }
-
     @Test
     fun `build uses nested payment mode builder values at build time`() {
         val mode = IntentConfiguration.Mode.Payment(
