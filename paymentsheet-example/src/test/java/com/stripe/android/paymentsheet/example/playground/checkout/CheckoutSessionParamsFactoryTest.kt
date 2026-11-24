@@ -30,10 +30,6 @@ class CheckoutSessionParamsFactoryTest {
 
         val invoiceCreation = params.getValue("invoice_creation").jsonObject
         assertThat(invoiceCreation["enabled"]).isEqualTo(JsonPrimitive(true))
-        val invoiceData = invoiceCreation.getValue("invoice_data").jsonObject
-        assertThat(invoiceData.string("description")).isEqualTo("Checkout live post-purchase invoice")
-        assertThat(invoiceData.getValue("metadata").jsonObject.string("suite"))
-            .isEqualTo("checkout_live_billing_invoice")
     }
 
     @Test

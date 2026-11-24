@@ -97,13 +97,6 @@ internal object CheckoutSessionParamsFactory {
                 "invoice_creation",
                 buildJsonObject {
                     put("enabled", true)
-                    put(
-                        "invoice_data",
-                        buildJsonObject {
-                            put("description", "Checkout live post-purchase invoice")
-                            put("metadata", buildJsonObject { put("suite", "checkout_live_billing_invoice") })
-                        },
-                    )
                 },
             )
         }
