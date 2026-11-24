@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementFactory
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -40,11 +41,15 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class EmbeddedLinkInlineAuthControllerTest {
@@ -178,17 +183,144 @@ internal class EmbeddedLinkInlineAuthControllerTest {
     }
 
     @Test
-    fun `wrong code clears the card's code and keeps the card`() = runScenario {
+    fun `wrong code stays while the card shakes, then clears and keeps the card`() = runScenario {
         sendFirstCode()
-        accountManager.confirmVerificationResultProvider = {
-            Result.failure(APIException(stripeError = StripeError(code = "invalid", message = "Wrong code")))
-        }
-        val otpElement = enterCodeInCard()
 
-        accountManager.awaitConfirmVerificationCall()
+        val otpElement = rejectCodeInCard()
+
+        assertThat(otpElement.controller.fieldValue.value).isEqualTo(CODE)
+        assertThat(controller.card.value?.state?.errorMessage).isNotNull()
+
+        testScope.advanceTimeBy(REJECTED_CODE_CLEAR_DELAY - 1.milliseconds)
+        assertThat(otpElement.controller.fieldValue.value).isEqualTo(CODE)
+
+        testScope.advanceTimeBy(1.milliseconds)
+        testScope.runCurrent()
         assertThat(otpElement.controller.fieldValue.value).isEmpty()
         assertThat(controller.card.value?.state?.errorMessage).isNotNull()
         assertThat(controller.phase.value).isEqualTo(Phase.Expanded)
+    }
+
+    @Test
+    fun `typing a new code clears the error`() = runScenario {
+        sendFirstCode()
+        val otpElement = rejectCodeInCard()
+        testScope.advanceTimeBy(REJECTED_CODE_CLEAR_DELAY)
+        testScope.runCurrent()
+        assertThat(controller.card.value?.state?.errorMessage).isNotNull()
+
+        otpElement.controller.onValueChanged(index = 0, text = "1")
+        yield()
+
+        assertThat(controller.card.value?.state?.errorMessage).isNull()
+    }
+
+    @Test
+    fun `typing again clears a rejected code right away`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        val otpElement = rejectCodeInCard()
+
+        controller.onCodeTapped()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.Focused)
+        assertThat(otpElement.controller.fieldValue.value).isEmpty()
+    }
+
+    @Test
+    fun `tapping the code types it in the card when the layout allows`() = runScenario(
+        layoutCodeEntry = CodeEntry.Inline,
+    ) {
+        sendFirstCode()
+
+        controller.onCodeTapped()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.Focused)
+        assertThat(controller.isTyping.value).isTrue()
+        assertThat(controller.dialog.value).isNull()
+    }
+
+    @Test
+    fun `every tap that starts typing is logged`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        startTyping()
+
+        controller.endTyping()
+        controller.onCodeTapped()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.Focused)
+        assertThat(controller.isTyping.value).isTrue()
+    }
+
+    @Test
+    fun `ending typing keeps the card and its code`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        startTyping()
+
+        controller.endTyping()
+
+        assertThat(controller.isTyping.value).isFalse()
+        assertThat(controller.phase.value).isEqualTo(Phase.Expanded)
+        assertThat(controller.card.value).isNotNull()
+    }
+
+    @Test
+    fun `hidden card moves typing to the dialog`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        startTyping()
+
+        controller.onTypingObscured()
+
+        assertThat(controller.isTyping.value).isFalse()
+        assertDialogShown(DialogReason.Obscured)
+    }
+
+    @Test
+    fun `hidden card after typing ended doesn't open the dialog`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        startTyping()
+        controller.endTyping()
+
+        controller.onTypingObscured()
+
+        assertThat(controller.dialog.value).isNull()
+    }
+
+    @Test
+    fun `closing the card ends typing`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        startTyping()
+
+        controller.onClose()
+
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        assertThat(controller.isTyping.value).isFalse()
+    }
+
+    @Test
+    fun `verifying ends typing`() = runScenario(layoutCodeEntry = CodeEntry.Inline) {
+        sendFirstCode()
+        startTyping()
+
+        enterCodeInCard()
+
+        accountManager.awaitConfirmVerificationCall()
+        assertThat(host.verifiedCalls.awaitItem()).isTrue()
+        assertThat(controller.isTyping.value).isFalse()
+    }
+
+    @Test
+    fun `layout that can't keep the card above the keyboard uses the dialog`() = runScenario(
+        layoutCodeEntry = CodeEntry.Dialog(DialogReason.DoesNotFit),
+    ) {
+        sendFirstCode()
+
+        controller.onCodeTapped()
+
+        assertDialogShown(DialogReason.DoesNotFit)
+        assertThat(controller.isTyping.value).isFalse()
     }
 
     @Test
@@ -458,6 +590,31 @@ internal class EmbeddedLinkInlineAuthControllerTest {
         return otpElement
     }
 
+    private suspend fun Scenario.startTyping() {
+        controller.onCodeTapped()
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.Focused)
+        assertThat(controller.isTyping.value).isTrue()
+    }
+
+    /**
+     * Enters a code in the card that's rejected once the card has handled the typing, like a network response would.
+     */
+    private suspend fun Scenario.rejectCodeInCard(): OTPElement {
+        val response = CompletableDeferred<Unit>()
+        accountManager.confirmVerificationResultProvider = {
+            response.await()
+            Result.failure(APIException(stripeError = StripeError(code = "invalid", message = "Wrong code")))
+        }
+        val otpElement = enterCodeInCard()
+        accountManager.awaitConfirmVerificationCall()
+        yield()
+        response.complete(Unit)
+        // Lets the rejection reach the card's code.
+        yield()
+        return otpElement
+    }
+
     private fun enterCode(otpElement: OTPElement?) {
         requireNotNull(otpElement).controller.onValueChanged(index = 0, text = CODE)
     }
@@ -471,6 +628,7 @@ internal class EmbeddedLinkInlineAuthControllerTest {
         requiresAttestation: Boolean = false,
         attestationSucceeds: Boolean = true,
         isScreenReaderOn: Boolean = false,
+        layoutCodeEntry: CodeEntry = CodeEntry.Dialog(DialogReason.NotInWindow),
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val account = needsVerificationAccount(emailOtpRequiresAdditionalInfo = emailOtpRequiresAdditionalInfo)
@@ -521,7 +679,7 @@ internal class EmbeddedLinkInlineAuthControllerTest {
             requiresAttestation = requiresAttestation,
             prepareAttestation = { attestationSucceeds },
             isScreenReaderOn = { isScreenReaderOn },
-            layoutCodeEntry = { CodeEntry.Dialog(DialogReason.NotInWindow) },
+            layoutCodeEntry = { layoutCodeEntry },
             cardOtpElement = OTPElementFactory.create(),
             scope = scope,
         )
@@ -596,6 +754,11 @@ internal class EmbeddedLinkInlineAuthControllerTest {
 
     private companion object {
         const val CODE = "123456"
+
+        /**
+         * About as long as the card shakes for a rejected code.
+         */
+        val REJECTED_CODE_CLEAR_DELAY = 1500.milliseconds
         val ELEMENT = Any()
         val OTHER_ELEMENT = Any()
 

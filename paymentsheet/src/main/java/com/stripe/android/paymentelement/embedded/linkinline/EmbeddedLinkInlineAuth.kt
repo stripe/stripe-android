@@ -74,6 +74,11 @@ internal interface EmbeddedLinkInlineAuth {
      */
     val needsVisibility: StateFlow<Boolean>
 
+    /**
+     * Whether the code is being typed in the card.
+     */
+    val isTyping: StateFlow<Boolean>
+
     val isPresentingDialog: Boolean
 
     /**
@@ -149,6 +154,22 @@ internal interface EmbeddedLinkInlineAuth {
      * @param isReady Whether the host can show the dialog now, i.e. its window is resumed and focused.
      */
     fun registerDialogHost(isReady: () -> Boolean): AutoCloseable
+
+    /**
+     * Registers composed UI that decides whether the card's code can be typed in place, until the returned handle
+     * is closed.
+     */
+    fun registerTypingHost(codeEntry: () -> EmbeddedLinkInlineAuthController.CodeEntry): AutoCloseable
+
+    /**
+     * Ends typing in the card, e.g. on Done, when the card loses focus, or on `configure` or `confirm`.
+     */
+    fun endTyping()
+
+    /**
+     * The card stayed hidden behind the keyboard while typing, so the code is entered in the dialog instead.
+     */
+    fun onTypingObscured()
 }
 
 @Immutable
@@ -199,6 +220,7 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
             savedStateHandle[LINK_PICK_EMAIL_KEY] = value
         }
     private val dialogHosts = CopyOnWriteArrayList<() -> Boolean>()
+    private val typingHosts = CopyOnWriteArrayList<() -> CodeEntry>()
     private var isFirstConfiguration = true
     private var hasConfirmedIntent = false
 
@@ -227,6 +249,10 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
 
     override val needsVisibility: StateFlow<Boolean> = controller.flatMapLatestAsStateFlow {
         it?.needsVisibility ?: stateFlowOf(false)
+    }
+
+    override val isTyping: StateFlow<Boolean> = controller.flatMapLatestAsStateFlow {
+        it?.isTyping ?: stateFlowOf(false)
     }
 
     override val isPresentingDialog: Boolean
@@ -392,6 +418,23 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
         }
     }
 
+    override fun registerTypingHost(codeEntry: () -> CodeEntry): AutoCloseable {
+        typingHosts.add(codeEntry)
+        return AutoCloseable {
+            typingHosts.remove(codeEntry)
+            // Typing can't continue without the UI it happens in.
+            controller.value?.endTyping()
+        }
+    }
+
+    override fun endTyping() {
+        controller.value?.endTyping()
+    }
+
+    override fun onTypingObscured() {
+        controller.value?.onTypingObscured()
+    }
+
     override fun canPresentDialog(): Boolean {
         return dialogHosts.any { it() } &&
             !sheetStateHolder.sheetIsOpen &&
@@ -523,8 +566,8 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
             requiresAttestation = linkConfigurationCoordinator.linkGate(linkConfiguration).useAttestationEndpoints,
             prepareAttestation = { integrityRequestManager.prepare().isSuccess },
             isScreenReaderOn = ::isScreenReaderOn,
-            // Typing in the card needs keyboard handling, so codes are entered in the dialog for now.
-            layoutCodeEntry = { CodeEntry.Dialog(DialogReason.NotInWindow) },
+            // The most recently composed element decides, since it's the one on screen.
+            layoutCodeEntry = { typingHosts.lastOrNull()?.invoke() ?: CodeEntry.Dialog(DialogReason.NotInWindow) },
             cardOtpElement = OTPElementFactory.create(),
             scope = controllerScope,
         )
@@ -623,6 +666,7 @@ internal class DisabledEmbeddedLinkInlineAuth @Inject constructor() : EmbeddedLi
     override val card: StateFlow<EmbeddedLinkInlineCardUi?> = stateFlowOf(null)
     override val dialog: StateFlow<EmbeddedLinkVerificationDialogSession?> = stateFlowOf(null)
     override val needsVisibility: StateFlow<Boolean> = stateFlowOf(false)
+    override val isTyping: StateFlow<Boolean> = stateFlowOf(false)
     override val isPresentingDialog: Boolean = false
     override var activityHost: EmbeddedLinkInlineActivityHost? = null
     override val verifiesBeforeConfirming: Boolean = false
@@ -663,4 +707,12 @@ internal class DisabledEmbeddedLinkInlineAuth @Inject constructor() : EmbeddedLi
     override fun onAction(action: EmbeddedLinkInlineCardState.Action) = Unit
 
     override fun registerDialogHost(isReady: () -> Boolean): AutoCloseable = AutoCloseable {}
+
+    override fun registerTypingHost(
+        codeEntry: () -> EmbeddedLinkInlineAuthController.CodeEntry,
+    ): AutoCloseable = AutoCloseable {}
+
+    override fun endTyping() = Unit
+
+    override fun onTypingObscured() = Unit
 }

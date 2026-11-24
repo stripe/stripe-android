@@ -32,6 +32,8 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthController.CodeEntry
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthEvent.DialogReason
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationEligibility.IneligibleReason
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -193,6 +195,90 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
         eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
         accountManager.awaitStartVerificationCall()
         assertThat(startThreads.awaitItem()).isSameInstanceAs(elementThread)
+    }
+
+    @Test
+    fun `code is typed in the card when its layout allows`() = runScenario {
+        configure()
+        linkInlineAuth.registerTypingHost { CodeEntry.Inline }
+        sendCode()
+
+        linkInlineAuth.onCodeTapped()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.Focused)
+        assertThat(linkInlineAuth.isTyping.value).isTrue()
+    }
+
+    @Test
+    fun `code is entered in the dialog without UI to type it in`() = runScenario {
+        configure()
+        linkInlineAuth.registerDialogHost(isReady = { true })
+        sendCode()
+
+        linkInlineAuth.onCodeTapped()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.DialogShown(DialogReason.NotInWindow))
+        assertThat(linkInlineAuth.isTyping.value).isFalse()
+    }
+
+    @Test
+    fun `most recently composed element decides where the code is entered`() = runScenario {
+        configure()
+        linkInlineAuth.registerDialogHost(isReady = { true })
+        linkInlineAuth.registerTypingHost { CodeEntry.Inline }
+        linkInlineAuth.registerTypingHost { CodeEntry.Dialog(DialogReason.DoesNotFit) }
+        sendCode()
+
+        linkInlineAuth.onCodeTapped()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.DialogShown(DialogReason.DoesNotFit))
+    }
+
+    @Test
+    fun `typing ends when its UI goes away`() = runScenario {
+        configure()
+        val typingHost = linkInlineAuth.registerTypingHost { CodeEntry.Inline }
+        sendCode()
+        linkInlineAuth.onCodeTapped()
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+
+        typingHost.close()
+
+        assertThat(linkInlineAuth.isTyping.value).isFalse()
+    }
+
+    @Test
+    fun `ending typing keeps the card`() = runScenario {
+        configure()
+        linkInlineAuth.registerTypingHost { CodeEntry.Inline }
+        sendCode()
+        linkInlineAuth.onCodeTapped()
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+
+        linkInlineAuth.endTyping()
+
+        assertThat(linkInlineAuth.isTyping.value).isFalse()
+        assertThat(linkInlineAuth.card.value).isNotNull()
+    }
+
+    @Test
+    fun `hidden card moves typing to the dialog`() = runScenario {
+        configure()
+        linkInlineAuth.registerDialogHost(isReady = { true })
+        linkInlineAuth.registerTypingHost { CodeEntry.Inline }
+        sendCode()
+        linkInlineAuth.onCodeTapped()
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+
+        linkInlineAuth.onTypingObscured()
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.DialogShown(DialogReason.Obscured))
+        assertThat(linkInlineAuth.isTyping.value).isFalse()
+        assertThat(linkInlineAuth.isPresentingDialog).isTrue()
     }
 
     @Test
@@ -617,6 +703,17 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
         }
 
         fun linkAccountHolder() = accountManager.linkAccountHolder
+
+        /**
+         * Sends the card's code once the element is visible, and waits until the card takes a code.
+         */
+        suspend fun sendCode() {
+            linkInlineAuth.onElementVisible()
+            assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+                .isEqualTo(EmbeddedLinkInlineAuthEvent.Shown)
+            accountManager.awaitStartVerificationCall()
+            linkInlineAuth.card.first { it?.state?.isCodeEntryEnabled == true }
+        }
 
         /**
          * Sends the card's code and enters the right one in the card.

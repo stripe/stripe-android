@@ -38,6 +38,8 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
     ): ConfigureResult {
         return viewModelScope.async {
+            // The list is rebuilt, so typing in the inline Link card ends. The typed digits stay.
+            linkInlineAuth.endTyping()
             confirmationStateHolder.state = null
             configurationHandler.configure(
                 configuration = configuration,

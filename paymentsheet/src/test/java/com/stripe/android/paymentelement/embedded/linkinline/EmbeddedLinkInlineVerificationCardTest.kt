@@ -1,8 +1,16 @@
 package com.stripe.android.paymentelement.embedded.linkinline
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -152,38 +161,107 @@ internal class EmbeddedLinkInlineVerificationCardTest {
         composeRule.onNodeWithTag(EMBEDDED_LINK_INLINE_CARD_ERROR_TEST_TAG).assertDoesNotExist()
     }
 
+    @Test
+    fun `code doesn't take focus until it's typed in place`() = runScenario {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsNotFocused()
+        composeRule.onNodeWithTag(EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `typing in place focuses the code and moves the tap target aside`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsFocused()
+        composeRule.onNodeWithTag(EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `Done on the keyboard ends typing`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performImeAction()
+
+        doneCalls.awaitItem()
+    }
+
+    @Test
+    fun `ending typing clears the code's focus`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsFocused()
+
+        isTyping.value = false
+
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsNotFocused()
+        composeRule.onNodeWithTag(EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `host clearing focus interrupts typing`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsFocused()
+
+        composeRule.runOnIdle { requireNotNull(focusManager.value).clearFocus() }
+
+        typingInterruptedCalls.awaitItem()
+    }
+
+    @Test
+    fun `card leaving the screen interrupts typing`() = runScenario(isTyping = true) {
+        isShown.value = false
+
+        composeRule.onNodeWithTag(EMBEDDED_LINK_INLINE_CARD_TEST_TAG).assertDoesNotExist()
+        typingInterruptedCalls.awaitItem()
+    }
+
     private fun runScenario(
         state: EmbeddedLinkInlineCardState = cardState(),
+        isTyping: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val codeTapCalls = Turbine<Unit>()
+        val doneCalls = Turbine<Unit>()
+        val typingInterruptedCalls = Turbine<Unit>()
         val closeCalls = Turbine<Unit>()
         val switchAccountCalls = Turbine<Unit>()
         val actionCalls = Turbine<Action>()
+        val isTypingState = mutableStateOf(isTyping)
+        val isShown = mutableStateOf(true)
+        val focusManager = mutableStateOf<FocusManager?>(null)
 
         composeRule.setContent {
+            focusManager.value = LocalFocusManager.current
             StripeTheme {
-                EmbeddedLinkInlineVerificationCard(
-                    state = state,
-                    otpElement = OTPElementFactory.create(),
-                    linkBrand = LinkBrand.Link,
-                    rowStyle = RowStyle.FlatWithRadio.default,
-                    onCodeTapped = { codeTapCalls.add(Unit) },
-                    onClose = { closeCalls.add(Unit) },
-                    onSwitchAccount = { switchAccountCalls.add(Unit) },
-                    onAction = { actionCalls.add(it) },
-                )
+                if (isShown.value) {
+                    EmbeddedLinkInlineVerificationCard(
+                        state = state,
+                        otpElement = OTPElementFactory.create(),
+                        linkBrand = LinkBrand.Link,
+                        rowStyle = RowStyle.FlatWithRadio.default,
+                        isTyping = isTypingState.value,
+                        focusRegionModifier = Modifier,
+                        onCodeTapped = { codeTapCalls.add(Unit) },
+                        onDone = { doneCalls.add(Unit) },
+                        onTypingInterrupted = {
+                            typingInterruptedCalls.add(Unit)
+                            isTypingState.value = false
+                        },
+                        onClose = { closeCalls.add(Unit) },
+                        onSwitchAccount = { switchAccountCalls.add(Unit) },
+                        onAction = { actionCalls.add(it) },
+                    )
+                }
             }
         }
 
         Scenario(
             codeTapCalls = codeTapCalls,
+            doneCalls = doneCalls,
+            typingInterruptedCalls = typingInterruptedCalls,
             closeCalls = closeCalls,
             switchAccountCalls = switchAccountCalls,
             actionCalls = actionCalls,
+            isTyping = isTypingState,
+            isShown = isShown,
+            focusManager = focusManager,
         ).block()
 
         codeTapCalls.ensureAllEventsConsumed()
+        doneCalls.ensureAllEventsConsumed()
+        typingInterruptedCalls.ensureAllEventsConsumed()
         closeCalls.ensureAllEventsConsumed()
         switchAccountCalls.ensureAllEventsConsumed()
         actionCalls.ensureAllEventsConsumed()
@@ -191,13 +269,19 @@ internal class EmbeddedLinkInlineVerificationCardTest {
 
     private class Scenario(
         val codeTapCalls: Turbine<Unit>,
+        val doneCalls: Turbine<Unit>,
+        val typingInterruptedCalls: Turbine<Unit>,
         val closeCalls: Turbine<Unit>,
         val switchAccountCalls: Turbine<Unit>,
         val actionCalls: Turbine<Action>,
+        val isTyping: MutableState<Boolean>,
+        val isShown: MutableState<Boolean>,
+        val focusManager: State<FocusManager?>,
     )
 
     private companion object {
         const val EMAIL = "jenny.rosen@example.com"
+        const val FIRST_DIGIT_TEST_TAG = "OTP-0"
         const val RECIPIENT = "(•••) ••• ••55"
 
         val MENU = Actions.Menu(
