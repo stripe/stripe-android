@@ -167,7 +167,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
 
     // The card has its own border, so the separators right next to it are hidden.
     val linkInlineCardIndex = if (linkInlineCard != null) {
-        paymentMethods.indexOfFirst { it.code == PaymentMethod.Type.Link.code }
+        paymentMethods.indexOfFirst { it.isLinkWalletRow }
     } else {
         -1
     }
@@ -356,7 +356,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     }
 
     val linkInlineCardIndex = if (linkInlineCard != null) {
-        paymentMethods.indexOfFirst { it.code == PaymentMethod.Type.Link.code }
+        paymentMethods.indexOfFirst { it.isLinkWalletRow }
     } else {
         -1
     }
@@ -383,7 +383,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
             )
         }
 
-        if (item.code == PaymentMethod.Type.Link.code && lastLinkInlineCard.value != null) {
+        if (item.isLinkWalletRow && lastLinkInlineCard.value != null) {
             Crossfade(
                 targetState = linkInlineCard != null,
                 animationSpec = tween(durationMillis = EMBEDDED_LINK_INLINE_CARD_ANIMATION_MILLIS),
@@ -470,6 +470,11 @@ private fun EmbeddedLinkInlineCardSlot(
         linkInlineCard()
     }
 }
+
+// Instant Bank Payments and Link card brand rows also use the Link code, so the wallet row is told apart by its
+// synthetic code.
+private val DisplayablePaymentMethod.isLinkWalletRow: Boolean
+    get() = syntheticCode == PaymentMethod.Type.Link.code
 
 private val EmbeddedLinkInlineCardVerticalPadding = 8.dp
 
