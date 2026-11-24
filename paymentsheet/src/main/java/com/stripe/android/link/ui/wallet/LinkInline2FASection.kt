@@ -34,6 +34,7 @@ import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
+import com.stripe.android.link.ui.verification.VerificationSandboxBanner
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
@@ -66,6 +67,10 @@ internal fun LinkInline2FASection(
 
             // Verification instruction message
             Title(verificationState)
+
+            if (verificationState.isTestMode) {
+                VerificationSandboxBanner()
+            }
 
             // OTP input
             OTPSection(
@@ -225,6 +230,7 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
     )
 
     val verificationState = VerificationViewState(
+        isTestMode = false,
         authFlow = null,
         isProcessing = false,
         requestFocus = true,
@@ -255,6 +261,7 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
     )
 
     val verificationState = VerificationViewState(
+        isTestMode = false,
         authFlow = null,
         isProcessing = false,
         requestFocus = true,
@@ -289,6 +296,7 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
     )
 
     val verificationState = VerificationViewState(
+        isTestMode = false,
         authFlow = null,
         isProcessing = false,
         requestFocus = true,
@@ -325,6 +333,7 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
     )
 
     val verificationState = VerificationViewState(
+        isTestMode = false,
         authFlow = null,
         isProcessing = true,
         requestFocus = false,
@@ -361,6 +370,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
     )
 
     val verificationState = VerificationViewState(
+        isTestMode = false,
         authFlow = null,
         isProcessing = false,
         requestFocus = false,

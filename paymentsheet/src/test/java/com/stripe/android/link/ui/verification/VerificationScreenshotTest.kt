@@ -82,6 +82,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(content = ""),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             requestFocus = false,
                             redactedPhoneNumber = "(•••) ••• ••91",
@@ -102,6 +103,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             requestFocus = false,
                             redactedPhoneNumber = "(•••) ••• ••91",
@@ -122,6 +124,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             isProcessing = true,
                             requestFocus = false,
@@ -142,6 +145,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             isSendingNewCode = true,
                             requestFocus = false,
@@ -162,6 +166,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             isSendingNewCode = false,
                             requestFocus = false,
@@ -182,6 +187,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(content = ""),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             requestFocus = false,
                             redactedPhoneNumber = "(•••) ••• ••91",
@@ -202,6 +208,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             requestFocus = false,
                             redactedPhoneNumber = "(•••) ••• ••91",
@@ -222,6 +229,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             isSendingNewCode = false,
                             requestFocus = false,
@@ -242,6 +250,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(content = ""),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             isProcessingWebAuth = true,
                             isDialog = false,
@@ -264,6 +273,7 @@ internal class VerificationScreenshotTest(
                     content = TestCase.Content(
                         otpElement = otpElementWithContent(content = ""),
                         state = VerificationViewState(
+                            isTestMode = false,
                             authFlow = null,
                             isProcessingWebAuth = true,
                             isDialog = true,
@@ -327,6 +337,7 @@ internal class VerificationScreenshotTest(
             content = TestCase.Content(
                 otpElement = otpElementWithContent(content = ""),
                 state = VerificationViewState(
+                    isTestMode = false,
                     authFlow = authFlow,
                     requestFocus = false,
                     redactedPhoneNumber = "(•••) ••• ••91",
