@@ -60,7 +60,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePaddingRelative(systemBars.bottom)
+            view.updatePaddingRelative(bottom = systemBars.bottom)
             WindowInsetsCompat.CONSUMED
         }
     }
