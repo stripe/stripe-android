@@ -3,6 +3,8 @@ package com.stripe.android.identity.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.util.Size
@@ -11,8 +13,11 @@ import com.stripe.android.camera.framework.image.constrainToSize
 import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.cropWithFill
 import com.stripe.android.camera.framework.image.size
-import com.stripe.android.camera.framework.image.toJpeg
+import com.stripe.android.camera.framework.util.centerOn
+import com.stripe.android.camera.framework.util.intersectionWith
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
+import com.stripe.android.camera.framework.util.move
+import com.stripe.android.camera.framework.util.toRect
 import com.stripe.android.identity.ml.BoundingBox
 import java.io.File
 import java.io.FileOutputStream
@@ -49,32 +54,24 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         maxDimension: Int,
         compressionQuality: Float
     ): File {
-        context.contentResolver.openInputStream(originalUri).use { inputStream ->
-            File(
-                context.filesDir,
-                StringBuilder().also { nameBuilder ->
-                    nameBuilder.append(verificationId)
-                    side?.let {
-                        nameBuilder.append("_$side")
-                    }
-                    if (isFullFrame) {
-                        nameBuilder.append("_full_frame")
-                    }
-                    nameBuilder.append(".jpeg")
-                }.toString()
-            ).let { fileToSave ->
-                FileOutputStream(fileToSave, false).use { fileOutputStream ->
-                    fileOutputStream.write(
-                        BitmapFactory.decodeStream(inputStream).constrainToSize(
-                            Size(
-                                maxDimension,
-                                maxDimension
-                            )
-                        ).toJpeg(quality = (compressionQuality * 100).toInt())
-                    )
-                }
-                return fileToSave
-            }
+        val bitmap = context.contentResolver.openInputStream(originalUri)?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+        } ?: throw IOException("Unable to decode identity image")
+        try {
+            return resizeBitmapAndCreateFileToUpload(
+                bitmap = bitmap,
+                verificationId = verificationId,
+                fileName = buildString {
+                    append(verificationId)
+                    side?.let { append("_$it") }
+                    if (isFullFrame) append("_full_frame")
+                    append(".jpeg")
+                },
+                maxDimension = maxDimension,
+                compressionQuality = compressionQuality
+            )
+        } finally {
+            bitmap.recycle()
         }
     }
 
@@ -85,21 +82,17 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         maxDimension: Int,
         compressionQuality: Float
     ): File {
-        File(
-            context.filesDir,
-            fileName
-        ).let { fileToSave ->
-            FileOutputStream(fileToSave, false).use { fileOutputStream ->
-                fileOutputStream.write(
-                    bitmap.constrainToSize(
-                        Size(
-                            maxDimension,
-                            maxDimension
-                        )
-                    ).toJpeg(quality = (compressionQuality * 100).toInt())
-                )
+        val resized = bitmap.constrainToSize(Size(maxDimension, maxDimension))
+        val quality = (compressionQuality * MAX_COMPRESSION_QUALITY).toInt()
+        try {
+            return writeImageFile(File(context.filesDir, fileName)) { output ->
+                if (!resized.compress(Bitmap.CompressFormat.JPEG, quality, output)) {
+                    throw IOException("Unable to encode identity image")
+                }
             }
-            return fileToSave
+        } finally {
+            // Camera frames can also be used by other uploads and the scanner.
+            if (resized !== bitmap) resized.recycle()
         }
     }
 
@@ -122,12 +115,21 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
 
         return File(context.cacheDir, asset.fileName).also { file ->
             if (!file.exists()) {
-                context.assets.open(asset.path).use { inputStream ->
-                    FileOutputStream(file, false).use { fileOutputStream ->
-                        inputStream.copyTo(fileOutputStream)
-                    }
+                writeImageFile(file) { output ->
+                    context.assets.open(asset.path).use { input -> input.copyTo(output) }
                 }
             }
+        }
+    }
+
+    private fun writeImageFile(file: File, write: (FileOutputStream) -> Unit): File {
+        var completed = false
+        try {
+            FileOutputStream(file, false).use(write)
+            completed = true
+            return file
+        } finally {
+            if (!completed) file.delete()
         }
     }
 
@@ -136,22 +138,42 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         boundingBox: BoundingBox,
         paddingSize: Float
     ): Bitmap {
-        val modelInput = original.cropCenter(
-            maxAspectRatioInSize(
-                original.size(),
-                1f
-            )
-        )
+        val modelSize = maxAspectRatioInSize(original.size(), 1f)
+        if (original.config != Bitmap.Config.ARGB_8888) {
+            // Bitmap.createBitmap(source, ...) can normalize other configs. Retain that behavior.
+            val modelInput = original.cropCenter(modelSize)
+            return modelInput.cropWithFill(cropRegion(modelInput.width, modelInput.height, boundingBox, paddingSize))
+        }
 
-        return modelInput.cropWithFill(
-            Rect(
-                (modelInput.width * boundingBox.left - paddingSize).toInt(),
-                (modelInput.height * boundingBox.top - paddingSize).toInt(),
-                (modelInput.width * (boundingBox.left + boundingBox.width) + paddingSize).toInt(),
-                (modelInput.height * (boundingBox.top + boundingBox.height) + paddingSize).toInt()
+        val modelBounds = modelSize.centerOn(original.size().toRect())
+        // centerOn rounds odd dimensions down; use the actual centered bounds to preserve existing crops.
+        val region = cropRegion(modelBounds.width(), modelBounds.height(), boundingBox, paddingSize)
+        val intersection = Rect(0, 0, modelBounds.width(), modelBounds.height()).intersectionWith(region)
+        val result = Bitmap.createBitmap(region.width(), region.height(), Bitmap.Config.ARGB_8888)
+        var completed = false
+        try {
+            val canvas = Canvas(result)
+            canvas.drawColor(Color.GRAY)
+            // Draw directly from the camera frame instead of allocating a center crop and an intersection crop.
+            canvas.drawBitmap(
+                original,
+                intersection.move(modelBounds.left, modelBounds.top),
+                intersection.move(-region.left, -region.top),
+                null
             )
-        )
+            completed = true
+            return result
+        } finally {
+            if (!completed) result.recycle()
+        }
     }
+
+    private fun cropRegion(width: Int, height: Int, boundingBox: BoundingBox, padding: Float): Rect = Rect(
+        (width * boundingBox.left - padding).toInt(),
+        (height * boundingBox.top - padding).toInt(),
+        (width * (boundingBox.left + boundingBox.width) + padding).toInt(),
+        (height * (boundingBox.top + boundingBox.height) + padding).toInt()
+    )
 
     override fun createTFLiteFile(modelUrl: String): File {
         return File(
@@ -192,3 +214,5 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         val fileName: String
     )
 }
+
+private const val MAX_COMPRESSION_QUALITY = 100

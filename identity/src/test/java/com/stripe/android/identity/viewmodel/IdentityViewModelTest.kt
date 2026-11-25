@@ -5,9 +5,12 @@ import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.CameraPreviewImage
@@ -64,16 +67,30 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieModels
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.FakeIdentityIO
+import com.stripe.android.identity.utils.FakeIdentityIO.Operation
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.TestModeImage
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.ViewModelStoreTestRule
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -92,8 +109,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertFailsWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class IdentityViewModelTest {
     @get:Rule
@@ -101,6 +122,9 @@ internal class IdentityViewModelTest {
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
@@ -160,8 +184,14 @@ internal class IdentityViewModelTest {
     private val mockOnReadyToSubmit = mock<() -> Unit>()
     private val mockTfLiteInitializer = mock<InterpreterInitializer>()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val viewModel = IdentityViewModel(
+    private val viewModel = createViewModel()
+
+    private fun createViewModel(
+        identityIO: IdentityIO = mockIdentityIO,
+        repository: IdentityRepository = mockIdentityRepository,
+        workContext: CoroutineContext = UnconfinedTestDispatcher(),
+        savedStateHandle: SavedStateHandle = mockSavedStateHandle,
+    ) = IdentityViewModel(
         ApplicationProvider.getApplicationContext(),
         IdentityVerificationSheetContract.Args(
             verificationSessionId = VERIFICATION_SESSION_ID,
@@ -174,16 +204,16 @@ internal class IdentityViewModelTest {
             injectorKey = DUMMY_INJECTOR_KEY,
             presentTime = 0
         ),
-        mockIdentityRepository,
+        repository,
         mockIdentityModelFetcher,
-        mockIdentityIO,
+        identityIO,
         mockIdentityAnalyticsRequestFactory,
         mockScreenTracker,
         mock(),
         mockTfLiteInitializer,
-        mockSavedStateHandle,
+        savedStateHandle,
         mock(),
-        UnconfinedTestDispatcher(),
+        workContext,
         mock()
     ).also { viewModelStoreRule.track(it) }
 
@@ -1450,6 +1480,470 @@ internal class IdentityViewModelTest {
         paramsCallback(
             failedCollectedDataParam
         )
+    }
+
+    @Test
+    fun `manual image shows loading before preparation is dispatched`() = runImageScenario {
+        viewModel.documentFrontUploadedState.test {
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.IDLE)
+            selectUri()
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.LOADING)
+            identityIO.calls.expectNoEvents()
+            repository.uploadCalls.expectNoEvents()
+
+            scope.advanceUntilIdle()
+
+            assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.READ_URI)
+            assertThat(repository.uploadCalls.awaitItem().file).isEqualTo(IMAGE_FILE)
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.SUCCESS)
+        }
+    }
+
+    @Test
+    fun `manual image and test mode asset are prepared off Main`() = runImageScenario(realWorker = true) {
+        val mainThread = Thread.currentThread()
+        viewModel.documentFrontUploadedState.test {
+            awaitItem()
+            selectUri(isLiveMode = false)
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.LOADING)
+            val read = identityIO.calls.awaitItem()
+            assertThat(read.operation).isEqualTo(Operation.READ_URI)
+            assertThat(read.thread).isNotSameInstanceAs(mainThread)
+            val placeholder = identityIO.calls.awaitItem()
+            assertThat(placeholder.operation).isEqualTo(Operation.TEST_MODE)
+            assertThat(placeholder.thread).isNotSameInstanceAs(mainThread)
+            val upload = repository.uploadCalls.awaitItem()
+            assertThat(upload.file).isEqualTo(TEST_MODE_DOCUMENT_FRONT_FILE)
+            assertThat(upload.thread).isSameInstanceAs(mainThread)
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.SUCCESS)
+        }
+    }
+
+    @Test
+    fun `manual bitmap is prepared off Main`() = runImageScenario(realWorker = true) {
+        val mainThread = Thread.currentThread()
+        viewModel.documentFrontUploadedState.test {
+            awaitItem()
+            selectBitmap()
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.LOADING)
+            val preparation = identityIO.calls.awaitItem()
+            assertThat(preparation.operation).isEqualTo(Operation.RESIZE_BITMAP)
+            assertThat(preparation.thread).isNotSameInstanceAs(mainThread)
+            repository.uploadCalls.awaitItem()
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.SUCCESS)
+        }
+    }
+
+    @Test
+    fun `scanned document cropping and resizing run off Main`() = runImageScenario(realWorker = true) {
+        val mainThread = Thread.currentThread()
+        viewModel.documentFrontUploadedState.test {
+            awaitItem()
+            viewModel.uploadScanResult(FINAL_ID_DETECTOR_RESULT_FRONT, mockVerificationPage)
+            repeat(3) {
+                assertThat(identityIO.calls.awaitItem().thread).isNotSameInstanceAs(mainThread)
+            }
+            repeat(2) { repository.uploadCalls.awaitItem() }
+            var state = awaitItem()
+            while (!state.isUploaded()) state = awaitItem()
+            assertThat(state.highResResult.status).isEqualTo(Status.SUCCESS)
+            assertThat(state.lowResResult.status).isEqualTo(Status.SUCCESS)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `selfie cropping and resizing run off Main`() = runImageScenario(realWorker = true) {
+        val mainThread = Thread.currentThread()
+        viewModel.selfieUploadState.test {
+            awaitItem()
+            viewModel.uploadScanResult(FINAL_FACE_DETECTOR_RESULT, mockVerificationPage)
+            // Three cropped high-resolution images and three full-frame images.
+            repeat(9) {
+                assertThat(identityIO.calls.awaitItem().thread).isNotSameInstanceAs(mainThread)
+            }
+            repeat(6) { repository.uploadCalls.awaitItem() }
+            var state = awaitItem()
+            while (state.isAnyLoading()) state = awaitItem()
+            assertThat(state.bestHighResResult.status).isEqualTo(Status.SUCCESS)
+            assertThat(state.lastLowResResult.status).isEqualTo(Status.SUCCESS)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `bitmap preparation failure reports an error without uploading`() = runImageScenario {
+        val failure = IOException("Cannot encode image")
+        identityIO.preparationFailure = failure
+        selectBitmap()
+        scope.advanceUntilIdle()
+
+        assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.RESIZE_BITMAP)
+        val result = viewModel.documentFrontUploadedState.value.highResResult
+        assertThat(result.status).isEqualTo(Status.ERROR)
+        assertThat(result.throwable?.cause).isInstanceOf(IOException::class.java)
+        assertThat(result.throwable?.cause?.message).isEqualTo(failure.message)
+        repository.uploadCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `high resolution preparation failure still uploads the full frame`() = runImageScenario {
+        identityIO.cropFailure = IOException("Cannot crop image")
+        viewModel.uploadScanResult(FINAL_ID_DETECTOR_RESULT_FRONT, mockVerificationPage)
+        scope.advanceUntilIdle()
+
+        assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.CROP)
+        assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.RESIZE_BITMAP)
+        repository.uploadCalls.awaitItem()
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.ERROR)
+        assertThat(viewModel.documentFrontUploadedState.value.lowResResult.status).isEqualTo(Status.SUCCESS)
+    }
+
+    @Test
+    fun `invalid file purpose reports a preparation error`() = runImageScenario {
+        viewModel.uploadManualResult(
+            uri = Uri.EMPTY,
+            isFront = true,
+            isLiveMode = true,
+            docCapturePage = DOCUMENT_CAPTURE.copy(filePurpose = "unsupported"),
+            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+            scanType = IdentityScanState.ScanType.DOC_FRONT
+        )
+        scope.advanceUntilIdle()
+
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.ERROR)
+        identityIO.calls.expectNoEvents()
+        repository.uploadCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `clearing a queued document cancels its preparation`() = runImageScenario {
+        selectUri()
+        assertThat(viewModel.documentFrontUploadedState.value.isLoading()).isTrue()
+        viewModel.clearDocumentUploadedState()
+        scope.advanceUntilIdle()
+
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.IDLE)
+        identityIO.calls.expectNoEvents()
+        repository.uploadCalls.expectNoEvents()
+        verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+            throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `clearing queued selfies cancels their preparation`() = runImageScenario {
+        viewModel.uploadScanResult(FINAL_FACE_DETECTOR_RESULT, mockVerificationPage)
+        assertThat(viewModel.selfieUploadState.value.isAnyLoading()).isTrue()
+        viewModel.clearSelfieUploadedState()
+        scope.advanceUntilIdle()
+
+        assertThat(viewModel.selfieUploadState.value.bestHighResResult.status).isEqualTo(Status.IDLE)
+        identityIO.calls.expectNoEvents()
+        repository.uploadCalls.expectNoEvents()
+        verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+            throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `preparation cancellation is not reported as an upload error`() = runImageScenario {
+        identityIO.preparationFailure = CancellationException("Cancelled image")
+        selectUri()
+        scope.advanceUntilIdle()
+
+        identityIO.calls.awaitItem()
+        repository.uploadCalls.expectNoEvents()
+        verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+            throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `upload cancellation is not reported as an upload error`() = runImageScenario {
+        repository.result = Result.failure(CancellationException("Cancelled upload"))
+        selectUri()
+        scope.advanceUntilIdle()
+
+        identityIO.calls.awaitItem()
+        repository.uploadCalls.awaitItem()
+        verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+            throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `replacement waits for an old upload to release its file`() = runImageScenario {
+        val release = CompletableDeferred<Unit>()
+        repository.uploadGate = release
+        repository.finishUploadOnCancellation = true
+        try {
+            selectUri(Uri.parse("content://image/old"))
+            scope.advanceUntilIdle()
+            identityIO.calls.awaitItem()
+            repository.uploadCalls.awaitItem()
+
+            val replacement = Uri.parse("content://image/new")
+            selectUri(replacement)
+            scope.advanceUntilIdle()
+            identityIO.calls.expectNoEvents()
+            repository.uploadCalls.expectNoEvents()
+
+            release.complete(Unit)
+            scope.advanceUntilIdle()
+            assertThat(identityIO.calls.awaitItem().uri).isEqualTo(replacement)
+            repository.uploadCalls.awaitItem()
+            assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.SUCCESS)
+            verify(mockIdentityAnalyticsRequestFactory, times(1)).imageUpload(
+                anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()
+            )
+        } finally {
+            release.complete(Unit)
+        }
+    }
+
+    @Test
+    fun `clearing a running preparation prevents stale upload and state`() = runImageScenario(realWorker = true) {
+        val release = CountDownLatch(1)
+        identityIO.preparationGate = release
+        try {
+            selectUri()
+            identityIO.calls.awaitItem()
+            viewModel.clearDocumentUploadedState()
+        } finally {
+            release.countDown()
+        }
+        // Joining children also waits for the non-interruptible preparation to return.
+        viewModel.viewModelScope.coroutineContext[kotlinx.coroutines.Job]!!.children
+            .filter { it.isCancelled }.forEach { it.join() }
+        scope.advanceUntilIdle()
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.IDLE)
+        repository.uploadCalls.expectNoEvents()
+        verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+            throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `replacement during encoding only uploads the newest selection`() = runImageScenario(realWorker = true) {
+        val release = CountDownLatch(1)
+        val original = Uri.parse("content://image/original")
+        val replacement = Uri.parse("content://image/replacement")
+        val replacementFile = File("replacement.jpeg")
+        identityIO.filesByUri = mapOf(original to File("original.jpeg"), replacement to replacementFile)
+        identityIO.preparationGate = release
+        viewModel.documentFrontUploadedState.test {
+            awaitItem()
+            try {
+                selectUri(original)
+                assertThat(awaitItem().highResResult.status).isEqualTo(Status.LOADING)
+                assertThat(identityIO.calls.awaitItem().uri).isEqualTo(original)
+                selectUri(Uri.parse("content://image/superseded"))
+                selectUri(replacement)
+                scope.runCurrent()
+                identityIO.calls.expectNoEvents()
+                repository.uploadCalls.expectNoEvents()
+            } finally {
+                release.countDown()
+            }
+            assertThat(identityIO.calls.awaitItem().uri).isEqualTo(replacement)
+            assertThat(repository.uploadCalls.awaitItem().file).isEqualTo(replacementFile)
+            assertThat(awaitItem().highResResult.status).isEqualTo(Status.SUCCESS)
+            verify(mockIdentityAnalyticsRequestFactory, times(1)).imageUpload(
+                anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()
+            )
+        }
+    }
+
+    @Test
+    fun `rapid queued selections prepare and upload only the latest image`() = runImageScenario {
+        val latest = Uri.parse("content://image/latest")
+        selectUri(Uri.parse("content://image/first"))
+        selectUri(Uri.parse("content://image/second"))
+        selectUri(latest)
+        scope.advanceUntilIdle()
+
+        assertThat(identityIO.calls.awaitItem().uri).isEqualTo(latest)
+        repository.uploadCalls.awaitItem()
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.SUCCESS)
+    }
+
+    @Test
+    fun `late upload failure after reset does not publish state or error telemetry`() = runImageScenario {
+        val release = CompletableDeferred<Unit>()
+        repository.uploadGate = release
+        repository.finishUploadOnCancellation = true
+        repository.result = Result.failure(IOException("Late network failure"))
+        viewModel.documentFrontUploadedState.test {
+            awaitItem()
+            try {
+                selectUri()
+                assertThat(awaitItem().highResResult.status).isEqualTo(Status.LOADING)
+                scope.advanceUntilIdle()
+                identityIO.calls.awaitItem()
+                repository.uploadCalls.awaitItem()
+                viewModel.clearDocumentUploadedState()
+                assertThat(awaitItem().highResResult.status).isEqualTo(Status.IDLE)
+            } finally {
+                release.complete(Unit)
+            }
+            scope.advanceUntilIdle()
+            expectNoEvents()
+            verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+                throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+            )
+        }
+    }
+
+    @Test
+    @Suppress("RestrictedApi") // Use the same clearing mechanism as ViewModelProvider's owner.
+    fun `clearing the ViewModel during encoding prevents upload`() = runImageScenario(realWorker = true) {
+        val store = ViewModelStore().apply { put("identity", viewModel) }
+        val viewModelJob = requireNotNull(viewModel.viewModelScope.coroutineContext[Job])
+        val release = CountDownLatch(1)
+        identityIO.preparationGate = release
+        viewModel.documentFrontUploadedState.test {
+            awaitItem()
+            try {
+                selectUri()
+                assertThat(awaitItem().highResResult.status).isEqualTo(Status.LOADING)
+                identityIO.calls.awaitItem()
+                store.clear()
+                assertThat(viewModelJob.isCancelled).isTrue()
+            } finally {
+                release.countDown()
+                store.clear()
+            }
+            viewModelJob.join()
+            repository.uploadCalls.expectNoEvents()
+            expectNoEvents()
+            verify(mockIdentityAnalyticsRequestFactory, never()).genericError(
+                throwable = any(), additionalMetadata = any(), overrideMessage = anyOrNull()
+            )
+        }
+    }
+
+    @Test
+    fun `a pending front upload does not block the back upload`() = runImageScenario {
+        val front = Uri.parse("content://image/front")
+        val back = Uri.parse("content://image/back")
+        val frontFile = File("front.jpeg")
+        val backFile = File("back.jpeg")
+        val release = CompletableDeferred<Unit>()
+        identityIO.filesByUri = mapOf(front to frontFile, back to backFile)
+        repository.uploadGatesByFile = mapOf(frontFile to release)
+        try {
+            selectUri(front)
+            scope.advanceUntilIdle()
+            assertThat(identityIO.calls.awaitItem().uri).isEqualTo(front)
+            assertThat(repository.uploadCalls.awaitItem().file).isEqualTo(frontFile)
+            assertThat(viewModel.documentFrontUploadedState.value.isLoading()).isTrue()
+
+            selectUri(back, isFront = false)
+            scope.advanceUntilIdle()
+            assertThat(identityIO.calls.awaitItem().uri).isEqualTo(back)
+            assertThat(repository.uploadCalls.awaitItem().file).isEqualTo(backFile)
+            assertThat(viewModel.documentBackUploadedState.value.highResResult.status).isEqualTo(Status.SUCCESS)
+            assertThat(viewModel.documentFrontUploadedState.value.isLoading()).isTrue()
+        } finally {
+            release.complete(Unit)
+        }
+        scope.advanceUntilIdle()
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.SUCCESS)
+    }
+
+    @Test
+    fun `selfie crop failures still upload every full frame`() = runImageScenario {
+        identityIO.cropFailure = IOException("Cannot crop selfie")
+        viewModel.uploadScanResult(FINAL_FACE_DETECTOR_RESULT, mockVerificationPage)
+        scope.advanceUntilIdle()
+
+        repeat(3) {
+            assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.CROP)
+            assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.RESIZE_BITMAP)
+            repository.uploadCalls.awaitItem()
+        }
+        val state = viewModel.selfieUploadState.value
+        assertThat(state.firstHighResResult.status).isEqualTo(Status.ERROR)
+        assertThat(state.bestHighResResult.status).isEqualTo(Status.ERROR)
+        assertThat(state.lastHighResResult.status).isEqualTo(Status.ERROR)
+        assertThat(state.firstLowResResult.status).isEqualTo(Status.SUCCESS)
+        assertThat(state.bestLowResResult.status).isEqualTo(Status.SUCCESS)
+        assertThat(state.lastLowResResult.status).isEqualTo(Status.SUCCESS)
+    }
+
+    @Test
+    fun `missing test mode asset fails without uploading the real document`() = runImageScenario {
+        identityIO.placeholderFailure = IOException("Missing test-mode image")
+        selectUri(isLiveMode = false)
+        scope.advanceUntilIdle()
+
+        assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.READ_URI)
+        assertThat(identityIO.calls.awaitItem().operation).isEqualTo(Operation.TEST_MODE)
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.ERROR)
+        repository.uploadCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `a failed preparation releases the slot for a successful retry`() = runImageScenario {
+        identityIO.preparationFailure = IOException("Failed image read")
+        selectUri()
+        scope.advanceUntilIdle()
+        identityIO.calls.awaitItem()
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.ERROR)
+        repository.uploadCalls.expectNoEvents()
+
+        identityIO.preparationFailure = null
+        val retry = Uri.parse("content://image/retry")
+        selectUri(retry)
+        scope.advanceUntilIdle()
+        assertThat(identityIO.calls.awaitItem().uri).isEqualTo(retry)
+        repository.uploadCalls.awaitItem()
+        assertThat(viewModel.documentFrontUploadedState.value.highResResult.status).isEqualTo(Status.SUCCESS)
+    }
+
+    private fun runImageScenario(
+        realWorker: Boolean = false,
+        block: suspend ImageScenario.() -> Unit,
+    ) = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val identityIO = FakeIdentityIO(IMAGE_FILE, CROPPED_BITMAP, TEST_MODE_DOCUMENT_FRONT_FILE)
+        val repository = FakeImageUploadRepository(mockIdentityRepository)
+        val viewModel = createViewModel(
+            identityIO = identityIO,
+            repository = repository,
+            workContext = if (realWorker) Dispatchers.IO else StandardTestDispatcher(testScheduler),
+            savedStateHandle = SavedStateHandle(),
+        )
+        try {
+            ImageScenario(viewModel, identityIO, repository, this).block()
+            identityIO.ensureAllEventsConsumed()
+            repository.ensureAllEventsConsumed()
+        } finally {
+            viewModel.viewModelScope.cancel()
+        }
+    }
+
+    private data class ImageScenario(
+        val viewModel: IdentityViewModel,
+        val identityIO: FakeIdentityIO,
+        val repository: FakeImageUploadRepository,
+        val scope: TestScope,
+    ) {
+        fun selectUri(uri: Uri = Uri.EMPTY, isLiveMode: Boolean = true, isFront: Boolean = true) {
+            viewModel.uploadManualResult(
+                uri, isFront, isLiveMode, DOCUMENT_CAPTURE,
+                DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                if (isFront) IdentityScanState.ScanType.DOC_FRONT else IdentityScanState.ScanType.DOC_BACK
+            )
+        }
+
+        fun selectBitmap() {
+            viewModel.uploadManualResult(
+                INPUT_BITMAP, true, true, DOCUMENT_CAPTURE,
+                DocumentUploadParam.UploadMethod.MANUALCAPTURE, IdentityScanState.ScanType.DOC_FRONT
+            )
+        }
     }
 
     private companion object {
