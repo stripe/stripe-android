@@ -50,6 +50,9 @@ object CleanupChromeRule : TestRule {
 
         val descriptors = uiAutomation.executeShellCommandRw("sh")
         ParcelFileDescriptor.AutoCloseOutputStream(descriptors[1]).bufferedWriter().use { writer ->
+            // User builds such as Play Store images only read the command-line file for the debug app.
+            writer.write("am set-debug-app --persistent com.android.chrome")
+            writer.newLine()
             writer.write(
                 "echo chrome --disable-fre --no-default-browser-check " +
                     "--disable-features=Vulkan " +
