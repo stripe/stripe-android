@@ -3,6 +3,7 @@ package com.stripe.android.identity.navigation
 import android.content.Context
 import android.util.Log
 import androidx.navigation.NavController
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNSET_BUTTON_TEXT
@@ -71,9 +72,18 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 
 /**
  * Navigate to the final error screen with default values, clicking the action button would return
- * to the previous screen.
+ * to the previous screen. If [cause] shows that the ephemeral key no longer works, navigate to the
+ * final error screen instead.
  */
-internal fun NavController.navigateToErrorScreenWithDefaultValues(context: Context) {
+internal fun NavController.navigateToErrorScreenWithDefaultValues(
+    context: Context,
+    cause: Throwable? = null
+) {
+    // A retry with the same ephemeral key cannot succeed.
+    if (generateSequence(cause) { it.cause }.any { it is AuthenticationException }) {
+        navigateToFinalErrorScreen(context)
+        return
+    }
     navigateTo(
         ErrorDestination(
             errorTitle = context.getString(stripeCoreR.string.stripe_error),

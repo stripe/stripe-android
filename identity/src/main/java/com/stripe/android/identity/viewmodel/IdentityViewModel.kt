@@ -1349,7 +1349,7 @@ internal class IdentityViewModel(
             }
         }.onFailure {
             errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+            navController.navigateToErrorScreenWithDefaultValues(getApplication(), it)
         }
     }
 
@@ -1505,7 +1505,7 @@ internal class IdentityViewModel(
             )
         }.onFailure { cause ->
             errorCause.postValue(cause)
-            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+            navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
         }
     }
 
@@ -1663,7 +1663,8 @@ internal class IdentityViewModel(
                     val cause = requireNotNull(resource.throwable)
                     errorCause.postValue(cause)
                     navController.navigateToErrorScreenWithDefaultValues(
-                        getApplication()
+                        getApplication(),
+                        cause
                     )
                 }
 
@@ -1988,10 +1989,9 @@ internal class IdentityViewModel(
             documentBackUploadedState
         }.collectLatest { uploadedState ->
             if (uploadedState.hasError()) {
-                errorCause.postValue(uploadedState.getError())
-                navController.navigateToErrorScreenWithDefaultValues(
-                    getApplication()
-                )
+                val cause = uploadedState.getError()
+                errorCause.postValue(cause)
+                navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
             } else {
                 val collectedDataParam = createCollectedDataParamForDocumentCapture(
                     uploadedState = uploadedState,
@@ -2026,8 +2026,9 @@ internal class IdentityViewModel(
             frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
                 if (collectedData.idDocumentFront == null) {
                     if (frontUploadState.hasError()) {
-                        errorCause.postValue(frontUploadState.getError())
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                        val cause = frontUploadState.getError()
+                        errorCause.postValue(cause)
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
                     } else {
                         val collectedDataParam = createCollectedDataParamForDocumentCapture(
                             uploadedState = frontUploadState,
@@ -2045,8 +2046,9 @@ internal class IdentityViewModel(
             backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
                 if (collectedData.idDocumentBack == null) {
                     if (backUploadedState.hasError()) {
-                        errorCause.postValue(backUploadedState.getError())
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                        val cause = backUploadedState.getError()
+                        errorCause.postValue(cause)
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
                     } else {
                         val collectedDataParam = createCollectedDataParamForDocumentCapture(
                             uploadedState = backUploadedState,
@@ -2138,8 +2140,9 @@ internal class IdentityViewModel(
                 it.isIdle(sideSelfies) -> {} // no-op
                 it.isAnyLoading() -> {} // no-op
                 it.hasError(sideSelfies) -> {
-                    errorCause.postValue(it.getError(sideSelfies))
-                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    val cause = it.getError(sideSelfies)
+                    errorCause.postValue(cause)
+                    navController.navigateToErrorScreenWithDefaultValues(getApplication(), cause)
                 }
 
                 it.isAllUploaded(sideSelfies) -> {
@@ -2207,7 +2210,7 @@ internal class IdentityViewModel(
                         }
                     }.onFailure { throwable ->
                         errorCause.postValue(throwable)
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication(), throwable)
                     }
                 }
 

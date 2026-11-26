@@ -59,7 +59,7 @@ internal fun CheckVerificationPageAndCompose(
         verificationPageResource = verificationPageState,
         onError = {
             identityViewModel.errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(context)
+            navController.navigateToErrorScreenWithDefaultValues(context, it)
         },
         onSuccess = onSuccess
     )
@@ -116,7 +116,7 @@ internal fun CheckVerificationPageModelFilesAndCompose(
                         message = verificationPageState.message
                     )
                 )
-                navController.navigateToErrorScreenWithDefaultValues(context)
+                navController.navigateToErrorScreenWithDefaultValues(context, verificationPageState.throwable)
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.stripe.android.identity.networking
 
 import android.os.Parcelable
+import com.stripe.android.core.exception.AuthenticationException
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
@@ -40,4 +41,13 @@ internal data class Resource<out T>(
         // Resource<Unit> shouldn't be used as Unit can't be parcelized.
         internal const val DUMMY_RESOURCE = 0
     }
+}
+
+/**
+ * The cause of a failed result. An [AuthenticationException] comes first: it ends the flow, so another
+ * failure must not hide it.
+ */
+internal fun Iterable<Resource<*>>.errorCause(): Throwable? {
+    val causes = filter { it.status == Status.ERROR }.mapNotNull { it.throwable }
+    return causes.firstOrNull { it is AuthenticationException } ?: causes.firstOrNull()
 }

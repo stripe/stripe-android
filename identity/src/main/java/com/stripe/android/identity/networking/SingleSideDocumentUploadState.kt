@@ -73,7 +73,10 @@ internal data class SingleSideDocumentUploadState(
             if (lowResResult.status == Status.ERROR) {
                 errorMessageBuilder.appendLine(lowResResult.message)
             }
-            return IllegalStateException(errorMessageBuilder.toString())
+            return IllegalStateException(
+                errorMessageBuilder.toString(),
+                listOf(highResResult, lowResResult).errorCause()
+            )
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeFile
@@ -44,6 +45,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
 import java.net.HttpURLConnection.HTTP_OK
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.assertFailsWith
@@ -518,7 +520,7 @@ class DefaultIdentityRepositoryTest {
         runBlocking {
             whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
                 StripeResponse(
-                    code = HTTP_UNAUTHORIZED,
+                    code = HTTP_BAD_REQUEST,
                     body = ERROR_JSON_STRING
                 )
             )
@@ -531,7 +533,30 @@ class DefaultIdentityRepositoryTest {
                 assertThat(apiException.stripeError).isEqualTo(
                     StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
                 )
-                assertThat(apiException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
+                assertThat(apiException.statusCode).isEqualTo(HTTP_BAD_REQUEST)
+            }
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage with unauthorized response throws AuthenticationException from executeRequestWithKSerializer`() {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_UNAUTHORIZED,
+                    body = ERROR_JSON_STRING
+                )
+            )
+            assertFailsWith<AuthenticationException> {
+                identityRepository.retrieveVerificationPage(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY
+                )
+            }.let { authenticationException ->
+                assertThat(authenticationException.stripeError).isEqualTo(
+                    StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
+                )
+                assertThat(authenticationException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
             }
         }
     }
@@ -586,7 +611,7 @@ class DefaultIdentityRepositoryTest {
         runBlocking {
             whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
                 StripeResponse(
-                    code = HTTP_UNAUTHORIZED,
+                    code = HTTP_BAD_REQUEST,
                     body = ERROR_JSON_STRING
                 )
             )
@@ -601,7 +626,32 @@ class DefaultIdentityRepositoryTest {
                 assertThat(apiException.stripeError).isEqualTo(
                     StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
                 )
-                assertThat(apiException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
+                assertThat(apiException.statusCode).isEqualTo(HTTP_BAD_REQUEST)
+            }
+        }
+    }
+
+    @Test
+    fun `uploadImage with unauthorized response throws AuthenticationException from executeRequestWithModelJsonParser`() {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_UNAUTHORIZED,
+                    body = ERROR_JSON_STRING
+                )
+            )
+            assertFailsWith<AuthenticationException> {
+                identityRepository.uploadImage(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY,
+                    mock(),
+                    mock()
+                )
+            }.let { authenticationException ->
+                assertThat(authenticationException.stripeError).isEqualTo(
+                    StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
+                )
+                assertThat(authenticationException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
             }
         }
     }

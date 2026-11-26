@@ -2,6 +2,7 @@ package com.stripe.android.identity.networking
 
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequestV2
@@ -17,7 +18,8 @@ import java.io.File
 internal interface IdentityRepository {
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun retrieveVerificationPage(
         id: String,
@@ -26,7 +28,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun postVerificationPageData(
         id: String,
@@ -37,7 +40,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun postVerificationPageSubmit(
         id: String,
@@ -46,7 +50,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun verifyTestVerificationSession(
         id: String,
@@ -56,7 +61,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun unverifyTestVerificationSession(
         id: String,
@@ -66,7 +72,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun generatePhoneOtp(
         id: String,
@@ -75,7 +82,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun cannotVerifyPhoneOtp(
         id: String,
@@ -84,7 +92,8 @@ internal interface IdentityRepository {
 
     @Throws(
         APIConnectionException::class,
-        APIException::class
+        APIException::class,
+        AuthenticationException::class
     )
     suspend fun uploadImage(
         verificationId: String,

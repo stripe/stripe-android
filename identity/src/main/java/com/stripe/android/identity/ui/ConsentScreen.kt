@@ -69,7 +69,7 @@ internal fun ConsentScreen(
         verificationPageResource = verificationPageState,
         onError = {
             identityViewModel.errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(context)
+            navController.navigateToErrorScreenWithDefaultValues(context, it)
         }
     ) {
         val verificationPage = remember { it }

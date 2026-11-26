@@ -38,6 +38,9 @@ NEXT_VERSION_BUMP: MAJOR
 ### Financial Connections
 * [CHANGED] Updated Link-branded Financial Connections flows, including Instant Debits, to the new Link design system.
 
+### Identity
+* [FIXED][15444](https://github.com/stripe/stripe-android/pull/15444) Fixed an issue where an expired verification session sent the user back to the start of the Identity flow in a loop. The flow now ends with `VerificationFlowResult.Failed`.
+
 ## 23.26.0 - 2026-11-09
 
 ### Payments
