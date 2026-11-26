@@ -18,8 +18,7 @@ internal class CollectedDataParamTest {
             bestLowResResult = uploadedResult("file_best_low"),
             trainingConsent = true,
             bestFaceScore = BEST_FACE_SCORE,
-            faceScoreVariance = FACE_SCORE_VARIANCE,
-            numFrames = NUM_FRAMES
+            faceScoreVariance = FACE_SCORE_VARIANCE
         ).face
 
         assertThat(face).isNotNull()
@@ -32,7 +31,7 @@ internal class CollectedDataParamTest {
         assertThat(face.bestLowResImage).isEqualTo("file_best_low")
         assertThat(face.bestFaceScore).isEqualTo(BEST_FACE_SCORE)
         assertThat(face.faceScoreVariance).isEqualTo(FACE_SCORE_VARIANCE)
-        assertThat(face.numFrames).isEqualTo(NUM_FRAMES)
+        assertThat(face.numFrames).isEqualTo(6)
         assertThat(face.trainingConsent).isTrue()
         assertThat(face.leftHighResImage).isNull()
         assertThat(face.rightHighResImage).isNull()
@@ -50,7 +49,6 @@ internal class CollectedDataParamTest {
             trainingConsent = false,
             bestFaceScore = BEST_FACE_SCORE,
             faceScoreVariance = FACE_SCORE_VARIANCE,
-            numFrames = NUM_FRAMES,
             leftFullFrameResult = uploadedResult("file_left"),
             rightFullFrameResult = uploadedResult("file_right")
         ).face
@@ -58,6 +56,7 @@ internal class CollectedDataParamTest {
         requireNotNull(face)
         assertThat(face.leftHighResImage).isEqualTo("file_left")
         assertThat(face.rightHighResImage).isEqualTo("file_right")
+        assertThat(face.numFrames).isEqualTo(8)
         assertThat(face.trainingConsent).isFalse()
     }
 
@@ -79,7 +78,6 @@ internal class CollectedDataParamTest {
             trainingConsent = false,
             bestFaceScore = BEST_FACE_SCORE,
             faceScoreVariance = FACE_SCORE_VARIANCE,
-            numFrames = NUM_FRAMES,
             bestCameraLensModel = "wide_angle",
             bestExposureIso = 100f,
             bestFocalLength = 2.5f,
@@ -112,7 +110,6 @@ internal class CollectedDataParamTest {
     private companion object {
         const val BEST_FACE_SCORE = 0.91f
         const val FACE_SCORE_VARIANCE = 0.04f
-        const val NUM_FRAMES = 8
         const val EXPOSURE_DURATION_MS = 33L
     }
 }

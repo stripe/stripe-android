@@ -2160,7 +2160,6 @@ internal class IdentityViewModel(
                                 trainingConsent = trainingConsent,
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
-                                numFrames = faceDetectorTransitioner.numFrames,
                                 bestCameraLensModel = selfieCameraLensModel,
                                 bestExposureIso = selfieBestExposureIso,
                                 bestFocalLength = selfieBestFocalLength,
