@@ -9,6 +9,8 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -90,6 +92,7 @@ internal class OTPViewModel(
                     onGenerateOtpSuccess()
                 },
                 onFailure = {
+                    currentCoroutineContext().ensureActive()
                     onRequestingError(it)
                 }
             )
@@ -117,6 +120,7 @@ internal class OTPViewModel(
                     onRequestingCannotVerifySuccess(it)
                 },
                 onFailure = {
+                    currentCoroutineContext().ensureActive()
                     onRequestingError(it)
                 }
             )

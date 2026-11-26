@@ -96,6 +96,8 @@ import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.utils.TestModeImage
 import com.stripe.android.mlcore.base.InterpreterInitializer
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -103,6 +105,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -885,6 +888,7 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
+                    currentCoroutineContext().ensureActive()
                     identityAnalyticsRequestFactory.genericError(
                         throwable = it,
                         overrideMessage = "Failed to upload file : ${fileToUpload.name}",
@@ -1059,6 +1063,7 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
+                    currentCoroutineContext().ensureActive()
                     identityAnalyticsRequestFactory.genericError(
                         throwable = it,
                         overrideMessage = "Failed to upload file : ${fileToUpload.name}",
@@ -1209,6 +1214,7 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
+                    currentCoroutineContext().ensureActive()
                     "Failed to retrieve verification page with " +
                         (
                             "sessionID: ${verificationArgs.verificationSessionId}"
@@ -1269,7 +1275,7 @@ internal class IdentityViewModel(
      *
      */
     @Suppress("LongMethod")
-    private fun Result<VerificationPageData>.checkSubmitStatusAndNavigate(
+    private suspend fun Result<VerificationPageData>.checkSubmitStatusAndNavigate(
         fromRoute: String,
         navController: NavController
     ) {
@@ -1348,6 +1354,10 @@ internal class IdentityViewModel(
                 }
             }
         }.onFailure {
+            if (!currentCoroutineContext().isActive) {
+                verificationPageSubmit.updateStateAndSave { Resource.idle() }
+            }
+            currentCoroutineContext().ensureActive()
             errorCause.postValue(it)
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
@@ -1370,6 +1380,7 @@ internal class IdentityViewModel(
                     target.postValue(Resource.success(it))
                 },
                 onFailure = {
+                    currentCoroutineContext().ensureActive()
                     identityAnalyticsRequestFactory.genericError(
                         throwable = it,
                         overrideMessage = "Failed to download model from $modelUrl",
@@ -1412,6 +1423,7 @@ internal class IdentityViewModel(
                     target.postValue(Resource.success(null))
                 },
                 onFailure = { throwable ->
+                    currentCoroutineContext().ensureActive()
                     val mediaPipeThrowable = throwable as? MediaPipeFaceDetectorUnavailableException
                         ?: MediaPipeFaceDetectorUnavailableException(throwable)
                     identityAnalyticsRequestFactory.genericError(
@@ -1504,6 +1516,12 @@ internal class IdentityViewModel(
                 onCorrectResponse
             )
         }.onFailure { cause ->
+            // A cancelled request is not a failure. Check the job, not the exception type:
+            // DefaultIdentityRepository wraps the CancellationException in an APIConnectionException.
+            if (!currentCoroutineContext().isActive) {
+                verificationPageData.updateStateAndSave { Resource.idle() }
+            }
+            currentCoroutineContext().ensureActive()
             errorCause.postValue(cause)
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
@@ -1884,6 +1902,7 @@ internal class IdentityViewModel(
                 }
             )
         } catch (e: IllegalStateException) {
+            currentCoroutineContext().ensureActive()
             val cause = IllegalStateException(
                 "Failed to postVerificationPageDataForForceConfirm",
                 e
@@ -2206,6 +2225,7 @@ internal class IdentityViewModel(
                             )
                         }
                     }.onFailure { throwable ->
+                        currentCoroutineContext().ensureActive()
                         errorCause.postValue(throwable)
                         navController.navigateToErrorScreenWithDefaultValues(getApplication())
                     }

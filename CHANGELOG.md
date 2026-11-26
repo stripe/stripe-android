@@ -38,6 +38,9 @@ NEXT_VERSION_BUMP: MAJOR
 ### Financial Connections
 * [CHANGED] Updated Link-branded Financial Connections flows, including Instant Debits, to the new Link design system.
 
+### Identity
+* [FIXED][15455](https://github.com/stripe/stripe-android/pull/15455) Fixed an issue where a cancelled request was reported as a network error.
+
 ## 23.26.0 - 2026-11-09
 
 ### Payments
