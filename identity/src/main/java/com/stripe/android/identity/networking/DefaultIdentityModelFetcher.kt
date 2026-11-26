@@ -34,7 +34,7 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
             InterpreterWrapperImpl(
                 modelFile,
                 InterpreterOptionsWrapper.Builder().build()
-            )
+            ).close()
             true
         } catch (e: Exception) {
             identityAnalyticsRequestFactory.genericError(
