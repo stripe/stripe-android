@@ -15,7 +15,8 @@ internal class ErrorDestination(
     continueButtonRequirement: Requirement? = null,
     backButtonText: String,
     backButtonDestination: String = UNEXPECTED_ROUTE,
-    shouldFail: Boolean = false
+    shouldFail: Boolean = false,
+    isUploadError: Boolean = false
 ) : IdentityTopLevelDestination() {
 
     override val destinationRoute = ROUTE
@@ -26,7 +27,8 @@ internal class ErrorDestination(
         ARG_CONTINUE_BUTTON_REQUIREMENT to (continueButtonRequirement ?: UNSET_BUTTON_REQUIREMENT),
         ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination.toRouteBase(),
         ARG_GO_BACK_BUTTON_TEXT to backButtonText,
-        ARG_SHOULD_FAIL to shouldFail
+        ARG_SHOULD_FAIL to shouldFail,
+        ARG_IS_UPLOAD_ERROR to isUploadError
     )
 
     internal companion object {
@@ -44,6 +46,10 @@ internal class ErrorDestination(
 
         // if set to true, clicking bottom button and pressBack would end flow with Failed
         const val ARG_SHOULD_FAIL = "shouldFail"
+
+        // if set to true, an image upload failed: the screen offers Try again when the failed
+        // uploads can start again, and the next screen removes it from the back stack
+        const val ARG_IS_UPLOAD_ERROR = "isUploadError"
 
         // Indicates the server returns a requirementError that doesn't match with current route.
         //  E.g ConsentScreen->DocSelectScreen could only have BIOMETRICCONSENT error but not IDDOCUMENTFRONT error.
@@ -88,6 +94,9 @@ internal class ErrorDestination(
         fun shouldFail(backStackEntry: NavBackStackEntry) =
             backStackEntry.getBooleanArgument(ARG_SHOULD_FAIL)
 
+        fun isUploadError(backStackEntry: NavBackStackEntry?) =
+            backStackEntry.getBooleanArgument(ARG_IS_UPLOAD_ERROR)
+
         val ROUTE = object : DestinationRoute() {
             override val routeBase = ERROR
             override val arguments = listOf(
@@ -104,6 +113,9 @@ internal class ErrorDestination(
                     type = NavType.StringType
                 },
                 navArgument(ARG_SHOULD_FAIL) {
+                    type = NavType.BoolType
+                },
+                navArgument(ARG_IS_UPLOAD_ERROR) {
                     type = NavType.BoolType
                 },
                 navArgument(ARG_CONTINUE_BUTTON_TEXT) {

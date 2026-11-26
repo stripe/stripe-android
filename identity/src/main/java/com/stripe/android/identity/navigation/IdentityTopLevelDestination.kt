@@ -79,12 +79,24 @@ internal fun NavBackStackEntry?.getBooleanArgument(argName: String) =
  * Navigate to the [IdentityTopLevelDestination] by calling NavController.navigate(fragmentID, bundle).
  */
 internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) {
+    // Leaving an upload error removes it, so Back from the next screen, or a second failed retry,
+    // does not return to it. Navigation ignores a pop to a route that is not in the back stack, so
+    // pop the error when the destination's own pop target is missing.
+    val popUpToParam = if (ErrorDestination.isUploadError(currentBackStackEntry)) {
+        destination.popUpToParam?.takeIf { hasBackStackEntry(it.route) }
+            ?: PopUpToParam(ErrorDestination.ROUTE.route, inclusive = true)
+    } else {
+        destination.popUpToParam
+    }
     navigate(destination.routeWithArgs) {
-        destination.popUpToParam?.let {
+        popUpToParam?.let {
             popUpTo(it.route) { inclusive = it.inclusive }
         }
     }
 }
+
+private fun NavController.hasBackStackEntry(route: String) =
+    runCatching { getBackStackEntry(route) }.isSuccess
 
 internal fun String.routeToScreenName(): String = when (this) {
     ConsentDestination.ROUTE.route ->

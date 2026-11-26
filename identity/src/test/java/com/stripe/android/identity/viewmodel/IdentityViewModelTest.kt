@@ -3,6 +3,7 @@ package com.stripe.android.identity.viewmodel
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Looper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
@@ -33,6 +34,7 @@ import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_WARMUP
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -74,7 +76,10 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import com.stripe.android.testing.ViewModelStoreTestRule
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -88,6 +93,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -96,6 +102,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import java.io.File
 import kotlin.test.assertFailsWith
 
@@ -201,6 +208,45 @@ internal class IdentityViewModelTest {
     private fun mockUploadFailure() = runBlocking {
         whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any())).thenThrow(
             UPLOADED_FAILURE_EXCEPTION
+        )
+    }
+
+    private fun uploadManualFront() {
+        viewModel.uploadManualResult(
+            mock<Uri>(),
+            isFront = true,
+            isLiveMode = true,
+            docCapturePage = DOCUMENT_CAPTURE,
+            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+            scanType = IdentityScanState.ScanType.DOC_FRONT
+        )
+        // frontCollectedInfo combines the upload state on the main looper.
+        shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun CoroutineScope.showFrontScanUploadError() {
+        viewModel.uploadScanResult(FINAL_ID_DETECTOR_RESULT_FRONT, mockVerificationPage)
+        launch(UnconfinedTestDispatcher()) {
+            viewModel.collectDataForDocumentScanScreen(mockController, true, mockOnMissingBack)
+        }.cancel()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun CoroutineScope.tapTryAgain() {
+        launch(UnconfinedTestDispatcher()) {
+            viewModel.retryFailedUploads(mockController)
+        }.cancel()
+    }
+
+    // A transitioner whose frames carry no frame metadata.
+    private fun selfieTransitioner() = mock<FaceDetectorTransitioner> {
+        on { selfieFrameForSelfie(any()) }.thenReturn(
+            FaceDetectorTransitioner.SelfieFrame(
+                input = mock(),
+                output = FaceDetectorOutput(boundingBox = mock(), resultScore = 0.9f),
+                bestFrameScore = 0.9f
+            )
         )
     }
 
@@ -662,6 +708,246 @@ internal class IdentityViewModelTest {
             eq(ApplicationProvider.getApplicationContext<Context>().finalErrorDestination().routeWithArgs),
             any<NavOptionsBuilder.() -> Unit>()
         )
+    }
+
+    @Test
+    fun `retryFailedUploads uploads only the failed document file and returns to scan the back`() =
+        runBlocking {
+            // Given a front scan whose high-res upload failed and whose low-res upload succeeded
+            whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+                .thenThrow(UPLOADED_FAILURE_EXCEPTION)
+                .thenReturn(StripeFile(id = "file_front"))
+            whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+                .thenReturn(VERIFICATION_PAGE_DATA_MISSING_BACK)
+
+            // ...and the scan screen showed the upload error with a retry
+            showFrontScanUploadError()
+            verify(mockController).navigate(
+                argWhere<String> { it.contains("${ErrorDestination.ARG_IS_UPLOAD_ERROR}=true") },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+            assertThat(viewModel.canRetryFailedUploads()).isTrue()
+
+            // When the user taps Try again
+            tapTryAgain()
+
+            // Then only the failed file uploads again
+            verify(mockIdentityRepository, times(3)).uploadImage(any(), any(), any(), any(), any())
+            assertThat(viewModel.documentFrontUploadedState.value.isUploaded()).isTrue()
+            // ...and the error screen goes up to the scan screen, which scans the back
+            verify(mockController).navigateUp()
+            verify(mockOnMissingBack, never()).invoke()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `retryFailedUploads uploads only the failed selfie file and posts the selfie`() = runBlocking<Unit> {
+        // Given selfie uploads where only the first upload failed
+        whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+            .thenThrow(UPLOADED_FAILURE_EXCEPTION)
+            .thenReturn(StripeFile(id = "file_selfie"))
+        whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+            .thenReturn(VERIFICATION_PAGE_DATA_HAS_ERROR)
+        viewModel.uploadScanResult(FINAL_FACE_DETECTOR_RESULT, mockVerificationPage)
+
+        // ...and the selfie screen showed the upload error with a retry
+        launch(UnconfinedTestDispatcher()) {
+            viewModel.collectDataForSelfieScreen(
+                mockController,
+                selfieTransitioner(),
+                mockVerificationPage
+            )
+        }.cancel()
+        assertThat(viewModel.canRetryFailedUploads()).isTrue()
+
+        // When the user taps Try again
+        tapTryAgain()
+
+        // Then only the failed file uploads again: six selfie files, then the failed one
+        verify(mockIdentityRepository, times(7)).uploadImage(any(), any(), any(), any(), any())
+        // ...and the selfie is posted
+        verify(mockIdentityRepository).postVerificationPageData(
+            any(),
+            any(),
+            argWhere { it.face != null },
+            any()
+        )
+    }
+
+    @Test
+    fun `retryFailedUploads that fails again shows the upload error again with a retry`() =
+        runBlocking {
+            // Given a front scan whose uploads failed, and the scan screen showed the upload error
+            mockUploadFailure()
+            showFrontScanUploadError()
+
+            // When the user taps Try again, and the uploads fail again
+            tapTryAgain()
+
+            // Then both files upload again
+            verify(mockIdentityRepository, times(4)).uploadImage(any(), any(), any(), any(), any())
+            // ...and the upload error shows again with a retry
+            verify(mockController, times(2)).navigate(
+                argWhere<String> { it.contains("${ErrorDestination.ARG_IS_UPLOAD_ERROR}=true") },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+            assertThat(viewModel.canRetryFailedUploads()).isTrue()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `retryFailedUploads from the upload screen goes back to it as a tracked transition`() =
+        runBlocking<Unit> {
+            // Given a front file whose upload failed, and the upload screen showed the upload error
+            whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+                .thenThrow(UPLOADED_FAILURE_EXCEPTION)
+                .thenReturn(UPLOADED_STRIPE_FILE)
+            uploadManualFront()
+            assertThat(viewModel.frontCollectedInfo.value.first.hasError()).isTrue()
+            launch(UnconfinedTestDispatcher()) {
+                viewModel.collectDataForDocumentUploadScreen(mockController, isFront = true)
+            }.cancel()
+
+            // When the user taps Try again
+            tapTryAgain()
+
+            // Then the file uploads again
+            verify(mockIdentityRepository, times(2)).uploadImage(any(), any(), any(), any(), any())
+            // ...and the error screen starts a screen transition and goes up to the upload screen
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_ERROR), any())
+            verify(mockController).navigateUp()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `an upload error for a file that could not be prepared does not offer a retry`() =
+        runBlocking {
+            // Given a front file that could not be prepared for upload
+            whenever(
+                mockIdentityIO.resizeUriAndCreateFileToUpload(any(), any(), any(), any(), any(), any())
+            ).thenThrow(IllegalStateException("Could not resize"))
+            uploadManualFront()
+            assertThat(viewModel.frontCollectedInfo.value.first.hasError()).isTrue()
+
+            // When the upload screen shows the upload error
+            launch(UnconfinedTestDispatcher()) {
+                viewModel.collectDataForDocumentUploadScreen(mockController, isFront = true)
+            }.cancel()
+            verify(mockController).navigate(
+                argWhere<String> { it.contains("${ErrorDestination.ARG_IS_UPLOAD_ERROR}=true") },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+
+            // Then the error screen does not offer Try again
+            assertThat(viewModel.canRetryFailedUploads()).isFalse()
+        }
+
+    @Test
+    fun `retryFailedUploads keeps offering Try again while the post is pending`() =
+        runBlocking {
+            // Given a front scan whose high-res upload failed, and the scan screen showed the upload error
+            whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+                .thenThrow(UPLOADED_FAILURE_EXCEPTION)
+                .thenReturn(StripeFile(id = "file_front"))
+            showFrontScanUploadError()
+            // ...and a post of the collected front that does not finish
+            whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+                .doSuspendableAnswer { awaitCancellation() }
+
+            // When the user taps Try again, the upload succeeds, and the activity is recreated during
+            // the post
+            tapTryAgain()
+            verify(mockIdentityRepository).postVerificationPageData(any(), any(), any(), any())
+
+            // Then the recreated error screen still offers Try again, to post the front again
+            assertThat(viewModel.canRetryFailedUploads()).isTrue()
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `collectDataForDocumentScanScreen shows the upload error after both files finish`() =
+        runBlocking<Unit> {
+            // Given a front scan whose high-res upload failed while its low-res upload still runs
+            val lowResUpload = CompletableDeferred<StripeFile>()
+            whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+                .thenThrow(UPLOADED_FAILURE_EXCEPTION)
+                .doSuspendableAnswer { lowResUpload.await() }
+            viewModel.uploadScanResult(FINAL_ID_DETECTOR_RESULT_FRONT, mockVerificationPage)
+            val collector = launch(UnconfinedTestDispatcher()) {
+                viewModel.collectDataForDocumentScanScreen(mockController, true, mockOnMissingBack)
+            }
+            verify(mockController, never()).navigate(any<String>(), any<NavOptionsBuilder.() -> Unit>())
+
+            // When the low-res upload fails too
+            lowResUpload.completeExceptionally(UPLOADED_FAILURE_EXCEPTION)
+
+            // Then the scan screen shows one upload error, for both files
+            verify(mockController).navigate(
+                argWhere<String> { it.contains("${ErrorDestination.ARG_IS_UPLOAD_ERROR}=true") },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+            collector.cancel()
+        }
+
+    @Test
+    fun `retrieveAndBufferVerificationPage keeps the front uploads that a retry needs`() =
+        runBlocking {
+            // Given a front scan whose high-res upload failed and whose low-res upload succeeded
+            whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+                .thenThrow(UPLOADED_FAILURE_EXCEPTION)
+                .thenReturn(StripeFile(id = "file_front"))
+            // ...and the scan screen showed the upload error with a retry
+            showFrontScanUploadError()
+            // ...and a verification page that still misses the front
+            val verificationPageMissingFront = mock<VerificationPage> {
+                on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
+                on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
+                on { requirements }.thenReturn(
+                    VerificationPageRequirements(missing = listOf(Requirement.IDDOCUMENTFRONT))
+                )
+            }
+            whenever(mockIdentityRepository.retrieveVerificationPage(any(), any()))
+                .thenReturn(verificationPageMissingFront)
+
+            // When the recreated activity refreshes the verification page
+            viewModel.retrieveAndBufferVerificationPage(shouldRetrieveModel = false)
+
+            // Then the front keeps the uploaded low-res file
+            assertThat(
+                viewModel.documentFrontUploadedState.value.lowResResult.data?.uploadedStripeFile?.id
+            ).isEqualTo("file_front")
+        }
+
+    @Test
+    fun `an upload that finishes after its state is cleared does not change the state`() =
+        runBlocking {
+            // Given a front upload that has not finished
+            val upload = CompletableDeferred<StripeFile>()
+            whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any()))
+                .doSuspendableAnswer { upload.await() }
+            uploadManualFront()
+
+            // When Go Back clears the document uploads, and then the upload fails
+            viewModel.clearDocumentUploadedState()
+            upload.completeExceptionally(UPLOADED_FAILURE_EXCEPTION)
+
+            // Then the front stays cleared
+            assertThat(viewModel.documentFrontUploadedState.value)
+                .isEqualTo(SingleSideDocumentUploadState())
+        }
+
+    @Test
+    fun `clearDocumentUploadedState removes the upload retry`() = runBlocking {
+        // Given a document upload error that offers a retry
+        mockUploadFailure()
+        showFrontScanUploadError()
+        assertThat(viewModel.canRetryFailedUploads()).isTrue()
+
+        // When Go Back clears the document uploads
+        viewModel.clearDocumentUploadedState()
+
+        // Then the error screen no longer offers a retry
+        assertThat(viewModel.canRetryFailedUploads()).isFalse()
     }
 
     @Test
@@ -1584,7 +1870,7 @@ internal class IdentityViewModelTest {
         val CROPPED_BITMAP = mock<Bitmap>()
         val EXTRACTED_BITMAP = mock<Bitmap>()
         val BOUNDING_BOX = mock<BoundingBox>()
-        val ALL_SCORES = listOf(1f, 2f, 3f)
+        val ALL_SCORES = listOf(1f, 2f, 3f, 4f)
         val FINAL_ID_DETECTOR_RESULT_FRONT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(

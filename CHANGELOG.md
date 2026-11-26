@@ -40,6 +40,7 @@ NEXT_VERSION_BUMP: MAJOR
 
 ### Identity
 * [FIXED][15444](https://github.com/stripe/stripe-android/pull/15444) Fixed an issue where an expired verification session sent the user back to the start of the Identity flow in a loop. The flow now ends with `VerificationFlowResult.Failed`.
+* [FIXED][15457](https://github.com/stripe/stripe-android/pull/15457) Fixed an issue where an image upload failure in Identity made users capture their document or selfie again. The error screen now offers Try again, which uploads again only the images that failed.
 
 ## 23.26.0 - 2026-11-09
 
