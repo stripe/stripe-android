@@ -19,6 +19,7 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
+import java.io.Closeable
 import java.io.File
 
 /**
@@ -31,7 +32,7 @@ internal class IDDetectorAnalyzer(
     private val laplacianBlurDetector: LaplacianBlurDetector,
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
 ) :
-    Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
+    Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>, Closeable {
 
     private val interpreterApi: InterpreterWrapper = InterpreterWrapperImpl(
         modelFile,
@@ -134,6 +135,10 @@ internal class IDDetectorAnalyzer(
             laplacianBlurDetector.calculateBlurOutput(croppedImage),
             croppedImage
         )
+
+    override fun close() {
+        interpreterApi.close()
+    }
 
     internal class Factory(
         private val modelFile: File,
