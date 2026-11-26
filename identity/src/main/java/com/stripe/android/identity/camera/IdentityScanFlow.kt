@@ -40,7 +40,7 @@ internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val aggregateResultListener:
     AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
-    private val idDetectorModelFile: File,
+    private val idDetectorModelFile: File?,
     private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage,
     private val modelPerformanceTracker: ModelPerformanceTracker,
@@ -125,7 +125,10 @@ internal class IdentityScanFlow(
                             }
                         } else {
                             IDDetectorAnalyzer.Factory(
-                                idDetectorModelFile,
+                                requireNotNull(idDetectorModelFile) {
+                                    "Failed to initialize IDDetectorAnalyzer, " +
+                                        "idDetectorModelFile is null"
+                                },
                                 verificationPage.documentCapture.models.idDetectorMinScore,
                                 modelPerformanceTracker,
                                 laplacianBlurDetector,

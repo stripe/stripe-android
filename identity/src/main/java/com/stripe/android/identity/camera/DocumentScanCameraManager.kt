@@ -2,8 +2,8 @@ package com.stripe.android.identity.camera
 
 import android.content.Context
 import android.view.View
+import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraXAdapter
-import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
@@ -18,7 +18,12 @@ internal class DocumentScanCameraManager(
         requireNotNull(context.getActivity()),
         cameraView.previewFrame,
         MINIMUM_RESOLUTION,
-        DefaultCameraErrorListener(context, cameraErrorCallback)
+        // The caller shows the camera error screen, so no dialog is shown here.
+        object : CameraErrorListener {
+            override fun onCameraOpenError(cause: Throwable?) = cameraErrorCallback(cause)
+            override fun onCameraAccessError(cause: Throwable?) = cameraErrorCallback(cause)
+            override fun onCameraUnsupportedError(cause: Throwable?) = cameraErrorCallback(cause)
+        }
     )
 
     override fun onInitialized() {
